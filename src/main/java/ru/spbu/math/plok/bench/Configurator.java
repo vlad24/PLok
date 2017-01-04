@@ -19,12 +19,12 @@ public class Configurator {
 
 	private static Logger log = LoggerFactory.getLogger(Configurator.class);
 	private static final String  	DEFAULT_REPORT_OUTPUT 	= "report_" + System.currentTimeMillis() + ".txt";
-	private static final String 	DEFAULT_BREAK 			= "2000";
+	private static final String 	DEFAULT_STORAGE_PATH	= "./tmp_file_storage";
+	private static final String 	DEFAULT_PHASE_BREAK 	= "2000";
 	private static final String 	DEFAULT_S 				= "PLok";
 	private static final String 	DEFAULT_C 				= "0.25";
 	private static final Integer 	DEFAULT_p 				= 10;
 	private static final int     	m 						= Float.BYTES;
-	private static final String DEFAULT_STORAGE_PATH		= "./tmp_file_storage";
 
 	private int 			config_N;
 	private Integer 		config_p;
@@ -60,19 +60,29 @@ public class Configurator {
 
 
 	public Configurator(){
-		phaseBreak		= new Option("break", true, "break between write and read phases"); phaseBreak.setType(Integer.class);
-		O				= new Option("O", "output", true, "output");						O.setType(String.class);
-		S				= new Option("S", "storage", true, "storage type");					S.setType(String.class);
-		N      			= new Option("N", true, "vector length"); 							N.setType(String.class);	N.setRequired(true);
-		T      			= new Option("T", true, "write time (msec)");						T.setType(Integer.class);	T.setRequired(true);
-		V      			= new Option("V", true, "distribution (exp, norm, uni)");			V.setType(String.class);	V.setRequired(true);
-		C     	 		= new Option("C", true, "cache ratio");								C.setType(Float.class);
-		P     	 		= new Option("P", true, "P for block");								P.setType(Integer.class);	P.setRequired(true);
-		L     	 		= new Option("L", true, "L for block");								L.setType(Integer.class);	L.setRequired(true);
+		N      			= new Option("N", true, "vector length"); 							N.setRequired(true);
+		T      			= new Option("T", true, "write time (msec)");						T.setRequired(true);
+		C     	 		= new Option("C", true, "cache ratio");								C.setRequired(false);
+		V      			= new Option("V", true, "distribution (exp, norm, uni)");			V.setRequired(true);
+		S				= new Option("S", true, "storage type");							S.setRequired(false);
+		O				= new Option("O", "output", true, "output");						O.setRequired(false);
+		phaseBreak		= new Option("break", true, "break between write and read phases"); phaseBreak.setRequired(false);
+		P     	 		= new Option("P", true, "P for block");								P.setRequired(true);
+		L     	 		= new Option("L", true, "L for block");								L.setRequired(true);
 		storagePath		= new Option("storagePath", true, "persister file");
 		debug			= new Option("debug", false, "debug mode flag");
-		options = new Options().addOption(N).addOption(T).addOption(C).addOption(V).addOption(S).addOption(O).addOption(phaseBreak).addOption(debug)
-				.addOption(P).addOption(L);
+		options = new Options().
+				addOption(N).
+				addOption(T).
+				addOption(C).
+				addOption(V).
+				addOption(S).
+				addOption(O).
+				addOption(phaseBreak).
+				addOption(debug).
+				addOption(storagePath).
+				addOption(P).
+				addOption(L);
 		parser = new PosixParser();
 		inited = false;
 	}
@@ -90,7 +100,7 @@ public class Configurator {
 		if (!inited){
 			CommandLine line 		= parser.parse(options, args);
 			config_debug			= line.hasOption("debug");
-			config_phaseBreak    	= Integer.valueOf(line.getOptionValue("break", DEFAULT_BREAK));
+			config_phaseBreak    	= Integer.valueOf(line.getOptionValue("break", DEFAULT_PHASE_BREAK));
 			config_N 				= Integer.valueOf(line.getOptionValue("N"));
 			config_T 				= Integer.valueOf(line.getOptionValue("T"));
 			config_C 				= Float.valueOf(line.getOptionValue("C", DEFAULT_C));
@@ -194,7 +204,6 @@ public class Configurator {
 	}
 
 	public String getStoragePath() {
-		// TODO Auto-generated method stub
 		return config_storagePath;
 	}
 }
