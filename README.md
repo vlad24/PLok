@@ -1,2 +1,2 @@
 # PLok
-2D grid almost regular tiling research.
+2D grid tiling research.
