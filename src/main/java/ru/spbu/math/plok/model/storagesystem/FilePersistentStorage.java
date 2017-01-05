@@ -21,10 +21,9 @@ import ru.spbu.math.plok.model.generator.Vector;
 public class FilePersistentStorage {
 
 	private static final Logger log = LoggerFactory.getLogger(FilePersistentStorage.class);
-	private static final String PERSISTER_MAIN_FILE_NAME_FORMAT = "storage_%d";
+	private static final String STORAGE_FILE_NAME_FORMAT = "storage_%d";
 	private final int blockSize;
 	private final String storagePath;
-	private int id;
 	private int P;
 	private int L;
 	private int P_S;
@@ -37,30 +36,27 @@ public class FilePersistentStorage {
 	@Inject
 	public FilePersistentStorage(@Named("storagePath") String storagePath, @Named("N") int N, @Named("P") int P, @Named("L") int L) throws IOException {
 		super();
-		this.storagePath = Paths.get(storagePath, "PLokStorage").toAbsolutePath().toString();
+		this.storagePath = Paths.get(storagePath).toAbsolutePath().toString();
 		this.P 		= P;
 		this.L 		= L;
 		this.L_S 	= N % L;
 		this.P_S 	= P * L / L_S;
 		this.blockSize = 
-				3 * Integer.BYTES   + 2 * Long.BYTES +		//header
-				P * L * Float.BYTES + L * Long.BYTES + 		//subvectors and their timestamps
-				1; 											//additional byte to store whether block is special 
+				1 + 										//additional byte to store whether block is special or common
+				BlockHeader.BYTES +							//header
+				P * L * Float.BYTES + L * Long.BYTES; 		//vectors and their timestamps (data)
 		File storageFile = Paths.get(this.storagePath,
-				String.format(PERSISTER_MAIN_FILE_NAME_FORMAT, System.currentTimeMillis())).toFile();
+				String.format(STORAGE_FILE_NAME_FORMAT, System.currentTimeMillis())).toFile();
 		storageFile.getParentFile().mkdirs();
 		raf = new RandomAccessFile(storageFile, "rw");
 		writeBuffer = ByteBuffer.allocateDirect(blockSize);
-		blockID = (storageFile.length() / blockSize) - 1;
+		blockID = storageFile.length() / blockSize;
 		channel = raf.getChannel();
 		channel.position(channel.size());
-		log.debug("Persistent storage file {} has been created at {}", this.id, storageFile.getAbsolutePath());
+		log.debug("Persistent storage file has been created at {} with initial block id={}", storageFile.getAbsolutePath(), blockID);
 	}
 
 	public long add(Block block) throws IOException {
-		if (block.getHeader().getId() == -1){
-			log.debug("!!! {}", block);
-		}
 		return writeBytes(toBytes(block));
 	}
 
@@ -79,7 +75,6 @@ public class FilePersistentStorage {
 	}
 
 	  public ByteBuffer readBytes(long blockID) throws IOException {
-		log.debug("Reading {}", blockID);
 		ByteBuffer resultBuffer = ByteBuffer.allocate(blockSize);
 	    channel.read(resultBuffer, blockID * blockSize);
 	    return resultBuffer;

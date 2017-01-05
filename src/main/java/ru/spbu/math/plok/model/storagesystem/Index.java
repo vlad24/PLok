@@ -3,11 +3,15 @@ package ru.spbu.math.plok.model.storagesystem;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 
 public class Index {
+	private final static Logger log = LoggerFactory.getLogger(Index.class);
 	
 	private int p 	= -1; 
 	private int N 	= -1; 
@@ -20,7 +24,7 @@ public class Index {
 	private List<List<Integer>> grid;
 	private List<Integer> specialGrid;
 	private int blockCount;
-	
+
 
 	@Inject
 	public Index(@Named("N")int N,  @Named("P")int P,  @Named("L")int L,  @Named("p")int period) {
@@ -45,7 +49,7 @@ public class Index {
 	public void put(Block entry) {
 		put(entry.getHeader());
 	}
-	
+
 	public void put(BlockHeader entry) {
 		if (isSpecial(entry)){
 			specialGrid.add(entry.getId());
@@ -69,45 +73,55 @@ public class Index {
 	}
 
 	public List<Integer> get(long startTime, long endTime, int i1, int i2) {
-		List<Integer> basics   = getFromBasic(startTime, endTime, i1, i2);
-		List<Integer> specials = getFromSpecial(startTime, endTime, i1, i2);
+		List<Integer> basics   = getFromBasic  (startTime,   endTime,  i1,                        Math.min(N - L_S - 1, i2)    );
+		List<Integer> specials = getFromSpecial(startTime,   endTime,  Math.max(i1, N - L_S),     i2                           );
 		List<Integer> result = new ArrayList<>(basics.size() + specials.size());
 		result.addAll(basics);
 		result.addAll(specials);
 		return result;
 	}
 
-	private List<Integer> getFromSpecial(long startTime, long endTime, int i1, int i2) {
-		long firstTime = firstBasicTimestamp;
-		long lastTime = firstTime + specialGrid.size() * P * p;
+	private List<Integer> getFromSpecial(long qStartTime, long qEndTime, int qIndexStart, int qIndexEnd) {
+		log.debug("SPECIALS {}-{}", qIndexStart, qIndexEnd);
+		long firstTime = firstSpecialTimestamp;
+		long lastTime = firstTime + (specialGrid.size() * P) * p;
 		if (specialGrid.isEmpty() 
-				|| startTime > lastTime
-				|| endTime   < firstTime) {
+				|| qStartTime > lastTime
+				|| qEndTime   < firstTime
+				|| qIndexStart  > N - 1
+				|| qIndexEnd  < 0
+				|| qIndexEnd  > qIndexStart
+				) {
 			return new ArrayList<>();
 		}
-		int leftBlockIndex  = (int)  (startTime    >= firstTime ? ((startTime - firstTime) / p) / P_S   : 0              );
-		int rightBlockIndex = (int)  (lastTime     >= endTime   ? ((endTime   - firstTime) / p) / P_S   : specialGrid.size() - 1);
+		int leftBlockIndex  = (int)  (qStartTime    >= firstTime  ? ((qStartTime - firstTime) / p) / P_S   : 0              );
+		int rightBlockIndex = (int)  (lastTime      >= qEndTime   ? ((qEndTime   - firstTime) / p) / P_S   : specialGrid.size() - 1);
 		return specialGrid.subList(leftBlockIndex, rightBlockIndex + 1);
 	}
 
 	private List<Integer> getFromBasic(long qTimeStart, long qTimeEnd, int qIndexStart, int qIndexEnd) {
+		log.debug("BASICS {}-{}", qIndexStart, qIndexEnd);
 		long firstTime = firstBasicTimestamp;
-		long lastTime  = firstTime + grid.size() * P * p ;
+		long lastTime  = firstTime + grid.size() * P * p - p;
 		if (grid.isEmpty() 
 				|| qTimeStart  > lastTime
 				|| qTimeEnd    < firstTime
-				|| qIndexStart > N
-				|| qIndexEnd   < 0 
+				|| qIndexStart > N - 1
+				|| qIndexEnd   < 0
+				|| qIndexEnd   < qIndexStart
 				) {
 			return new ArrayList<>();
 		}
 		int leftBlockIndex  = (int)  (qTimeStart  >= firstTime  ? ((qTimeStart - firstTime) / p) / P   : 0                );
 		int rightBlockIndex = (int)  (qTimeEnd    <= lastTime	? ((qTimeEnd   - firstTime) / p) / P   : grid.size() - 1  );
-		int upBlockIndex  	= (int) (qIndexStart  >= 0 			? qIndexStart / L : 0);
-		int downBlockIndex  = (int) (qIndexEnd    <= N 			? qIndexEnd / L : 0);
+		int upBlockIndex  	= (int)  (qIndexStart >= 0 		    ? qIndexStart / L : 0 );
+		int downBlockIndex  = (int)  (qIndexEnd   <= N - 1	    ? qIndexEnd   / L : 0 );
 		List<Integer> result = new ArrayList<>();
 		for (int i = leftBlockIndex; i <= rightBlockIndex; i++){
-			 result.addAll(grid.get(i).subList(upBlockIndex, downBlockIndex + 1));
+			//log.debug("Gettnig {} coluumn from available 0-{} ", i, grid.size() - 1);
+			List<Integer> list = grid.get(i);
+			//log.debug("Up:{} Down: {} Available:0-{}", upBlockIndex, downBlockIndex+1, list.size()-1);
+			result.addAll(list.subList(upBlockIndex, downBlockIndex + 1));
 		}
 		return result;
 	}

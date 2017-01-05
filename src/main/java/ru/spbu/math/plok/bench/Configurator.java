@@ -18,8 +18,8 @@ import ru.spbu.math.plok.model.client.Distribution;
 public class Configurator {
 
 	private static Logger log = LoggerFactory.getLogger(Configurator.class);
-	private static final String  	DEFAULT_REPORT_OUTPUT 	= "report_" + System.currentTimeMillis() + ".txt";
-	private static final String 	DEFAULT_STORAGE_PATH	= "./tmp_file_storage";
+	private static final String  	DEFAULT_REPORT_OUTPUT 	= "./reports/report_" + System.currentTimeMillis() + ".txt";
+	private static final String 	DEFAULT_STORAGE_PATH	= "./storages";
 	private static final String 	DEFAULT_PHASE_BREAK 	= "2000";
 	private static final String 	DEFAULT_S 				= "PLok";
 	private static final String 	DEFAULT_C 				= "0.25";
@@ -127,7 +127,7 @@ public class Configurator {
 	}
 
 	private int calculateA() {
-		return 1000 * calculated_SIZE / m;
+		return 10 * calculated_SIZE / m;
 	}
 
 	@Override

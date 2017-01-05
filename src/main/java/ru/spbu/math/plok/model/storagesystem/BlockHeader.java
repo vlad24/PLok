@@ -1,6 +1,9 @@
 package ru.spbu.math.plok.model.storagesystem;
 
 public class BlockHeader {
+	
+	public static int BYTES = 3 * Integer.BYTES + 2 * Long.BYTES; 
+	
 	private int id;
 	private long tBeg;
 	private long tEnd;

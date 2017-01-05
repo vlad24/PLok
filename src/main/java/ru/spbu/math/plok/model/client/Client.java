@@ -39,8 +39,9 @@ public class Client{
 				Query q = queryGenerator.nextQuery();
 				store.serve(q);
 				madeQueries++;
+				log.debug("Progress = {}%", 100.0 * (float)madeQueries/queriesCount);
 			}
-			log.debug("Client {} is over");
+			log.debug("Client is over");
 		}catch(Exception er){
 			log.error("Client unexpectedly finished!", er);
 		}

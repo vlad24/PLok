@@ -13,8 +13,8 @@ public class QueryGenerator {
 	private final static org.slf4j.Logger log = LoggerFactory.getLogger(QueryGenerator.class);
 	private Distribution v;
 	private int N;
-	private long start = -1;
-	private long end = -1;
+	private long timeStart = -1;
+	private long timeEnd = -1;
 	private boolean inited = false;
 	
 	@Inject
@@ -26,22 +26,27 @@ public class QueryGenerator {
 	public Query nextQuery(){
 		if (!inited)
 			throw new IllegalStateException();
-		long qTimeStart = v.getRandomLong(start, end);
-		long qTimeEnd   = v.getRandomLong(qTimeStart, end);
+		long qTimeStart = v.getRandomLong(timeStart, timeEnd);
+		long qTimeEnd   = v.getRandomLong(qTimeStart, timeEnd);
 		int qIndexStart = v.getRandomInt(0, N - 1);
-		int qIndexEnd   = v.getRandomInt(qIndexStart, N);
-		log.debug("time_delta:{}, index_range:{}", (qTimeEnd-qTimeStart+1) , (qIndexEnd-qIndexStart+1));
+		int qIndexEnd   = v.getRandomInt(qIndexStart, N - 1);
+//		qTimeEnd = timeEnd;
+//		qTimeStart = timeStart;
+//		qIndexStart = 0;
+//		qIndexEnd = N - 1;
+		log.debug("QUERY:({},{},{},{}) // time_delta:{}, index_range:{}", qIndexStart, qIndexEnd, qTimeStart, qTimeEnd,
+				(qTimeEnd - qTimeStart + 1) , (qIndexEnd - qIndexStart + 1));
 		return new Query(qIndexStart, qIndexEnd, qTimeStart, qTimeEnd);
 	}
 
 	public void setStart(long start) {
-		this.start = start;
-		inited = (end != -1);
+		this.timeStart = start;
+		inited = (timeEnd != -1);
 	}
 
 	public void setEnd(long end) {
-		this.end = end;
-		inited = (start != -1);
+		this.timeEnd = end;
+		inited = (timeStart != -1);
 	}
 
 

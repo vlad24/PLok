@@ -41,7 +41,6 @@ public class Tester {
 			client.setQueryTimeBounds((Long)generatorReport.get("attackStart"), (Long)generatorReport.get("attackEnd"));
 			HashMap<String, Object> queryReport = client.attack(store);
 			log.info("Client has finished!");
-			log.info("Writing reports to output.");
 			ReportPrinter.print(configurator, queryReport);
 		}
 		log.info("All done!");

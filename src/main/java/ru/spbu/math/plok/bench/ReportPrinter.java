@@ -17,6 +17,7 @@ public class ReportPrinter {
 	public static void print(Configurator configurator, HashMap<String, Object> queryReport) throws IOException{
 		BufferedWriter outputWriter  = null;
 		File report = new File(configurator.getOutput());
+		report.getParentFile().mkdirs();
 		if (!report.exists()){
 			report.createNewFile();
 		}
@@ -25,7 +26,7 @@ public class ReportPrinter {
 		if (queryReport != null){
 			outputWriter.write("#Results:\n" + mapJoiner.join((Map<?, ?>) queryReport) + "\n");
 		}else{
-			outputWriter.write("Query report is null!\n");
+			outputWriter.write("#Results:\n No report generated. Check program logs. \n");
 		}
 		outputWriter.flush();
 		outputWriter.close();

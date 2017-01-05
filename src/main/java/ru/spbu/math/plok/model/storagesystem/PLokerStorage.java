@@ -26,8 +26,8 @@ public class PLokerStorage implements StorageSystem{
 	private final LoadingCache<Integer, Block> cache;
 	private final FilePersistentStorage storage;
 	private Index index;
-	protected long cacheMissCount;
-	protected long requestCount;
+	protected long blocksReadFromDisk;
+	protected long blocksReadInTotal;
 
 	private List<Block> currentCommonBlocks;
 	private Block currentSpecial;
@@ -49,7 +49,7 @@ public class PLokerStorage implements StorageSystem{
 				.build(new CacheLoader<Integer, Block>() {
 					@Override
 					public Block load(Integer key) throws Exception {
-						cacheMissCount++;
+						blocksReadFromDisk++;
 						return readFromDisk(key);
 					}
 				});
@@ -74,7 +74,6 @@ public class PLokerStorage implements StorageSystem{
 	}
 
 	protected Block readFromDisk(long key) throws IOException {
-		log.debug("Reading {}", key);
 		return this.storage.get(key);
 	}
 
@@ -84,11 +83,13 @@ public class PLokerStorage implements StorageSystem{
 		putSpecialPart(vector);
 	}
 
-	private void putSpecialPart(Vector vector) {
+	private void putSpecialPart(Vector vector) throws IOException {
 		if (L_S != 0){
 			if (currentSpecial.tryAdd(vector.cutCopy(vector.getLength() - L_S, vector.getLength() - 1))){
 				currentSpecial.autoFillHeader(getNextId(currentSpecial), vector.getLength() - L_S);
 				index.put(currentSpecial);
+				//TODO debug
+				//storage.add(currentSpecial);
 				currentSpecial = new Block(P_S, L_S);
 			}
 		}
@@ -116,6 +117,7 @@ public class PLokerStorage implements StorageSystem{
 		List<Integer> ids = index.get(q.getTimeStart(), q.getTimeEnd(), q.getIndexStart(), q.getIndexEnd());
 		List<Block> blocks = new ArrayList<>(); 
 		for (Integer id: ids){
+			blocksReadInTotal++;
 			blocks.add(cache.get(id));
 		}
 		return blocks;		
@@ -123,7 +125,11 @@ public class PLokerStorage implements StorageSystem{
 
 	@Override
 	public HashMap<String, Object> getStatistics() {
-		return null;
+		HashMap<String,Object> result = new HashMap<>();
+		result.put("a", blocksReadFromDisk);
+		result.put("A", blocksReadInTotal);
+		result.put("a/A", 100 * (float)blocksReadFromDisk / blocksReadInTotal);
+		return result;
 	}
 	
 	@Override
