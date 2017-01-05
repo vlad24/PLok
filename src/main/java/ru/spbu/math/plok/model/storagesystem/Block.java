@@ -9,7 +9,6 @@ public class Block {
 	private BlockHeader header;
 	private int P;
 	private int L;
-	
 	private ArrayList<Vector> data;
 	
 	public Block(int P, int L) {
@@ -20,7 +19,7 @@ public class Block {
 	
 	public boolean tryAdd(Vector vector){
 		if (vector.getLength() != L){
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Incorrect length!");
 		}else if (data.size() == P){
 			throw new IllegalStateException("Filled Block!");
 		}
@@ -32,12 +31,17 @@ public class Block {
 		return data.size() >= P;
 	}
 	
-	public void pack(long id, long iBeg){
+	
+	public void autoFillHeader(int id, int iBeg){
 		this.header = new BlockHeader(id, data.get(0).getTimestamp(), data.get(data.size() - 1).getTimestamp(), iBeg, iBeg + L - 1);
 	}
-
+	
 	public BlockHeader getHeader() {
 		return header;
+	}
+	
+	public void setHeader(BlockHeader header) {
+		this.header = header;
 	}
 
 	@Override

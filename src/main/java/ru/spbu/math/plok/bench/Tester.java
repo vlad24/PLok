@@ -34,6 +34,7 @@ public class Tester {
 			Client client 		= injector.getInstance(Client.class);
 			log.info("Letting the generator to attack for {} msec", configurator.getT());
 			HashMap<String, Object> generatorReport = generator.attack(store);
+			log.info("Stored {} blocks", store.getBlockCount());
 			log.info("Let's have a break for {} msec", configurator.getPhaseBreak());
 			TimeUnit.MILLISECONDS.sleep(configurator.getPhaseBreak());
 			log.info("Break is over. Starting client...");

@@ -8,7 +8,7 @@ import ru.spbu.math.plok.model.client.Distribution;
 import ru.spbu.math.plok.model.client.ExponentialDistribution;
 import ru.spbu.math.plok.model.client.NormalDistribution;
 import ru.spbu.math.plok.model.client.UniformDistribution;
-import ru.spbu.math.plok.model.storagesystem.PLokStorage;
+import ru.spbu.math.plok.model.storagesystem.PLokerStorage;
 import ru.spbu.math.plok.model.storagesystem.SQLStorage;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
 
@@ -49,7 +49,7 @@ public class BuildModule extends AbstractModule {
 		if (configs.getStorage().equalsIgnoreCase("sql"))
 			bind(StorageSystem.class).to(SQLStorage.class);
 		else {
-			bind(StorageSystem.class).to(PLokStorage.class);
+			bind(StorageSystem.class).to(PLokerStorage.class);
 		}
 	}
 

@@ -22,7 +22,11 @@ public class ReportPrinter {
 		}
 		outputWriter = new BufferedWriter(new FileWriter(report));
 		outputWriter.write("#Configurator:\n" + configurator.toString() + "\n");
-		outputWriter.write("#Results:\n" + mapJoiner.join((Map<?, ?>) queryReport) + "\n");
+		if (queryReport != null){
+			outputWriter.write("#Results:\n" + mapJoiner.join((Map<?, ?>) queryReport) + "\n");
+		}else{
+			outputWriter.write("Query report is null!\n");
+		}
 		outputWriter.flush();
 		outputWriter.close();
 	}

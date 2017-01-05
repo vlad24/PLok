@@ -1,7 +1,6 @@
 package ru.spbu.math.plok.model.client;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ public class Client{
 
 	private final long queriesCount;			// A
 	private long madeQueries;
-	private LinkedHashMap<String, Double> result;
 	private QueryGenerator queryGenerator;
 
 
@@ -32,7 +30,6 @@ public class Client{
 		this.queriesCount = queriesCount;
 		this.madeQueries = 0;
 		this.queryGenerator = provider.get();
-		this.result = new LinkedHashMap<String, Double>();
 	}
 
 	public HashMap<String, Object> attack(StorageSystem store){

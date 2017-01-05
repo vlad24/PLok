@@ -9,16 +9,16 @@ import com.google.inject.name.Named;
 
 public class Index {
 	
-	private int p = -1; 
-	private int N = -1; 
-	private int P = -1; 
-	private int L = -1; 
-	private int L_S;
-	private int P_S;
+	private int p 	= -1; 
+	private int N 	= -1; 
+	private int P 	= -1; 
+	private int L 	= -1; 
+	private int L_S = -1;
+	private int P_S = -1;
 	private long firstBasicTimestamp = -1;
 	private long firstSpecialTimestamp = -1;
-	private List<List<Long>> grid;
-	private List<Long> specialGrid;
+	private List<List<Integer>> grid;
+	private List<Integer> specialGrid;
 	private int blockCount;
 	
 
@@ -26,13 +26,13 @@ public class Index {
 	public Index(@Named("N")int N,  @Named("P")int P,  @Named("L")int L,  @Named("p")int period) {
 		super();
 		this.p = period;
+		this.N = N;
 		this.P = P;
 		this.L = L;
-		this.N = N;
 		this.L_S = N % L;
 		this.P_S = P * L / L_S;
 		grid = new ArrayList<>();
-		grid.add(new ArrayList<Long>());
+		grid.add(new ArrayList<Integer>());
 		specialGrid = new ArrayList<>();
 	}
 
@@ -54,11 +54,10 @@ public class Index {
 		}else{
 			int last = grid.size() - 1;
 			if (grid.get(last).size() == N / L){
-				grid.add(new ArrayList<Long>());
+				grid.add(new ArrayList<Integer>());
 				last++;
 			}
 			grid.get(last).add(entry.getId());
-			System.out.println("Columns in grid:" + grid.size());
 			if (firstBasicTimestamp == -1)
 				firstBasicTimestamp = entry.gettBeg();
 		}
@@ -69,16 +68,16 @@ public class Index {
 		return entry.getiEnd() - entry.getiBeg() + 1 != L;
 	}
 
-	public List<Long> get(long startTime, long endTime, int i1, int i2) {
-		List<Long> basics   = getFromBasic(startTime, endTime, i1, i2);
-		List<Long> specials = getFromSpecial(startTime, endTime, i1, i2);
-		List<Long> result = new ArrayList<>(basics.size() + specials.size());
+	public List<Integer> get(long startTime, long endTime, int i1, int i2) {
+		List<Integer> basics   = getFromBasic(startTime, endTime, i1, i2);
+		List<Integer> specials = getFromSpecial(startTime, endTime, i1, i2);
+		List<Integer> result = new ArrayList<>(basics.size() + specials.size());
 		result.addAll(basics);
 		result.addAll(specials);
 		return result;
 	}
 
-	private List<Long> getFromSpecial(long startTime, long endTime, int i1, int i2) {
+	private List<Integer> getFromSpecial(long startTime, long endTime, int i1, int i2) {
 		long firstTime = firstBasicTimestamp;
 		long lastTime = firstTime + specialGrid.size() * P * p;
 		if (specialGrid.isEmpty() 
@@ -91,7 +90,7 @@ public class Index {
 		return specialGrid.subList(leftBlockIndex, rightBlockIndex + 1);
 	}
 
-	private List<Long> getFromBasic(long qTimeStart, long qTimeEnd, int qIndexStart, int qIndexEnd) {
+	private List<Integer> getFromBasic(long qTimeStart, long qTimeEnd, int qIndexStart, int qIndexEnd) {
 		long firstTime = firstBasicTimestamp;
 		long lastTime  = firstTime + grid.size() * P * p ;
 		if (grid.isEmpty() 
@@ -106,7 +105,7 @@ public class Index {
 		int rightBlockIndex = (int)  (qTimeEnd    <= lastTime	? ((qTimeEnd   - firstTime) / p) / P   : grid.size() - 1  );
 		int upBlockIndex  	= (int) (qIndexStart  >= 0 			? qIndexStart / L : 0);
 		int downBlockIndex  = (int) (qIndexEnd    <= N 			? qIndexEnd / L : 0);
-		List<Long> result = new ArrayList<>();
+		List<Integer> result = new ArrayList<>();
 		for (int i = leftBlockIndex; i <= rightBlockIndex; i++){
 			 result.addAll(grid.get(i).subList(upBlockIndex, downBlockIndex + 1));
 		}

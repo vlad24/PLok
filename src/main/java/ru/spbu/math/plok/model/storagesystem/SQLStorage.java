@@ -32,5 +32,11 @@ public class SQLStorage implements StorageSystem{
 		return 0;
 	}
 
+	@Override
+	public int getNextId(Block block) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 
 }

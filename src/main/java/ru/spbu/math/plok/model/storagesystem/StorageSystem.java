@@ -7,10 +7,12 @@ import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.model.generator.Vector;
 
 public interface StorageSystem {
+	
+	public int getNextId(Block block);
 
 	public List<Block> serve(Query query) throws Exception;
 
-	public void put(Vector vector);
+	public void put(Vector vector) throws Exception;
 	
 	public HashMap<String, Object> getStatistics();
 

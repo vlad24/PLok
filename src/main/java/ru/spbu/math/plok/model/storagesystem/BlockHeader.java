@@ -1,19 +1,19 @@
 package ru.spbu.math.plok.model.storagesystem;
 
 public class BlockHeader {
-	private long id;
+	private int id;
 	private long tBeg;
 	private long tEnd;
-	private long iBeg;
-	private long iEnd;
+	private int iBeg;
+	private int iEnd;
 	
-	public BlockHeader(long id) {
+	public BlockHeader(int id) {
 		super();
 		this.id = id;
 		this.tBeg = -1L;
 		this.tEnd = -1L;
-		this.iBeg = -1L;
-		this.iEnd = -1L;
+		this.iBeg = -1;
+		this.iEnd = -1;
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public class BlockHeader {
 				+ "]";
 	}
 
-	public BlockHeader(long id, long tBeg, long tEnd, long iBeg, long iEnd) {
+	public BlockHeader(int id, long tBeg, long tEnd, int iBeg, int iEnd) {
 		super();
 		this.id = id;
 		this.tBeg = tBeg;
@@ -65,12 +65,8 @@ public class BlockHeader {
 		return true;
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public long gettBeg() {
@@ -89,24 +85,20 @@ public class BlockHeader {
 		this.tEnd = tEnd;
 	}
 
-	public long getiBeg() {
+	public int getiBeg() {
 		return iBeg;
 	}
 
-	public void setiBeg(long iBeg) {
+	public void setiBeg(int iBeg) {
 		this.iBeg = iBeg;
 	}
 
-	public long getiEnd() {
+	public int getiEnd() {
 		return iEnd;
 	}
 
-	public void setiEnd(long iEnd) {
+	public void setiEnd(int iEnd) {
 		this.iEnd = iEnd;
 	}
-
-	
-
-	
 	
 }

@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -15,78 +19,82 @@ import com.google.inject.name.Named;
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.model.generator.Vector;
 
-public class PLokStorage implements StorageSystem{
+public class PLokerStorage implements StorageSystem{
 
-	private final LoadingCache<Long, Block> cache;
+	private final static Logger log = LoggerFactory.getLogger(PLokerStorage.class);
+	
+	private final LoadingCache<Integer, Block> cache;
 	private final FilePersistentStorage storage;
 	private Index index;
 	protected long cacheMissCount;
 	protected long requestCount;
-	
+
 	private List<Block> currentCommonBlocks;
 	private Block currentSpecial;
-	
-	private int p = -1; 
+	private AtomicInteger nextId;
+
 	private int N = -1; 
 	private int P = -1; 
 	private int L = -1; 
 	private int L_S;
 	private int P_S;
-	
-	
+
+
 	@Inject
-	public PLokStorage(@Named("N")int N,  @Named("P")int P,  @Named("L")int L, @Named("cacheUnitSize") int cacheUnitSize, Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
+	public PLokerStorage(@Named("N")int N,  @Named("P")int P,  @Named("L")int L, @Named("cacheUnitSize") int cacheSizeInUnits, Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
 		super();
 		storage = persStorage.get();
-			cache = CacheBuilder.newBuilder()
-					.maximumSize(cacheUnitSize)
-					.build(new CacheLoader<Long, Block>() {
-						@Override
-						public Block load(Long key) throws Exception {
-							cacheMissCount++;
-							return readFromDisk(key);
-						}
-					});
-			index = indexProvider.get();
-			this.P = P;
-			this.L = L;
-			this.N = N;
-			this.L_S = N % L;
-			this.P_S = P * L / L_S;
-			currentCommonBlocks = new ArrayList<>(N / L);
-			refreshCommonColumn();
-			currentSpecial = new Block(P_S, L_S);
-		}
+		cache = CacheBuilder.newBuilder()
+				.maximumSize(cacheSizeInUnits)
+				.build(new CacheLoader<Integer, Block>() {
+					@Override
+					public Block load(Integer key) throws Exception {
+						cacheMissCount++;
+						return readFromDisk(key);
+					}
+				});
+		index = indexProvider.get();
+		this.P = P;
+		this.L = L;
+		this.N = N;
+		this.L_S = N % L;
+		this.P_S = P * L / L_S;
+		currentCommonBlocks = new ArrayList<>(N / L);
+		refreshCommonColumn();
+		currentSpecial = new Block(P_S, L_S);
+		nextId = new AtomicInteger(0);
+	}
 	private void refreshCommonColumn() {
-		currentCommonBlocks = new ArrayList<>();
-		//currentCommonBlocks.clear();
+		//currentCommonBlocks = new ArrayList<>();
+		currentCommonBlocks.clear();
 		for (int i = 0; i < N / L; i++){
 			currentCommonBlocks.add(new Block(P, L));
 		}
-		
+
 	}
-	
+
 	protected Block readFromDisk(long key) throws IOException {
+		log.debug("Reading {}", key);
 		return this.storage.get(key);
 	}
 
 
-	public void put(Vector vector) {
+	public void put(Vector vector) throws IOException {
 		putCommonPart(vector);
 		putSpecialPart(vector);
 	}
-	
+
 	private void putSpecialPart(Vector vector) {
 		if (L_S != 0){
 			if (currentSpecial.tryAdd(vector.cutCopy(vector.getLength() - L_S, vector.getLength() - 1))){
-				currentSpecial.pack(System.currentTimeMillis(), vector.getLength() - L_S);
+				currentSpecial.autoFillHeader(getNextId(currentSpecial), vector.getLength() - L_S);
 				index.put(currentSpecial);
 				currentSpecial = new Block(P_S, L_S);
 			}
 		}
 	}
-	
-	private void putCommonPart(Vector vector) {
+
+	private void putCommonPart(Vector vector) throws IOException {
 		boolean commonBlocksFilled = false;
 		for (int i = 0; i < N / L; i++){
 			int up = L * i;
@@ -94,34 +102,38 @@ public class PLokStorage implements StorageSystem{
 			Block block = currentCommonBlocks.get(i);
 			if (block.tryAdd(vector.cutCopy(up, down))){
 				commonBlocksFilled = true;
-				block.pack(System.currentTimeMillis(), up);
+				block.autoFillHeader(getNextId(block), up);
 				index.put(block);
-				System.out.println("Blocks in index:" + index.getBlockCount());
+				storage.add(block);
 			}
 		}
 		if (commonBlocksFilled){
 			refreshCommonColumn();
 		}
 	}
-	
+
 	public List<Block> serve(Query q) throws Exception{
-		List<Long> ids = index.get(q.getTimeStart(), q.getTimeEnd(), q.getIndexStart(), q.getIndexEnd());
+		List<Integer> ids = index.get(q.getTimeStart(), q.getTimeEnd(), q.getIndexStart(), q.getIndexEnd());
 		List<Block> blocks = new ArrayList<>(); 
-		for (Long id: ids){
+		for (Integer id: ids){
 			blocks.add(cache.get(id));
 		}
 		return blocks;		
 	}
-	
+
 	@Override
 	public HashMap<String, Object> getStatistics() {
-		// TODO Auto-generated method stub
 		return null;
 	}
+	
 	@Override
 	public int getBlockCount() {
 		return index.getBlockCount();
 	}
 	
+	@Override
+	public int getNextId(Block block) {
+		return nextId.getAndIncrement();
+	}
 
 }

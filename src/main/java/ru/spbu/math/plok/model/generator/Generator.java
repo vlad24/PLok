@@ -72,6 +72,7 @@ public class Generator{
 			report.put("attackStart", callStart);
 			report.put("attackEnd", callFinish);
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("Problem {}!", e.getMessage());
 			report.put("error", e.getMessage());
 		}finally{
