@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
-import ru.spbu.math.plok.model.client.Distribution;
-
 public class Configurator {
 
 	private static Logger log = LoggerFactory.getLogger(Configurator.class);
@@ -26,6 +24,7 @@ public class Configurator {
 	private static final Integer 	DEFAULT_p 				= 10;
 	private static final int     	m 						= Float.BYTES;
 
+	private boolean inited;
 	private int 			config_N;
 	private Integer 		config_p;
 	private Float 			config_C;
@@ -33,15 +32,14 @@ public class Configurator {
 	private String 			config_S;
 	private String 			config_O;
 	private String 			config_V;
+	private Integer 		config_P;
+	private Integer 		config_L;
 	private Integer 		config_phaseBreak;
+	private String 			config_storagePath;
 	private boolean 		config_debug;
 	private int 			calculated_A;
-	private int calculated_SIZE;
-	private boolean inited;
-	private int calculated_cacheSize;
-	private Integer config_P;
-	private Integer config_L;
-	private String config_storagePath;
+	private int 			calculated_SIZE;
+	private int 			calculated_cacheSize;
 
 	private CommandLineParser parser;
 	private Option phaseBreak;
