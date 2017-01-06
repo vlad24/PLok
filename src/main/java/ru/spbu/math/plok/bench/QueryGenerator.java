@@ -32,7 +32,7 @@ public class QueryGenerator {
 		int qIndexEnd   = v.getRandomInt(qIndexStart, N - 1);
 //		qTimeEnd = timeEnd;
 //		qTimeStart = timeStart;
-//		qIndexStart = 0;
+//		qIndexStart = N - 1;
 //		qIndexEnd = N - 1;
 		log.debug("QUERY:({},{},{},{}) // time_delta:{}, index_range:{}", qIndexStart, qIndexEnd, qTimeStart, qTimeEnd,
 				(qTimeEnd - qTimeStart + 1) , (qIndexEnd - qIndexStart + 1));

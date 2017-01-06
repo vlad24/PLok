@@ -12,7 +12,7 @@ public class NormalDistribution extends Distribution{
 	}
 
 	@Override
-	public int getRandomInt(long from, long to) {
+	public int getRandomInt(int from, int to) {
 		return 0;
 	}
 

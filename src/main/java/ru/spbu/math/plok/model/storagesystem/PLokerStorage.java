@@ -64,19 +64,17 @@ public class PLokerStorage implements StorageSystem{
 		currentSpecial = new Block(P_S, L_S);
 		nextId = new AtomicInteger(0);
 	}
+	
 	private void refreshCommonColumn() {
-		//currentCommonBlocks = new ArrayList<>();
 		currentCommonBlocks.clear();
 		for (int i = 0; i < N / L; i++){
 			currentCommonBlocks.add(new Block(P, L));
 		}
-
 	}
 
 	protected Block readFromDisk(long key) throws IOException {
 		return this.storage.get(key);
 	}
-
 
 	public void put(Vector vector) throws IOException {
 		putCommonPart(vector);
@@ -88,8 +86,7 @@ public class PLokerStorage implements StorageSystem{
 			if (currentSpecial.tryAdd(vector.cutCopy(vector.getLength() - L_S, vector.getLength() - 1))){
 				currentSpecial.autoFillHeader(getNextId(currentSpecial), vector.getLength() - L_S);
 				index.put(currentSpecial);
-				//TODO debug
-				//storage.add(currentSpecial);
+				storage.add(currentSpecial);
 				currentSpecial = new Block(P_S, L_S);
 			}
 		}
@@ -115,12 +112,12 @@ public class PLokerStorage implements StorageSystem{
 
 	public List<Block> serve(Query q) throws Exception{
 		List<Integer> ids = index.get(q.getTimeStart(), q.getTimeEnd(), q.getIndexStart(), q.getIndexEnd());
-		List<Block> blocks = new ArrayList<>(); 
+		List<Block> resultBlocks = new ArrayList<>(); 
 		for (Integer id: ids){
 			blocksReadInTotal++;
-			blocks.add(cache.get(id));
+			resultBlocks.add(cache.get(id));
 		}
-		return blocks;		
+		return resultBlocks;		
 	}
 
 	@Override

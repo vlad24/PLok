@@ -40,15 +40,18 @@ public class Index {
 		specialGrid = new ArrayList<>();
 	}
 
+	
 	@Override
 	public String toString() {
 		return "Index [p=" + p + ", N=" + N + ", P=" + P + ", L=" + L + ", L_S=" + L_S + ", P_S=" + P_S
 				+ ", grid=" + grid + ", specialGrid=" + specialGrid + "]";
 	}
 
+	
 	public void put(Block entry) {
 		put(entry.getHeader());
 	}
+	
 
 	public void put(BlockHeader entry) {
 		if (isSpecial(entry)){
@@ -67,40 +70,24 @@ public class Index {
 		}
 		blockCount++;
 	}
+	
 
 	private boolean isSpecial(BlockHeader entry) {
 		return entry.getiEnd() - entry.getiBeg() + 1 != L;
 	}
 
 	public List<Integer> get(long startTime, long endTime, int i1, int i2) {
-		List<Integer> basics   = getFromBasic  (startTime,   endTime,  i1,                        Math.min(N - L_S - 1, i2)    );
+		List<Integer> commons   = getFromBasic  (startTime,   endTime,  i1,                        Math.min(N - L_S - 1, i2)    );
 		List<Integer> specials = getFromSpecial(startTime,   endTime,  Math.max(i1, N - L_S),     i2                           );
-		List<Integer> result = new ArrayList<>(basics.size() + specials.size());
-		result.addAll(basics);
+		log.debug("Got {} commons and {} specials", commons.size(), specials.size());
+		List<Integer> result = new ArrayList<>(commons.size() + specials.size());
+		result.addAll(commons);
 		result.addAll(specials);
 		return result;
 	}
-
-	private List<Integer> getFromSpecial(long qStartTime, long qEndTime, int qIndexStart, int qIndexEnd) {
-		log.debug("SPECIALS {}-{}", qIndexStart, qIndexEnd);
-		long firstTime = firstSpecialTimestamp;
-		long lastTime = firstTime + (specialGrid.size() * P) * p;
-		if (specialGrid.isEmpty() 
-				|| qStartTime > lastTime
-				|| qEndTime   < firstTime
-				|| qIndexStart  > N - 1
-				|| qIndexEnd  < 0
-				|| qIndexEnd  > qIndexStart
-				) {
-			return new ArrayList<>();
-		}
-		int leftBlockIndex  = (int)  (qStartTime    >= firstTime  ? ((qStartTime - firstTime) / p) / P_S   : 0              );
-		int rightBlockIndex = (int)  (lastTime      >= qEndTime   ? ((qEndTime   - firstTime) / p) / P_S   : specialGrid.size() - 1);
-		return specialGrid.subList(leftBlockIndex, rightBlockIndex + 1);
-	}
-
+	
+	
 	private List<Integer> getFromBasic(long qTimeStart, long qTimeEnd, int qIndexStart, int qIndexEnd) {
-		log.debug("BASICS {}-{}", qIndexStart, qIndexEnd);
 		long firstTime = firstBasicTimestamp;
 		long lastTime  = firstTime + grid.size() * P * p - p;
 		if (grid.isEmpty() 
@@ -118,14 +105,31 @@ public class Index {
 		int downBlockIndex  = (int)  (qIndexEnd   <= N - 1	    ? qIndexEnd   / L : 0 );
 		List<Integer> result = new ArrayList<>();
 		for (int i = leftBlockIndex; i <= rightBlockIndex; i++){
-			//log.debug("Gettnig {} coluumn from available 0-{} ", i, grid.size() - 1);
 			List<Integer> list = grid.get(i);
-			//log.debug("Up:{} Down: {} Available:0-{}", upBlockIndex, downBlockIndex+1, list.size()-1);
 			result.addAll(list.subList(upBlockIndex, downBlockIndex + 1));
 		}
 		return result;
 	}
 
+	
+	private List<Integer> getFromSpecial(long qStartTime, long qEndTime, int qIndexStart, int qIndexEnd) {
+		long firstTime = firstSpecialTimestamp;
+		long lastTime = firstTime + (specialGrid.size() * P) * p;
+		if (specialGrid.isEmpty() 
+				|| qStartTime   > lastTime
+				|| qEndTime     < firstTime
+				|| qIndexStart  > N - 1
+				|| qIndexEnd    < 0
+				|| qIndexEnd    < qIndexStart
+				) {
+			return new ArrayList<>();
+		}
+		int leftBlockIndex  = (int)  (qStartTime    >= firstTime  ? ((qStartTime - firstTime) / p) / P_S   : 0              );
+		int rightBlockIndex = (int)  (lastTime      >= qEndTime   ? ((qEndTime   - firstTime) / p) / P_S   : specialGrid.size() - 1);
+		return specialGrid.subList(leftBlockIndex, rightBlockIndex + 1);
+	}
+
+	
 	public int getBlockCount() {
 		return blockCount;
 	}

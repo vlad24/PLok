@@ -28,7 +28,6 @@ public class FilePersistentStorage {
 	private int L;
 	private int P_S;
 	private int L_S;
-	private long blockID;
 	private ByteBuffer writeBuffer;
 	private final RandomAccessFile raf;
 	private final FileChannel channel;
@@ -41,42 +40,45 @@ public class FilePersistentStorage {
 		this.L 		= L;
 		this.L_S 	= N % L;
 		this.P_S 	= P * L / L_S;
-		this.blockSize = 
-				1 + 										//additional byte to store whether block is special or common
-				BlockHeader.BYTES +							//header
-				P * L * Float.BYTES + L * Long.BYTES; 		//vectors and their timestamps (data)
+		this.blockSize =	
+				1 + 													//additional byte to store whether block is special or common
+				BlockHeader.BYTES +										//header
+				Math.max(P   * L   * Float.BYTES + P   * Long.BYTES,
+						 P_S * L_S * Float.BYTES + P_S * Long.BYTES);	//vectors and their timestamps (data)
 		File storageFile = Paths.get(this.storagePath,
 				String.format(STORAGE_FILE_NAME_FORMAT, System.currentTimeMillis())).toFile();
 		storageFile.getParentFile().mkdirs();
 		raf = new RandomAccessFile(storageFile, "rw");
 		writeBuffer = ByteBuffer.allocateDirect(blockSize);
-		blockID = storageFile.length() / blockSize;
 		channel = raf.getChannel();
 		channel.position(channel.size());
-		log.debug("Persistent storage file has been created at {} with initial block id={}", storageFile.getAbsolutePath(), blockID);
+		log.debug("Persistent storage file has been created at {} ", storageFile.getAbsolutePath());
 	}
 
-	public long add(Block block) throws IOException {
-		return writeBytes(toBytes(block));
+	public void add(Block block) throws IOException {
+		log.debug("Writting {}", block);
+		writeBytes(toBytes(block));
 	}
 
 	public Block get(long id) throws IOException {
 		return fromBytes(readBytes(id));
 	}
 	
-	public long writeBytes(ByteBuffer block) throws IOException {
-		blockID++;
+	public void writeBytes(ByteBuffer block) throws IOException {
 		writeBuffer.put(block).flip();
 		while (writeBuffer.hasRemaining()) {
 			channel.write(writeBuffer);
+			//log.debug("Written {} bytes", b);
 		}
 		writeBuffer.clear();
-		return blockID;
+		//log.debug("Channel position: {}", channel.position());
 	}
 
 	  public ByteBuffer readBytes(long blockID) throws IOException {
 		ByteBuffer resultBuffer = ByteBuffer.allocate(blockSize);
+		//log.debug("Reading from {}", blockID * blockSize);
 	    channel.read(resultBuffer, blockID * blockSize);
+	    resultBuffer.flip();
 	    return resultBuffer;
 	  }
 	  
@@ -94,6 +96,8 @@ public class FilePersistentStorage {
 				}
 				result.putLong(v.getTimestamp());
 			}
+			result.position(result.capacity()).flip();
+			//log.debug("Gonna write {} bytes", result.remaining());
 			return result;
 		}
 		
@@ -106,8 +110,9 @@ public class FilePersistentStorage {
 			header.settEnd(bytes.getLong());
 			Block result = (isCommon == 1) ? new Block(P, L) : new Block(P_S, L_S);   
 			result.setHeader(header);
-			while (bytes.hasRemaining()){
-				int vectorLength = (isCommon == 1) ? L : L_S;
+			int vectorLength = (isCommon == 1) ? L : L_S;
+			int vectorAmount = (isCommon == 1) ? P : P_S;
+			for (int j = 0; j < vectorAmount; j++){
 				float[] values = new float[vectorLength];
 				for (int i = 0; i < vectorLength; i++){
 						values[i] = bytes.getFloat();

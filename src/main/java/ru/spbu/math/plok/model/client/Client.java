@@ -42,16 +42,18 @@ public class Client{
 				log.debug("Progress = {}%", 100.0 * (float)madeQueries/queriesCount);
 			}
 			log.debug("Client is over");
+			return store.getStatistics();
 		}catch(Exception er){
 			log.error("Client unexpectedly finished!", er);
+			HashMap<String, Object> errorReport = new HashMap<>();
+			errorReport.put("error", er);
+			return errorReport;
 		}
-		return store.getStatistics();
 	}
 
 	public void setQueryTimeBounds(long start, long end) {
 		queryGenerator.setStart(start);
 		queryGenerator.setEnd(end);
-		
 	}
 
 

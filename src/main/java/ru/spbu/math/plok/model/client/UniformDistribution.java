@@ -23,8 +23,8 @@ public class UniformDistribution extends Distribution{
 	}
 
 	@Override
-	public int getRandomInt(long from, long to) {
-		return (int) (from + rand.nextFloat() * (to - from));
+	public int getRandomInt(int from, int to) {
+		return from + rand.nextInt(to - from + 1);
 	}
 
 }
