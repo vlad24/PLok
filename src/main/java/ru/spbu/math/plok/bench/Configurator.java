@@ -36,7 +36,14 @@ public class Configurator {
 	private Integer 		config_phaseBreak;
 	private boolean 		config_debug;
 	private int 			calculated_A;
+	private int calculated_SIZE;
+	private boolean inited;
+	private int calculated_cacheSize;
+	private Integer config_P;
+	private Integer config_L;
+	private String config_storagePath;
 
+	private CommandLineParser parser;
 	private Option phaseBreak;
 	private Option O; 
 	private Option C;      		
@@ -49,15 +56,6 @@ public class Configurator {
 	private Option debug;
 	private Option storagePath;
 	private Options options;
-	private CommandLineParser parser;
-	private int calculated_SIZE;
-	private boolean inited;
-	private int calculated_cacheSize;
-	private Integer config_P;
-	private Integer config_L;
-	private String config_storagePath;
-
-
 
 	public Configurator(){
 		N      			= new Option("N", true, "vector length"); 							N.setRequired(true);
