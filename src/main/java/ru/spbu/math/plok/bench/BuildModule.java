@@ -39,7 +39,7 @@ public class BuildModule extends AbstractModule {
 
 	private void initVerbosity() {
 		String verbosity = configs.getVerbosity();
-		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("");
+		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("ROOT");
 		
 		if      (configs.isDebugging()){
 			rootLogger.setLevel(Level.DEBUG);

@@ -56,7 +56,7 @@ public class FilePersistentStorage {
 	}
 
 	public void add(Block block) throws IOException {
-		log.debug("Writting {}", block);
+		log.trace("Writting {}", block);
 		writeBytes(toBytes(block));
 	}
 
@@ -67,16 +67,16 @@ public class FilePersistentStorage {
 	public void writeBytes(ByteBuffer block) throws IOException {
 		writeBuffer.put(block).flip();
 		while (writeBuffer.hasRemaining()) {
-			channel.write(writeBuffer);
-			//log.debug("Written {} bytes", b);
+			int writtenAmount = channel.write(writeBuffer);
+			log.trace("Written {} bytes", writtenAmount);
 		}
 		writeBuffer.clear();
-		//log.debug("Channel position: {}", channel.position());
+		log.trace("Channel position: {}", channel.position());
 	}
 
 	  public ByteBuffer readBytes(long blockID) throws IOException {
 		ByteBuffer resultBuffer = ByteBuffer.allocate(blockSize);
-		//log.debug("Reading from {}", blockID * blockSize);
+		log.trace("Reading from {}", blockID * blockSize);
 	    channel.read(resultBuffer, blockID * blockSize);
 	    resultBuffer.flip();
 	    return resultBuffer;
@@ -97,11 +97,12 @@ public class FilePersistentStorage {
 				result.putLong(v.getTimestamp());
 			}
 			result.position(result.capacity()).flip();
-			//log.debug("Gonna write {} bytes", result.remaining());
+			log.trace("Gonna write {} bytes", result.remaining());
 			return result;
 		}
 		
 		private Block fromBytes(ByteBuffer bytes) {
+			log.trace("Parsing  from {}", bytes);
 			byte isCommon = bytes.get();
 			BlockHeader header = new BlockHeader(bytes.getInt());
 			header.setiBeg(bytes.getInt());
@@ -125,6 +126,7 @@ public class FilePersistentStorage {
 	
 
 	public void close() throws IOException {
+		log.trace("Closing file persister");
 		channel.force(false);
 		raf.close();
 	}
