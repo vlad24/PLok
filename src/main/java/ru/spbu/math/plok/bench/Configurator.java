@@ -19,6 +19,7 @@ public class Configurator {
 	private static final String  	DEFAULT_REPORT_OUTPUT 	= "./reports/report_" + System.currentTimeMillis() + ".txt";
 	private static final String 	DEFAULT_STORAGE_PATH	= "./storages";
 	private static final String 	DEFAULT_PHASE_BREAK 	= "2000";
+	private static final String 	DEFAULT_VERBOSITY 		= "info";
 	private static final String 	DEFAULT_S 				= "PLok";
 	private static final String 	DEFAULT_C 				= "0.25";
 	private static final Integer 	DEFAULT_p 				= 10;
@@ -52,8 +53,10 @@ public class Configurator {
 	private Option L;
 	private Option P;
 	private Option debug;
+	private Option verbosity;
 	private Option storagePath;
 	private Options options;
+	private String config_verbosity;
 
 	public Configurator(){
 		N      			= new Option("N", true, "vector length"); 							N.setRequired(true);
@@ -65,6 +68,7 @@ public class Configurator {
 		phaseBreak		= new Option("break", true, "break between write and read phases"); phaseBreak.setRequired(false);
 		P     	 		= new Option("P", true, "P for block");								P.setRequired(true);
 		L     	 		= new Option("L", true, "L for block");								L.setRequired(true);
+		verbosity		= new Option("verbosity", true, "verbosity level (debug, info)");	verbosity.setRequired(false);
 		storagePath		= new Option("storagePath", true, "persister file");
 		debug			= new Option("debug", false, "debug mode flag");
 		options = new Options().
@@ -77,6 +81,7 @@ public class Configurator {
 				addOption(phaseBreak).
 				addOption(debug).
 				addOption(storagePath).
+				addOption(verbosity).
 				addOption(P).
 				addOption(L);
 		parser = new PosixParser();
@@ -106,6 +111,7 @@ public class Configurator {
 			config_O				= line.getOptionValue("O", DEFAULT_REPORT_OUTPUT);
 			config_storagePath		= line.getOptionValue("storagePath", DEFAULT_STORAGE_PATH);
 			config_V 				= line.getOptionValue("V");
+			config_verbosity 		= line.getOptionValue("verbosity", DEFAULT_VERBOSITY);
 			config_p 				= DEFAULT_p;
 			calculated_SIZE 		= calculateSIZE();
 			calculated_cacheSize	= calculateCacheSize();
@@ -201,5 +207,9 @@ public class Configurator {
 
 	public String getStoragePath() {
 		return config_storagePath;
+	}
+	
+	public String getVerbosity() {
+		return config_verbosity;
 	}
 }
