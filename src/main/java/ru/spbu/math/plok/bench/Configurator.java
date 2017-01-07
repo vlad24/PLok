@@ -16,7 +16,7 @@ import com.google.common.base.MoreObjects;
 public class Configurator {
 
 	private static Logger log = LoggerFactory.getLogger(Configurator.class);
-	private static final String  	DEFAULT_REPORT_OUTPUT 	= "./reports/report_" + System.currentTimeMillis() + ".txt";
+	private static final String  	DEFAULT_REPORT_OUTPUT 	= "./reports/";
 	private static final String 	DEFAULT_STORAGE_PATH	= "./storages";
 	private static final String 	DEFAULT_PHASE_BREAK 	= "2000";
 	private static final String 	DEFAULT_VERBOSITY 		= "info";
