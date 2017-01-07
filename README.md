@@ -24,9 +24,9 @@ PLok is a project aimed to investigate dependency of optimal block sizes on quer
 | N				| vector length  								|  	integer ( > 0)				|	yes											| 
 | T				| write time (msec) 							| 	integer	( > 0)				|	yes											| 
 | C				| cache ratio 									|	float (between 0.0 and 1.0)	|	no (default: "0,25")						| 
-| V				| distribution									|	string (exp, norm, uni)		|	yes 										| 
+| V				| distribution									|	string ($exp/$norm/$uni or csv matrix file path)		|	yes 										| 
 | S				| storage type									|	string (sql, plok)			|	no (default: "ploker")						| 
-| O				| output path									|	string (path)				|	no (default: "./report_${timestamp}.txt")	| 
+| O				| output folder path								|	string (path)				|	no (default: "./reports")	| 
 | phaseBreak	| break between write and read phases(msec) 	|	integer ( > 0)				|	no (default: "2000")						| 
 | debug			| debug mode flag 								|	flag						|	no (default: false)							| 
 | storagePath 	| storage path									|	string (path)				|	no (default: "./tmp_file_storage/")			|
@@ -35,10 +35,12 @@ PLok is a project aimed to investigate dependency of optimal block sizes on quer
 
 ## Output example
 
-After launch a report file will be generated with the following metrics provided:
+After launch a report file (in report folder) named "report_${invocationTimestamp}.txt" will be generated with the following metrics provided:
 
 | Metric        | Description                                                                         |
 |:-------------:|:-----------------------------------------------------------------------------------:|
-|metric  | description|
+| a | number of queries served from disk|
+| A | total number of queries|
+| a/A | 100% * a/A|
 
 
