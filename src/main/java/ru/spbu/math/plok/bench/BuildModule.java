@@ -1,11 +1,13 @@
 package ru.spbu.math.plok.bench;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
 import ch.qos.logback.classic.Level;
+import ru.spbu.math.plok.model.client.distributions.CustomDistribution;
 import ru.spbu.math.plok.model.client.distributions.Distribution;
 import ru.spbu.math.plok.model.client.distributions.ExponentialDistribution;
 import ru.spbu.math.plok.model.client.distributions.NormalDistribution;
@@ -16,6 +18,8 @@ import ru.spbu.math.plok.model.storagesystem.StorageSystem;
 
 public class BuildModule extends AbstractModule {
 
+	private final static Logger log = LoggerFactory.getLogger(BuildModule.class);
+	
 	private Configurator configs;
 	
 	public BuildModule(Configurator configurator) {
@@ -56,13 +60,27 @@ public class BuildModule extends AbstractModule {
 	}
 
 	private void initDistribution() {
-		if (Distribution.DISTR_UNI.equalsIgnoreCase(configs.getV())){
-			bind(Distribution.class).to(UniformDistribution.class);
-		}else if (Distribution.DISTR_EXP.equalsIgnoreCase(configs.getV())){
-			bind(Distribution.class).to(ExponentialDistribution.class);
-		}else if (Distribution.DISTR_NORM.equalsIgnoreCase(configs.getV())){
-			bind(Distribution.class).to(NormalDistribution.class);
+		String distributionConfig = configs.getV();
+		if (distributionConfig.startsWith("$")){
+			if (Distribution.DISTR_UNI.equalsIgnoreCase(distributionConfig)){
+				bind(Distribution.class).to(UniformDistribution.class);
+				log.debug("Set uniform distribution.");
+			}else if (Distribution.DISTR_EXP.equalsIgnoreCase(distributionConfig)){
+				bind(Distribution.class).to(ExponentialDistribution.class);
+				log.debug("Set exponential distribution.");
+			}else if (Distribution.DISTR_NORM.equalsIgnoreCase(distributionConfig)){
+				bind(Distribution.class).to(NormalDistribution.class);
+				log.debug("Set normal distribution.");
+			}else{
+				bind(Distribution.class).to(UniformDistribution.class);
+				log.debug("Set uniform distribution.");
+			}
+		}else{
+			log.debug("Custom distribution will be set.");
+			log.trace("Initializing distribution matrix from file: {}", distributionConfig);
+			bind(Distribution.class).to(CustomDistribution.class);
 		}
+		
 	}
 
 	private void initStorage() {

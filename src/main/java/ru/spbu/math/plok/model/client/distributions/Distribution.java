@@ -6,9 +6,11 @@ import com.google.inject.name.Named;
 public abstract class Distribution {
 	
 
-	public static String DISTR_UNI = "uni";
-	public static String DISTR_EXP = "exp";
-	public static String DISTR_NORM = "norm";
+	public final static String DISTR_UNI    =  "$uni";
+	public final static String DISTR_EXP    =  "$exp";
+	public final static String DISTR_NORM   =  "$norm";
+	public final static String DISTR_CUSTOM =  "$custom";
+	
 	private String type;
 	
 	public String getType() {
@@ -24,6 +26,8 @@ public abstract class Distribution {
 	public Distribution(@Named("V")String v) {
 		if (v.equalsIgnoreCase(DISTR_EXP) || v.equalsIgnoreCase(DISTR_NORM) || v.equalsIgnoreCase(DISTR_UNI)){
 			this.type = v.toLowerCase();
+		}else{
+			this.type = DISTR_CUSTOM;
 		}
 	}
 
