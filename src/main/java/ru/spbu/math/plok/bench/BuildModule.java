@@ -6,10 +6,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
 import ch.qos.logback.classic.Level;
-import ru.spbu.math.plok.model.client.Distribution;
-import ru.spbu.math.plok.model.client.ExponentialDistribution;
-import ru.spbu.math.plok.model.client.NormalDistribution;
-import ru.spbu.math.plok.model.client.UniformDistribution;
+import ru.spbu.math.plok.model.client.distributions.Distribution;
+import ru.spbu.math.plok.model.client.distributions.ExponentialDistribution;
+import ru.spbu.math.plok.model.client.distributions.NormalDistribution;
+import ru.spbu.math.plok.model.client.distributions.UniformDistribution;
 import ru.spbu.math.plok.model.storagesystem.PLokerStorage;
 import ru.spbu.math.plok.model.storagesystem.SQLStorage;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;

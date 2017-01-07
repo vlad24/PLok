@@ -6,8 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import ch.qos.logback.classic.Logger;
-import ru.spbu.math.plok.model.client.Distribution;
 import ru.spbu.math.plok.model.client.Query;
+import ru.spbu.math.plok.model.client.distributions.Distribution;
 
 public class QueryGenerator {
 	private final static org.slf4j.Logger log = LoggerFactory.getLogger(QueryGenerator.class);

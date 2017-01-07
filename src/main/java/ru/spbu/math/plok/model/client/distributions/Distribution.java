@@ -1,4 +1,4 @@
-package ru.spbu.math.plok.model.client;
+package ru.spbu.math.plok.model.client.distributions;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
