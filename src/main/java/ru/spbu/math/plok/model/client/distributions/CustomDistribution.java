@@ -21,8 +21,7 @@ import ch.qos.logback.classic.Level;
 public class CustomDistribution extends Distribution{
 	private final static Logger log = LoggerFactory.getLogger(CustomDistribution.class);
 	private static final float SMALL_FLOAT = 0.000001f;
-	private float[][] distribution;
-	private float[][] probabilites;
+	private float[][] pdfMatrix;
 
 	@Inject
 	public CustomDistribution(@Named("V") String v) throws IOException {
@@ -33,65 +32,45 @@ public class CustomDistribution extends Distribution{
 		List<List<String>> fileData = getFileData(reader);
 		log.debug("File data got : {} ", fileData);
 		if (!fileData.isEmpty()){
-			distribution = buildDistributionMatrix(fileData);
-			probabilites = buildProbabilitiesMatrix(distribution);
+			pdfMatrix = buildPsMatrix(fileData);
 		}else{
 			throw new IllegalArgumentException("Empty file got!");
 		}
 		log.debug("Custom distribution successfully constructed");
-		log.debug("Distributions: {} ", getDistributionMatrix());
-		log.debug("Probabilities: {} ", getProbabilitiesMatrix());
+		log.debug("Probabilities: {} ", getProbabilities());
 	}
 
-	private float[][] buildDistributionMatrix(List<List<String>> fileData) {
+	private float[][] buildPsMatrix(List<List<String>> fileData) {
 		int rowAmount = fileData.size();
-		float[][] distributionMatrix = new float[rowAmount][rowAmount];
+		float[][] psMatrix = new float[rowAmount][rowAmount];
 		for (int i = 0; i < rowAmount; i++) {
 			List<String> row = fileData.get(i);
 			if (row.size() != rowAmount)
 				throw new IllegalArgumentException("Error at line " + i + " : row size != row amount");
-			distributionMatrix[i] = new float[rowAmount];
+			psMatrix[i] = new float[rowAmount];
 			for (int j = 0; j < rowAmount; j++){
-				distributionMatrix[i][j] = Float.parseFloat(row.get(j));
+				psMatrix[i][j] = Float.parseFloat(row.get(j));
 			}
 		}
-		validateConsistency(distributionMatrix);
-		return distributionMatrix;
+		validateProbabilitiesConsistency(psMatrix);
+		return psMatrix;
 	}
 	
-	private float[][] buildProbabilitiesMatrix(float[][] distributionMatrix){
-		for (int i = 0; i < distributionMatrix.length; i++){
-			for (int j = 0; j < distributionMatrix.length; j++){
-				if (i == 0 && j == 0){
-					probabilites[i][j] = distributionMatrix[i][j];  
-				}else if (i == 0){
-					probabilites[i][j] = distributionMatrix[i][j] - distributionMatrix[i][j - 1];
-				}else if (j == 0){
-					probabilites[i][j] = distributionMatrix[i][j] - distributionMatrix[i - 1][j];
-				}else{
-					probabilites[i][j] = distributionMatrix[i][j] - distributionMatrix[i - 1][j] - distributionMatrix[i][j - 1] +  distributionMatrix[i - 1][j - 1];  
-				}
-				if (Math.abs(probabilites[i][j]) < SMALL_FLOAT)
-					probabilites[i][j] = 0f;
+	private void validateProbabilitiesConsistency(float[][] ps) {
+		float sum = 0;
+		for (int i = 0; i < ps.length - 1 ; i++){
+			for (int j = 0; j < ps.length - 1 ; j++){
+				if (1 + SMALL_FLOAT < ps[i][j])
+					throw new IllegalArgumentException("Error at " + i + " " + j + " matrix element. More than 1.");
+				if (ps[i][j] < 0)
+					throw new IllegalArgumentException("Error at " + i + " " + j + " matrix element. Less than 0.");
+				sum += ps[i][j];
 			}
 		}
-		return probabilites;
+		if (Math.abs(1 - sum) > SMALL_FLOAT)
+			throw new IllegalArgumentException("Sum of matrix elements not equal to 1.");
 	}
 
-	private void validateConsistency(float[][] distrMatrix) {
-		if (Math.abs(1 - distrMatrix[distrMatrix.length - 1][distrMatrix.length - 1]) > SMALL_FLOAT)
-			throw new IllegalArgumentException("Last-last element is not equalt to one!");
-		for (int i = 0; i < distrMatrix.length - 1 ; i++){
-			for (int j = 0; j < distrMatrix.length - 1 ; j++){
-				if (distrMatrix[i][j] > distrMatrix[i + 1][j] || distrMatrix[i][j] > distrMatrix[i][j + 1])
-					throw new IllegalArgumentException("Error at " + i + " " + j + " matrix element. Increasing law broken.");
-				if (distrMatrix[i][j] < 0)
-					throw new IllegalArgumentException("Error at " + i + " " + j + " matrix element. Negative element.");
-			}
-		}
-
-
-	}
 
 	private List<List<String>> getFileData(BufferedReader reader) throws IOException {
 		String line;
@@ -115,12 +94,8 @@ public class CustomDistribution extends Distribution{
 		return 0;
 	}
 
-	public float[][] getDistributionMatrix() {
-		return distribution;
-	}
-
-	public float[][] getProbabilitiesMatrix() {
-		return probabilites;
+	public float[][] getProbabilities() {
+		return pdfMatrix;
 	}
 
 }
