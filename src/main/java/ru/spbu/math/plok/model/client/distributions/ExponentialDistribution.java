@@ -7,12 +7,12 @@ public class ExponentialDistribution extends Distribution{
 	}
 
 	@Override
-	public long getRandomLong(long from, long to) {
+	public long getRandomP(long from, long to) {
 		return 0;
 	}
 
 	@Override
-	public int getRandomInt(int from, int to) {
+	public int getRandomL(int from, int to) {
 		return 0;
 	}
 

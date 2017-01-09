@@ -110,13 +110,13 @@ public class CustomDistribution extends Distribution{
 	}
 
 	@Override
-	public long getRandomLong(long from, long to) {
+	public long getRandomP(long from, long to) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int getRandomInt(int from, int to) {
+	public int getRandomL(int from, int to) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

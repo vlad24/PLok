@@ -26,10 +26,10 @@ public class QueryGenerator {
 	public Query nextQuery(){
 		if (!inited)
 			throw new IllegalStateException();
-		long qTimeStart = v.getRandomLong(timeStart, timeEnd);
-		long qTimeEnd   = v.getRandomLong(qTimeStart, timeEnd);
-		int qIndexStart = v.getRandomInt(0, N - 1);
-		int qIndexEnd   = v.getRandomInt(qIndexStart, N - 1);
+		long qTimeStart = v.getRandomP(timeStart, timeEnd);
+		long qTimeEnd   = v.getRandomP(qTimeStart, timeEnd);
+		int qIndexStart = v.getRandomL(0, N - 1);
+		int qIndexEnd   = v.getRandomL(qIndexStart, N - 1);
 //		qTimeEnd = timeEnd;
 //		qTimeStart = timeStart;
 //		qIndexStart = N - 1;

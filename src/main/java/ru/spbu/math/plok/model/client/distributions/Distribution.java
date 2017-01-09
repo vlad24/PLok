@@ -31,9 +31,9 @@ public abstract class Distribution {
 		}
 	}
 
-	public abstract long getRandomLong(long from, long to);
+	public abstract long getRandomP(long from, long to);
 	
-	public abstract int getRandomInt(int from, int to);
+	public abstract int getRandomL(int from, int to);
 	
 	
 

@@ -17,13 +17,13 @@ public class UniformDistribution extends Distribution{
 	}
 
 	@Override
-	public long getRandomLong(long from, long to) {
+	public long getRandomP(long from, long to) {
 		float delta = rand.nextFloat() * (to - from);
 		return from + (long)delta;
 	}
 
 	@Override
-	public int getRandomInt(int from, int to) {
+	public int getRandomL(int from, int to) {
 		return from + rand.nextInt(to - from + 1);
 	}
 
