@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.omg.CORBA.OMGVMCID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,8 @@ public class CustomDistribution extends Distribution{
 	private int lOffset;
 	private float [] marginalP;
 	private float [] marginalL;
+	private float meanP; 
+	private float meanL; 
 
 	@Inject
 	public CustomDistribution(@Named("V") String v) throws IOException {
@@ -39,6 +42,7 @@ public class CustomDistribution extends Distribution{
 		if (!fileData.isEmpty()){
 			pmf = buildPmfMatrix(fileData);
 			calculateMarginals(pmf);
+			calculateMeans();
 		}else{
 			throw new IllegalArgumentException("Empty file got!");
 		}
@@ -46,7 +50,17 @@ public class CustomDistribution extends Distribution{
 		log.debug("PMF: {} ", getPmf());
 		log.debug("Marginal P: {} ", getMarginalP());
 		log.debug("Marginal L: {} ", getMarginalL());
+		log.debug("Means: mL={}, mP={}", meanL, meanP);
 		System.exit(1);
+	}
+
+	private void calculateMeans() {
+		for (int i = 0; i < marginalP.length; i++){
+			meanP += marginalP[i] * (pOffset + i);
+		}
+		for (int j = 0; j < marginalL.length; j++){
+			meanL += marginalL[j] * (lOffset + j);
+		}
 	}
 
 	private void calculateMarginals(float[][] pmfMatrix) {
@@ -160,6 +174,14 @@ public class CustomDistribution extends Distribution{
 	public int getRandomL(int from, int to) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public float getMeanL() {
+		return meanL;
+	}
+
+	public float getMeanP() {
+		return meanP;
 	}
 
 }
