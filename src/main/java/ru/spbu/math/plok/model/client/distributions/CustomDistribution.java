@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.omg.CORBA.OMGVMCID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,15 +20,16 @@ public class CustomDistribution extends Distribution{
 	private final static Logger log = LoggerFactory.getLogger(CustomDistribution.class);
 	private static final float SMALL_FLOAT = 0.000001f;
 	private static final String OFFSETS_SEPARATOR = "/";
-	private static final String ELEMENT_SEPARATOR = ";";
-	private float[][] pmf;
+	private static final String ELEMENT_SEPARATOR = ",";
 	private int pOffset;
 	private int lOffset;
+	private float[][] pmf;
 	private float [] marginalP;
 	private float [] marginalL;
 	private float meanP; 
 	private float meanL; 
 
+	
 	@Inject
 	public CustomDistribution(@Named("V") String v) throws IOException {
 		super(v);
@@ -39,13 +39,9 @@ public class CustomDistribution extends Distribution{
 		log.debug("Reading {}-separated matrix from {}", ELEMENT_SEPARATOR, matrixFile.getAbsolutePath());
 		List<List<String>> fileData = getFileData(matrixFile);
 		log.debug("File data got : {} ", fileData);
-		if (!fileData.isEmpty()){
-			pmf = buildPmfMatrix(fileData);
-			calculateMarginals(pmf);
-			calculateMeans();
-		}else{
-			throw new IllegalArgumentException("Empty file got!");
-		}
+		pmf = buildPmfMatrix(fileData);
+		calculateMarginals(pmf);
+		calculateMeans();
 		log.debug("Custom distribution successfully constructed");
 		log.debug("PMF: {} ", getPmf());
 		log.debug("Marginal P: {} ", getMarginalP());
@@ -53,7 +49,7 @@ public class CustomDistribution extends Distribution{
 		log.debug("Means: mL={}, mP={}", meanL, meanP);
 		System.exit(1);
 	}
-
+	
 	private void calculateMeans() {
 		for (int i = 0; i < marginalP.length; i++){
 			meanP += marginalP[i] * (pOffset + i);
@@ -62,40 +58,41 @@ public class CustomDistribution extends Distribution{
 			meanL += marginalL[j] * (lOffset + j);
 		}
 	}
-
+	
 	private void calculateMarginals(float[][] pmfMatrix) {
 		marginalL = new float[pmfMatrix.length];
-		marginalP = new float[pmfMatrix.length];
+		marginalP = new float[pmfMatrix[0].length];
 		for (int i = 0; i < pmfMatrix.length; i++) {
-			for (int j = 0; j < pmfMatrix.length; j++) {
+			for (int j = 0; j < pmfMatrix[i].length; j++) {
 				marginalL[i] += pmfMatrix[i][j];
 				marginalP[j] += pmfMatrix[i][j];
 			}
 		}
-		
-	}
-
-	private float[][] buildPmfMatrix(List<List<String>> fileData) {
-		int rowAmount = fileData.size();
-		float[][] pmfMatrix = new float[rowAmount][rowAmount];
-		for (int i = 0; i < rowAmount; i++) {
-			List<String> row = fileData.get(i);
-			if (row.size() != rowAmount)
-				throw new IllegalArgumentException("Error at line " + i + " : row size != row amount");
-			pmfMatrix[i] = new float[rowAmount];
-			for (int j = 0; j < rowAmount; j++){
-				pmfMatrix[i][j] = Float.parseFloat(row.get(j));
-			}
-		}
-		validatePmfConsistency(pmfMatrix);
-		return pmfMatrix;
 	}
 	
+	private float[][] buildPmfMatrix(List<List<String>> fileData) {
+		if (fileData != null && !fileData.isEmpty()){
+			int rowAmount = fileData.size();
+			int columnAmount = fileData.get(0).size();
+			float[][] pmfMatrix = new float[rowAmount][columnAmount];
+			for (int i = 0; i < rowAmount; i++) {
+				List<String> row = fileData.get(i);
+				pmfMatrix[i] = new float[columnAmount];
+				for (int j = 0; j < columnAmount; j++){
+					pmfMatrix[i][j] = Float.parseFloat(row.get(j));
+				}
+			}
+			validatePmfConsistency(pmfMatrix);
+			return pmfMatrix;
+		}else{
+			throw new IllegalArgumentException("Empty or null file data!");
+		}
+	}
 
 	private void validatePmfConsistency(float[][] pmfMatrix) {
 		float sum = 0;
 		for (int i = 0; i < pmfMatrix.length ; i++){
-			for (int j = 0; j < pmfMatrix.length ; j++){
+			for (int j = 0; j < pmfMatrix[i].length ; j++){
 				if (1 + SMALL_FLOAT < pmfMatrix[i][j])
 					throw new IllegalArgumentException("Error at " + i + " " + j + " matrix element. More than 1.");
 				if (pmfMatrix[i][j] < 0)
@@ -107,7 +104,6 @@ public class CustomDistribution extends Distribution{
 			throw new IllegalArgumentException("Sum of matrix elements not equal to 1. Instead: " + sum);
 		}
 	}
-
 
 	private boolean checkAndParseOffets(String line){
 		if (line.contains(OFFSETS_SEPARATOR)){
@@ -128,17 +124,19 @@ public class CustomDistribution extends Distribution{
 		String line;
 		List<List<String>> fileData = new ArrayList<>();
 		int lineNumber = 1;
+		int validLineNumber = 1;
 		try(BufferedReader reader = new BufferedReader(new FileReader(file))){
 			while ((line = reader.readLine()) != null){
 				if (isValidForPmfParsing(line)){
 					String[] row = line.replace(" ", "").split(ELEMENT_SEPARATOR);
 					fileData.add(Arrays.asList(row));
-				}else if (lineNumber == 1 && checkAndParseOffets(line)){
-					log.info("Initialized offsets {}, {}", pOffset, lOffset);
+					validLineNumber++;
+				}else if (validLineNumber == 1 && checkAndParseOffets(line)){
+					log.info("Initialized offsets for P ({}), and L ({}) from line {}", pOffset, lOffset, lineNumber);
+					validLineNumber++;
 				}else{
-					log.info("Line {} ignored: {}", lineNumber, line);
+					log.info("Line {} ignored: {}", validLineNumber, line);
 				}
-				lineNumber++;
 			}
 		}catch(Exception er){
 			log.error("Error at line {}: {}", lineNumber, er);
@@ -162,7 +160,7 @@ public class CustomDistribution extends Distribution{
 	public float [] getMarginalL() {
 		return marginalL;
 	}
-	
+
 
 	@Override
 	public long getRandomP(long from, long to) {
