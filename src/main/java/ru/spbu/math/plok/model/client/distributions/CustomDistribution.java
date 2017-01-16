@@ -28,6 +28,11 @@ public class CustomDistribution extends Distribution{
 	private float [] marginalL;
 	private float meanP; 
 	private float meanL; 
+	private float dL;
+	private float dP;
+	private float covariation;
+	private float correlation; 
+	
 
 	
 	@Inject
@@ -38,15 +43,21 @@ public class CustomDistribution extends Distribution{
 		File matrixFile = new File(Paths.get(v).toAbsolutePath().toString());
 		log.debug("Reading {}-separated matrix from {}", ELEMENT_SEPARATOR, matrixFile.getAbsolutePath());
 		List<List<String>> fileData = getFileData(matrixFile);
-		log.debug("File data got : {} ", fileData);
+		//log.debug("File data got : {} ", fileData);
 		pmf = buildPmfMatrix(fileData);
 		calculateMarginals(pmf);
 		calculateMeans();
+		calculateDs();
+		calculateCovariation();
+		calculateCorelation();
 		log.debug("Custom distribution successfully constructed");
-		log.debug("PMF: {} ", getPmf());
+		//log.debug("PMF: {} ", getPmf());
 		log.debug("Marginal P: {} ", getMarginalP());
 		log.debug("Marginal L: {} ", getMarginalL());
 		log.debug("Means: mL={}, mP={}", meanL, meanP);
+		log.debug("Ds: dL={}, dP={}", dL, dP);
+		log.debug("Covariation: cov={}", covariation);
+		log.debug("Corelation: cor={}", correlation);
 		System.exit(1);
 	}
 	
@@ -56,6 +67,15 @@ public class CustomDistribution extends Distribution{
 		}
 		for (int j = 0; j < marginalL.length; j++){
 			meanL += marginalL[j] * (lOffset + j);
+		}
+	}
+	
+	private void calculateDs() {
+		for (int i = 0; i < marginalP.length; i++){
+			dP += marginalP[i] * Math.pow((pOffset + i) - meanP, 2);
+		}
+		for (int i = 0; i < marginalL.length; i++){
+			dL += marginalL[i] * Math.pow((lOffset + i) - meanL, 2);
 		}
 	}
 	
@@ -69,6 +89,21 @@ public class CustomDistribution extends Distribution{
 			}
 		}
 	}
+	
+	private void calculateCovariation(){
+		float expectedPL = 0;
+		for (int i = 0; i < pmf.length; i++){
+			for (int j = 0; j < pmf[i].length; j++){
+				expectedPL += (lOffset + i) * (pOffset + j) * pmf[i][j];
+			}
+		}
+		covariation = expectedPL - meanL * meanP;
+	}
+	
+	private void calculateCorelation() {
+		correlation = covariation / (dL * dP); 
+	}
+	
 	
 	private float[][] buildPmfMatrix(List<List<String>> fileData) {
 		if (fileData != null && !fileData.isEmpty()){
