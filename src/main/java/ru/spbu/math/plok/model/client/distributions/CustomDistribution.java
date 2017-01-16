@@ -58,7 +58,6 @@ public class CustomDistribution extends Distribution{
 		log.debug("Ds: dL={}, dP={}", dL, dP);
 		log.debug("Covariation: cov={}", covariation);
 		log.debug("Corelation: cor={}", correlation);
-		System.exit(1);
 	}
 	
 	private void calculateMeans() {
