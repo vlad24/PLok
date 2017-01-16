@@ -18,7 +18,7 @@ import com.google.inject.name.Named;
 
 public class CustomDistribution extends Distribution{
 	private final static Logger log = LoggerFactory.getLogger(CustomDistribution.class);
-	private static final float SMALL_FLOAT = 0.000001f;
+	private static final float SMALL_FLOAT = 0.0001f;
 	private static final String OFFSETS_SEPARATOR = "/";
 	private static final String ELEMENT_SEPARATOR = ",";
 	private int pOffset;
@@ -71,6 +71,8 @@ public class CustomDistribution extends Distribution{
 	}
 	
 	private void calculateDs() {
+		dL = 0; 
+		dP = 0;
 		for (int i = 0; i < marginalP.length; i++){
 			dP += marginalP[i] * Math.pow((pOffset + i) - meanP, 2);
 		}
