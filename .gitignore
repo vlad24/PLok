@@ -7,7 +7,8 @@ target/
 #Eclipse configuration
 .classpath
 .project
+*.class
 *settings/*
 #Custom
-report_*
+report*
 storage*
