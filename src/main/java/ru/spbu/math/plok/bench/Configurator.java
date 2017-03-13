@@ -1,6 +1,7 @@
 package ru.spbu.math.plok.bench;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,9 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
-public class Configurator {
+import ru.spbu.math.plok.solver.BasicSolver;
+
+public class Configurator{
 
 	private static Logger log = LoggerFactory.getLogger(Configurator.class);
+	private static final String     DEFAULT_SOL = "basic";
 	private static final String  	DEFAULT_REPORT_OUTPUT 	= "./reports/";
 	private static final String 	DEFAULT_STORAGE_PATH	= "./storages";
 	private static final String 	DEFAULT_PHASE_BREAK 	= "2000";
@@ -27,15 +31,15 @@ public class Configurator {
 
 	private boolean inited;
 	private int 			config_N;
+	private HashMap<String, Object> solution;
 	private Integer 		config_p;
 	private Float 			config_C;
 	private int 			config_T;
 	private String 			config_S;
 	private String 			config_O;
-	private String 			config_V;
-	private Integer 		config_P;
-	private Integer 		config_L;
+	private String 			config_H;
 	private Integer 		config_phaseBreak;
+	private String          config_verbosity;
 	private String 			config_storagePath;
 	private boolean 		config_debug;
 	private int 			calculated_A;
@@ -48,26 +52,22 @@ public class Configurator {
 	private Option C;      		
 	private Option N;     		
 	private Option T;    		
-	private Option V;    		
+	private Option H;    		
 	private Option S;
-	private Option L;
-	private Option P;
+	private Option p;
 	private Option debug;
 	private Option verbosity;
 	private Option storagePath;
 	private Options options;
-	private String config_verbosity;
 
 	public Configurator(){
 		N      			= new Option("N", true, "vector length"); 							N.setRequired(true);
 		T      			= new Option("T", true, "write time (msec)");						T.setRequired(true);
 		C     	 		= new Option("C", true, "cache ratio");								C.setRequired(false);
-		V      			= new Option("V", true, "distribution (exp, norm, uni)");			V.setRequired(true);
+		H      			= new Option("H", true, "history file");			                H.setRequired(true);
 		S				= new Option("S", true, "storage type");							S.setRequired(false);
 		O				= new Option("O", "output", true, "output");						O.setRequired(false);
 		phaseBreak		= new Option("break", true, "break between write and read phases"); phaseBreak.setRequired(false);
-		P     	 		= new Option("P", true, "P for block");								P.setRequired(true);
-		L     	 		= new Option("L", true, "L for block");								L.setRequired(true);
 		verbosity		= new Option("verbosity", true, "verbosity level (debug, info)");	verbosity.setRequired(false);
 		storagePath		= new Option("storagePath", true, "persister file");
 		debug			= new Option("debug", false, "debug mode flag");
@@ -75,15 +75,13 @@ public class Configurator {
 				addOption(N).
 				addOption(T).
 				addOption(C).
-				addOption(V).
+				addOption(H).
 				addOption(S).
 				addOption(O).
 				addOption(phaseBreak).
 				addOption(debug).
 				addOption(storagePath).
-				addOption(verbosity).
-				addOption(P).
-				addOption(L);
+				addOption(verbosity);
 		parser = new PosixParser();
 		inited = false;
 	}
@@ -100,22 +98,21 @@ public class Configurator {
 	private void initConfigs(String[] args) throws IOException, ParseException{
 		if (!inited){
 			CommandLine line 		= parser.parse(options, args);
-			config_debug			= line.hasOption("debug");
 			config_phaseBreak    	= Integer.valueOf(line.getOptionValue("break", DEFAULT_PHASE_BREAK));
+			config_p 				= DEFAULT_p;
+			config_C 				= Float.valueOf(line.getOptionValue("C", DEFAULT_C));
 			config_N 				= Integer.valueOf(line.getOptionValue("N"));
 			config_T 				= Integer.valueOf(line.getOptionValue("T"));
-			config_C 				= Float.valueOf(line.getOptionValue("C", DEFAULT_C));
-			config_P 				= Integer.valueOf(line.getOptionValue("P"));
-			config_L 				= Integer.valueOf(line.getOptionValue("L"));
+			config_H 				= line.getOptionValue("H");
 			config_S 				= line.getOptionValue("S", DEFAULT_S);
 			config_O				= line.getOptionValue("O", DEFAULT_REPORT_OUTPUT);
 			config_storagePath		= line.getOptionValue("storagePath", DEFAULT_STORAGE_PATH);
-			config_V 				= line.getOptionValue("V");
 			config_verbosity 		= line.getOptionValue("verbosity", DEFAULT_VERBOSITY);
-			config_p 				= DEFAULT_p;
+			config_debug			= line.hasOption("debug");
 			calculated_SIZE 		= calculateSIZE();
 			calculated_cacheSize	= calculateCacheSize();
 			calculated_A 			= calculateA();
+			solution                = new BasicSolver().solvePLTask(config_H);
 			inited = true;
 		}
 	}
@@ -138,7 +135,7 @@ public class Configurator {
 				.omitNullValues()
 				.add("storage", config_S)
 				.add("N", config_N )
-				.add("V", config_V )
+				.add("H", config_H )
 				.add("T", config_T )
 				.add("p", config_p )
 				.add("A", calculated_A )
@@ -193,16 +190,8 @@ public class Configurator {
 		return calculated_cacheSize / m;
 	}
 
-	public Integer getP() {
-		return config_P;
-	}
-	
-	public Integer getL() {
-		return config_L;
-	}
-
-	public String getV() {
-		return config_V;
+	public String getH() {
+		return config_H;
 	}
 
 	public String getStoragePath() {
@@ -212,4 +201,9 @@ public class Configurator {
 	public String getVerbosity() {
 		return config_verbosity;
 	}
+	
+	public HashMap<String, Object> getPLSolution(){
+		return solution;
+	}
+
 }

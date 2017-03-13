@@ -1,11 +1,8 @@
 package ru.spbu.math.plok.bench;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +18,9 @@ public class Tester {
 	private static Logger log = LoggerFactory.getLogger(Tester.class);
 
 
-	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException, ParseException {
+	public static void main(String[] args) throws Exception {
 		log.debug("Tester started");
-		log.debug("Configuring...");
+		log.debug("Configuring and solving...");
 		Configurator configurator = new Configurator();
 		configurator.initFromArgs(args);
 		System.out.println(configurator);
@@ -38,8 +35,7 @@ public class Tester {
 			log.info("Let's have a break for {} msec", configurator.getPhaseBreak());
 			TimeUnit.MILLISECONDS.sleep(configurator.getPhaseBreak());
 			log.info("Break is over. Starting client...");
-			client.setQueryTimeBounds((Long)generatorReport.get("attackStart"), (Long)generatorReport.get("attackEnd"));
-			HashMap<String, Object> queryReport = client.attack(store);
+			HashMap<String, Object> queryReport = client.attack(store, (HashMap<String, Object>) configurator.getPLSolution().get("queries"), false);
 			log.info("Client has finished!");
 			ReportPrinter.print(configurator, queryReport);
 		}

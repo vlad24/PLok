@@ -1,42 +1,55 @@
 package ru.spbu.math.plok.bench;
 
+import java.util.ArrayList;
+
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
-import ch.qos.logback.classic.Logger;
 import ru.spbu.math.plok.model.client.Query;
-import ru.spbu.math.plok.model.client.distributions.Distribution;
+import ru.spbu.math.plok.solver.BasicSolver.UserQuery;
+import ru.spbu.math.plok.statutils.Stat;
 
 public class QueryGenerator {
 	private final static org.slf4j.Logger log = LoggerFactory.getLogger(QueryGenerator.class);
-	private Distribution v;
 	private int N;
 	private long timeStart = -1;
 	private long timeEnd = -1;
 	private boolean inited = false;
-	
+	private boolean imitaing = false;
+	private long yielded = 0;
+	private ArrayList<UserQuery> userQueriesCopy;
+
 	@Inject
-	public QueryGenerator(@Named("N") int N, Distribution v){
+	public QueryGenerator(int N){
 		this.N = N;
-		this.v = v;
+		imitaing = false;
 	}
-	
+
+	public QueryGenerator(ArrayList<UserQuery> userQueries) {
+		this.userQueriesCopy = userQueries;
+		imitaing = true;
+	}
+
 	public Query nextQuery(){
 		if (!inited)
 			throw new IllegalStateException();
-		long qTimeStart = v.getRandomP(timeStart, timeEnd);
-		long qTimeEnd   = v.getRandomP(qTimeStart, timeEnd);
-		int qIndexStart = v.getRandomL(0, N - 1);
-		int qIndexEnd   = v.getRandomL(qIndexStart, N - 1);
-//		qTimeEnd = timeEnd;
-//		qTimeStart = timeStart;
-//		qIndexStart = N - 1;
-//		qIndexEnd = N - 1;
-		log.debug("QUERY:({},{},{},{}) // time_delta:{}, index_range:{}", qIndexStart, qIndexEnd, qTimeStart, qTimeEnd,
-				(qTimeEnd - qTimeStart + 1) , (qIndexEnd - qIndexStart + 1));
-		return new Query(qIndexStart, qIndexEnd, qTimeStart, qTimeEnd);
+		if (imitaing){
+			UserQuery q = userQueriesCopy.get((int) (yielded++ % userQueriesCopy.size()));
+			return new Query(q.getI1(), q.getI2(), q.getJ1(), q.getI2());
+		}else{
+			long qTimeStart = Stat.getRandomUniform(timeStart, timeEnd);
+			long qTimeEnd   = Stat.getRandomUniform(qTimeStart, timeEnd);
+			int qIndexStart = (int) Stat.getRandomUniform(0, N - 1);
+			int qIndexEnd   = (int) Stat.getRandomUniform(qIndexStart, N - 1);
+			//		qTimeEnd = timeEnd;
+			//		qTimeStart = timeStart;
+			//		qIndexStart = N - 1;
+			//		qIndexEnd = N -1;
+			log.debug("QUERY:({},{},{},{}) // time_delta:{}, index_range:{}", qIndexStart, qIndexEnd, qTimeStart, qTimeEnd,
+					(qTimeEnd - qTimeStart + 1) , (qIndexEnd - qIndexStart + 1));
+			return new Query(qIndexStart, qIndexEnd, qTimeStart, qTimeEnd);
+		}
 	}
 
 	public void setStart(long start) {

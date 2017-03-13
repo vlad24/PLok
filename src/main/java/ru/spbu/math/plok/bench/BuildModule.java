@@ -7,11 +7,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
 import ch.qos.logback.classic.Level;
-import ru.spbu.math.plok.model.client.distributions.CustomDistribution;
-import ru.spbu.math.plok.model.client.distributions.Distribution;
-import ru.spbu.math.plok.model.client.distributions.ExponentialDistribution;
-import ru.spbu.math.plok.model.client.distributions.NormalDistribution;
-import ru.spbu.math.plok.model.client.distributions.UniformDistribution;
 import ru.spbu.math.plok.model.storagesystem.PLokerStorage;
 import ru.spbu.math.plok.model.storagesystem.SQLStorage;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
@@ -29,15 +24,12 @@ public class BuildModule extends AbstractModule {
 	public void configure() {
 		bindConstant().annotatedWith(Names.named("N")).to(configs.getN());
 		bindConstant().annotatedWith(Names.named("T")).to(configs.getT());
-		bindConstant().annotatedWith(Names.named("L")).to(configs.getL());
-		bindConstant().annotatedWith(Names.named("P")).to(configs.getP());
-		bindConstant().annotatedWith(Names.named("V")).to(configs.getV());
+		bindConstant().annotatedWith(Names.named("H")).to(configs.getH());
 		bindConstant().annotatedWith(Names.named("A")).to(configs.getA());
 		bindConstant().annotatedWith(Names.named("p")).to(configs.getPeriod());
 		bindConstant().annotatedWith(Names.named("cacheUnitSize")).to(configs.getCacheUnitSize());
 		bindConstant().annotatedWith(Names.named("storagePath")).to(configs.getStoragePath());
 		initStorage();
-		initDistribution();
 		initVerbosity();
 	}
 
@@ -57,30 +49,6 @@ public class BuildModule extends AbstractModule {
 		}else if (verbosity.equalsIgnoreCase(Level.ERROR.toString())){
 			rootLogger.setLevel(Level.ERROR);
 		}
-	}
-
-	private void initDistribution() {
-		String distributionConfig = configs.getV();
-		if (distributionConfig.startsWith("$")){
-			if (Distribution.DISTR_UNI.equalsIgnoreCase(distributionConfig)){
-				bind(Distribution.class).to(UniformDistribution.class);
-				log.debug("Set uniform distribution.");
-			}else if (Distribution.DISTR_EXP.equalsIgnoreCase(distributionConfig)){
-				bind(Distribution.class).to(ExponentialDistribution.class);
-				log.debug("Set exponential distribution.");
-			}else if (Distribution.DISTR_NORM.equalsIgnoreCase(distributionConfig)){
-				bind(Distribution.class).to(NormalDistribution.class);
-				log.debug("Set normal distribution.");
-			}else{
-				bind(Distribution.class).to(UniformDistribution.class);
-				log.debug("Set uniform distribution.");
-			}
-		}else{
-			log.debug("Custom distribution will be set.");
-			log.trace("Initializing distribution matrix from file: {}", distributionConfig);
-			bind(Distribution.class).to(CustomDistribution.class);
-		}
-		
 	}
 
 	private void initStorage() {

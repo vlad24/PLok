@@ -13,6 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
+import ru.spbu.math.plok.solver.BasicSolver;
 
 public class Generator{
 	
