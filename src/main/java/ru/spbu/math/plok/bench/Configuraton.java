@@ -14,12 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
-import ru.spbu.math.plok.solver.BasicSolver;
+public class Configuraton{
 
-public class Configurator{
-
-	private static Logger log = LoggerFactory.getLogger(Configurator.class);
-	private static final String     DEFAULT_SOL = "basic";
+	private static Logger log = LoggerFactory.getLogger(Configuraton.class);
+	private static final String     DEFAULT_SOLVER          = "basic";
 	private static final String  	DEFAULT_REPORT_OUTPUT 	= "./reports/";
 	private static final String 	DEFAULT_STORAGE_PATH	= "./storages";
 	private static final String 	DEFAULT_PHASE_BREAK 	= "2000";
@@ -31,7 +29,6 @@ public class Configurator{
 
 	private boolean inited;
 	private int 			config_N;
-	private HashMap<String, Object> solution;
 	private Integer 		config_p;
 	private Float 			config_C;
 	private int 			config_T;
@@ -41,6 +38,7 @@ public class Configurator{
 	private Integer 		config_phaseBreak;
 	private String          config_verbosity;
 	private String 			config_storagePath;
+	private String config_solver;
 	private boolean 		config_debug;
 	private int 			calculated_A;
 	private int 			calculated_SIZE;
@@ -59,8 +57,11 @@ public class Configurator{
 	private Option verbosity;
 	private Option storagePath;
 	private Options options;
+	private Option solver;
+	private Option repeatHistory;
+	private boolean config_repeatH;
 
-	public Configurator(){
+	public Configuraton(){
 		N      			= new Option("N", true, "vector length"); 							N.setRequired(true);
 		T      			= new Option("T", true, "write time (msec)");						T.setRequired(true);
 		C     	 		= new Option("C", true, "cache ratio");								C.setRequired(false);
@@ -69,8 +70,10 @@ public class Configurator{
 		O				= new Option("O", "output", true, "output");						O.setRequired(false);
 		phaseBreak		= new Option("break", true, "break between write and read phases"); phaseBreak.setRequired(false);
 		verbosity		= new Option("verbosity", true, "verbosity level (debug, info)");	verbosity.setRequired(false);
+		solver          = new Option("storagePath", true, "persister file");                solver.setRequired(false);
 		storagePath		= new Option("storagePath", true, "persister file");
 		debug			= new Option("debug", false, "debug mode flag");
+		repeatHistory   = new Option("repeat_history", false, "if client should attack with history");
 		options = new Options().
 				addOption(N).
 				addOption(T).
@@ -80,13 +83,15 @@ public class Configurator{
 				addOption(O).
 				addOption(phaseBreak).
 				addOption(debug).
+				addOption(repeatHistory).
 				addOption(storagePath).
+				addOption(solver).
 				addOption(verbosity);
 		parser = new PosixParser();
 		inited = false;
 	}
 
-	public Configurator(String[] args) throws IOException, ParseException {
+	public Configuraton(String[] args) throws IOException, ParseException {
 		super();
 		initConfigs(args);
 	}
@@ -106,13 +111,14 @@ public class Configurator{
 			config_H 				= line.getOptionValue("H");
 			config_S 				= line.getOptionValue("S", DEFAULT_S);
 			config_O				= line.getOptionValue("O", DEFAULT_REPORT_OUTPUT);
+			config_solver			= line.getOptionValue("solver", DEFAULT_SOLVER);
 			config_storagePath		= line.getOptionValue("storagePath", DEFAULT_STORAGE_PATH);
 			config_verbosity 		= line.getOptionValue("verbosity", DEFAULT_VERBOSITY);
 			config_debug			= line.hasOption("debug");
+			config_repeatH			= line.hasOption("repeat_history");
 			calculated_SIZE 		= calculateSIZE();
 			calculated_cacheSize	= calculateCacheSize();
 			calculated_A 			= calculateA();
-			solution                = new BasicSolver().solvePLTask(config_H);
 			inited = true;
 		}
 	}
@@ -142,6 +148,7 @@ public class Configurator{
 				.add("C", config_C )
 				.add("O", config_O )
 				.add("phaseBreak", config_phaseBreak)
+				.add("debug", config_repeatH)
 				.add("debug", config_debug)
 				.toString();
 	}
@@ -202,8 +209,12 @@ public class Configurator{
 		return config_verbosity;
 	}
 	
-	public HashMap<String, Object> getPLSolution(){
-		return solution;
+	public String getSolverType(){
+		return config_solver;
+	}
+	
+	public boolean isRepeatingHistory(){
+		return config_repeatH;
 	}
 
 }

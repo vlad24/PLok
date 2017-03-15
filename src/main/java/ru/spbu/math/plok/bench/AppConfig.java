@@ -10,14 +10,16 @@ import ch.qos.logback.classic.Level;
 import ru.spbu.math.plok.model.storagesystem.PLokerStorage;
 import ru.spbu.math.plok.model.storagesystem.SQLStorage;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
+import ru.spbu.math.plok.solver.BasicSolver;
+import ru.spbu.math.plok.solver.Solver;
 
-public class BuildModule extends AbstractModule {
+public class AppConfig extends AbstractModule {
 
-	private final static Logger log = LoggerFactory.getLogger(BuildModule.class);
+	private final static Logger log = LoggerFactory.getLogger(AppConfig.class);
 	
-	private Configurator configs;
+	private Configuraton configs;
 	
-	public BuildModule(Configurator configurator) {
+	public AppConfig(Configuraton configurator) {
 		configs = configurator;
 	}
 
@@ -31,6 +33,24 @@ public class BuildModule extends AbstractModule {
 		bindConstant().annotatedWith(Names.named("storagePath")).to(configs.getStoragePath());
 		initStorage();
 		initVerbosity();
+		initSolver();
+	}
+	
+	private void initSolver() {
+		if (configs.getSolverType().equalsIgnoreCase("basic"))
+			bind(Solver.class).to(BasicSolver.class);
+		else {
+			bind(Solver.class).to(BasicSolver.class);
+		}
+		
+	}
+
+	private void initStorage() {
+		if (configs.getStorage().equalsIgnoreCase("sql"))
+			bind(StorageSystem.class).to(SQLStorage.class);
+		else {
+			bind(StorageSystem.class).to(PLokerStorage.class);
+		}
 	}
 
 	private void initVerbosity() {
@@ -51,12 +71,12 @@ public class BuildModule extends AbstractModule {
 		}
 	}
 
-	private void initStorage() {
-		if (configs.getStorage().equalsIgnoreCase("sql"))
-			bind(StorageSystem.class).to(SQLStorage.class);
-		else {
-			bind(StorageSystem.class).to(PLokerStorage.class);
-		}
+	public void setPL(int P, int L){
+		bindConstant().annotatedWith(Names.named("P")).to(P);
+		bindConstant().annotatedWith(Names.named("L")).to(L);
 	}
+	
+	
+	
 
 }

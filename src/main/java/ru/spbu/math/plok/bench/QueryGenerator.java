@@ -1,65 +1,83 @@
 package ru.spbu.math.plok.bench;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
 import ru.spbu.math.plok.model.client.Query;
-import ru.spbu.math.plok.solver.BasicSolver.UserQuery;
+import ru.spbu.math.plok.model.client.UserChoice.Policy;
 import ru.spbu.math.plok.statutils.Stat;
 
 public class QueryGenerator {
+	
+	private static long TIME_UNKNOWN = 0L;
+	
 	private final static org.slf4j.Logger log = LoggerFactory.getLogger(QueryGenerator.class);
 	private int N;
-	private long timeStart = -1;
-	private long timeEnd = -1;
 	private boolean inited = false;
 	private boolean imitaing = false;
 	private long yielded = 0;
-	private ArrayList<UserQuery> userQueriesCopy;
+	private ArrayList<Query> userQueriesCopy;
+	private HashMap<String, Object> solution;
 
-	@Inject
-	public QueryGenerator(int N){
+	private long timeStart;
+
+	private long timeEnd;
+
+	public QueryGenerator(int N, HashMap<String, Object> solution){
 		this.N = N;
+		this.solution = solution;
 		imitaing = false;
 	}
 
-	public QueryGenerator(ArrayList<UserQuery> userQueries) {
+	public QueryGenerator(ArrayList<Query> userQueries) {
 		this.userQueriesCopy = userQueries;
 		imitaing = true;
 	}
-
+	
 	public Query nextQuery(){
 		if (!inited)
 			throw new IllegalStateException();
 		if (imitaing){
-			UserQuery q = userQueriesCopy.get((int) (yielded++ % userQueriesCopy.size()));
-			return new Query(q.getI1(), q.getI2(), q.getJ1(), q.getI2());
+			Query q = userQueriesCopy.get((int) (yielded++ % userQueriesCopy.size()));
+			return new Query(TIME_UNKNOWN, q.getI1(), q.getI2(), q.getJ1(), q.getJ2());
 		}else{
-			long qTimeStart = Stat.getRandomUniform(timeStart, timeEnd);
-			long qTimeEnd   = Stat.getRandomUniform(qTimeStart, timeEnd);
-			int qIndexStart = (int) Stat.getRandomUniform(0, N - 1);
-			int qIndexEnd   = (int) Stat.getRandomUniform(qIndexStart, N - 1);
-			//		qTimeEnd = timeEnd;
-			//		qTimeStart = timeStart;
-			//		qIndexStart = N - 1;
-			//		qIndexEnd = N -1;
-			log.debug("QUERY:({},{},{},{}) // time_delta:{}, index_range:{}", qIndexStart, qIndexEnd, qTimeStart, qTimeEnd,
-					(qTimeEnd - qTimeStart + 1) , (qIndexEnd - qIndexStart + 1));
-			return new Query(qIndexStart, qIndexEnd, qTimeStart, qTimeEnd);
+			long T = Stat.getRandomUniform(timeStart, timeEnd);
+			int i1 = 0;
+			int i2 = N - 1;
+			long j1 = 0;
+			long j2 = T;
+			Policy iPolicy = (Policy) solution.get("iPolicy");
+			Policy jPolicy = (Policy) solution.get("jPolicy");
+			if (iPolicy == Policy.FullTrack){
+				i1 = (int) Stat.getRandomUniform(0, N - 1);
+				i2   = (int) Stat.getRandomUniform(i1, N - 1);
+			}else if (iPolicy == Policy.RangeInterest) {
+				i1 = (int) Stat.getRandomUniform(0, N - 1);
+				i2   = (int) Stat.getRandomUniform(i1, N - 1);
+			}
+			if (jPolicy == Policy.FullTrack){
+				j1   = Stat.getRandomUniform(0, T);
+				j2   = Stat.getRandomUniform(j1, T);
+			}else if (jPolicy == Policy.LateTracking){
+				Long c = (Long) solution.get("jPolicy_last_tracking_c");
+				j1 = Stat.getRandomUniform(Math.max(0, T - c), T) ;
+				j2 = T;
+			}
+			log.debug("QUERY:({},{},{},{}) // time_delta:{}, index_range:{}", i1, i2, j1, j2, (j2 - j1 + 1) , (i2 - i1 + 1));
+			return new Query(T, i1, i2, j1, j2);
 		}
 	}
-
+	
 	public void setStart(long start) {
 		this.timeStart = start;
-		inited = (timeEnd != -1);
 	}
 
 	public void setEnd(long end) {
 		this.timeEnd = end;
-		inited = (timeStart != -1);
 	}
 
 

@@ -17,7 +17,7 @@ public class ReportPrinter {
 	private static String REPORT_FILENAME_PATTERN = "report_%d.txt";
 
 
-	public static void print(Configurator configurator, HashMap<String, Object> queryReport) throws IOException{
+	public static void print(Configuraton configurator, HashMap<String, Object> queryReport) throws IOException{
 		BufferedWriter outputWriter  = null;
 		Path targetFilePath = Paths.get(configurator.getOutput(), String.format(REPORT_FILENAME_PATTERN, System.currentTimeMillis())).toAbsolutePath();
 		File reportFile = new File(targetFilePath.toString());

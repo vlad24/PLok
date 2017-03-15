@@ -11,38 +11,32 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
+import ru.spbu.math.plok.model.client.Query;
+import ru.spbu.math.plok.model.client.UserChoice;
+import ru.spbu.math.plok.model.client.UserChoice.Policy;
 import ru.spbu.math.plok.statutils.Stat;
 
 
-public class BasicSolver{
+public class BasicSolver extends Solver{
 	
 	private final static Logger log = LoggerFactory.getLogger(BasicSolver.class);
+	private HParser parser;
 	
-	private static final String HINTS_SEPARATOR = "/";
-	private static final String ELEMENT_SEPARATOR = ",";
 	
-	public BasicSolver(){
+	@Inject
+	public BasicSolver(@Named("H") String historyFile){
+		super(historyFile);
 
 	}
 
-	public HashMap<String, Object> solvePLTask(String queryHistory) throws IOException {
-		if (ELEMENT_SEPARATOR.equals(HINTS_SEPARATOR))
-			throw new IllegalStateException("ELEMENT_SEPARATOR == OFFSETS_SEPARATOR!");
-		File historyFile = new File(Paths.get(queryHistory).toAbsolutePath().toString());
+	public HashMap<String, Object> solvePLTask() throws IOException {
+		this.parser = new HParser();
+		File historyFile = new File(Paths.get(H).toAbsolutePath().toString());
 		HashMap<String, Object> report = analyzeFileData(historyFile);
-		log.debug("Custom distribution successfully constructed");
-//		float[][] pmf = Stat.buildPmfMatrix(report.get("queries"));
-//		Stat.validatePmfConsistency(pmf);
-//		ArrayList<Float> means       = Stat.calculateMeans(pmf);
-//		ArrayList<Float> disps       = Stat.calculateDs(pmf);
-//		ArrayList<Float[]> marginals = Stat.calculateMarginals(pmf);
-//		log.debug("Marginal P: {} ", Arrays.toString(marginals.get(0)));
-//		log.debug("Marginal L: {} ", Arrays.toString(marginals.get(1)));
-//		log.debug("Means: mL={}, mP={}", means.get(0), means.get(1));
-//		log.debug("Ds: dL={}, dP={}", disps.get(0), disps.get(1));
-//		log.debug("Covariation: cov={}", Stat.calculateCovariation(pmf));
-//		log.debug("Corelation: cor={}", Stat.calculateCorelation(pmf));
-		return null;
+		return report;
 	}
 	
 	
@@ -51,18 +45,18 @@ public class BasicSolver{
 		int lineNumber = 1;
 		int validLineNumber = 1;
 		int iMax  = Integer.MIN_VALUE;
-		int jMax  = Integer.MIN_VALUE;
 		int iMin  = Integer.MAX_VALUE;
-		int jMin  = Integer.MAX_VALUE;;
+		long jMin  = Long.MAX_VALUE;;
+		long jMax  = Long.MIN_VALUE;
 		long tBeg = Long.MIN_VALUE;
 		long tEnd = Long.MAX_VALUE;
 		boolean hintsProvided = false;
 		HashMap<String, Object> report  = new HashMap<>();
-		ArrayList<UserQuery>    queries = new ArrayList<>();
+		ArrayList<Query>    queries = new ArrayList<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(file))){
 			while ((line = reader.readLine()) != null){
-				if (isValidHistoryLine(line)){
-					UserQuery query = getNextUserQuery(line);
+				if (parser.isValidHistoryLine(line)){
+					Query query = parser.getNextUserQuery(line);
 					queries.add(query);
 					if (query.getTime() <= tBeg)
 						tBeg = query.getTime();
@@ -71,14 +65,14 @@ public class BasicSolver{
 					if (query.getI1() <= iMin)
 						iMin = query.getI1();
 					if (query.getJ1() <= jMin)
-						jMin = query.getJ1();
+						jMin = query.getI2();
 					if (query.getI2() >= iMax)
 						iMax = query.getI2();
 					if (query.getJ2() >= jMax)
 						jMax = query.getJ2();
 					validLineNumber++;
 				}else if (validLineNumber == 1){
-					String[] hints = checkAndParseHints(line);
+					String[] hints = parser.checkAndParseHints(line);
 					 if (hints != null){
 						 hintsProvided = true;
 						 report.put("iHint", hints[0]);
@@ -95,9 +89,7 @@ public class BasicSolver{
 			report.put("jMax", jMax);
 			report.put("queries", queries);
 			if (!hintsProvided){
-				Stat.DISTRIBUTION_TYPE[] hints = guessDistros(queries);
-				report.put("iHint", hints[0]);
-				report.put("jHint", hints[0]);
+				 guessPolicies(queries, report);
 			}
 		}catch(Exception er){
 			log.error("Error at line {}: {}", lineNumber, er);
@@ -106,64 +98,11 @@ public class BasicSolver{
 		return report;
 	}
 
-	private Stat.DISTRIBUTION_TYPE[] guessDistros(ArrayList<UserQuery> queries) {
-		// TODO Auto-generated method stub
-		return new Stat.DISTRIBUTION_TYPE[]{Stat.DISTRIBUTION_TYPE.UNIFORM, Stat.DISTRIBUTION_TYPE.UNIFORM};
+	private void guessPolicies(ArrayList<Query> queries, HashMap<String, Object> report) {
+		// TODO Implement!
+		report.put("iPolicy",Policy.FullTrack);
+		report.put("jPolicy",Policy.FullTrack);
 	}
 
-	private UserQuery getNextUserQuery(String line) {
-		String[] row = line.replace(" ", "").split(ELEMENT_SEPARATOR);
-		return new UserQuery(Long.parseLong(row[0]), Integer.parseInt(row[1]), Integer.parseInt(row[2]), Integer.parseInt(row[3]), Integer.parseInt(row[4]));
-	}
-
-
-	private boolean isValidHistoryLine(String line) {
-		return line.contains(ELEMENT_SEPARATOR);
-	}
-	
-	private String[] checkAndParseHints(String line){
-		if (line.contains(HINTS_SEPARATOR)){
-			String[] hints = line.split(HINTS_SEPARATOR);
-			if (hints.length != 2)
-				throw new IllegalArgumentException("PMF file format exception: first line is in incorrect format");
-			return hints;
-		}else{
-			return null;
-		}
-	}
-	
-
-	
-	////////////////////////////////////////
-	public static class UserQuery{
-		long time;
-		int i1;
-		int i2;
-		int j1;
-		int j2;
-		public UserQuery(long time, int i1, int i2, int j1, int j2) {
-			super();
-			this.time = time;
-			this.i1 = i1;
-			this.i2 = i2;
-			this.j1 = j1;
-			this.j2 = j2;
-		}
-		public long getTime() {
-			return time;
-		}
-		public int getI1() {
-			return i1;
-		}
-		public int getI2() {
-			return i2;
-		}
-		public int getJ1() {
-			return j1;
-		}
-		public int getJ2() {
-			return j2;
-		}
-	}
 
 }

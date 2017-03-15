@@ -13,7 +13,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
-import ru.spbu.math.plok.solver.BasicSolver;
 
 public class Generator{
 	
@@ -46,7 +45,8 @@ public class Generator{
 		int needed = (expectedVectors / vectorSize) * vectorSize;
 		this.vectors = new ArrayList<Vector>(expectedVectors); 
 		for (int i = 0; i < needed; i++){
-			vectors.add(new Vector(System.currentTimeMillis(), getRandomFloatArray(vectorSize)));
+			long time = i * delay;
+			vectors.add(new Vector(time, getRandomFloatArray(vectorSize)));
 		}
 		
 	}
@@ -72,6 +72,8 @@ public class Generator{
 			log.debug("T is actually: {}", callFinish - callStart);
 			report.put("attackStart", callStart);
 			report.put("attackEnd", callFinish);
+			report.put("tFrom", vectors.get(0).getTimestamp());
+			report.put("tTo",   vectors.get(vectors.size() - 1).getTimestamp());
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Problem {}!", e.getMessage());

@@ -111,7 +111,7 @@ public class PLokerStorage implements StorageSystem{
 	}
 
 	public List<Block> serve(Query q) throws Exception{
-		List<Integer> ids = index.get(q.getTimeStart(), q.getTimeEnd(), q.getIndexStart(), q.getIndexEnd());
+		List<Integer> ids = index.get(q.getJ1(), q.getJ2(), q.getI1(), q.getI2());
 		List<Block> resultBlocks = new ArrayList<>(); 
 		for (Integer id: ids){
 			blocksReadInTotal++;

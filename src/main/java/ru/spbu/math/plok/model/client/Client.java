@@ -11,13 +11,15 @@ import com.google.inject.name.Named;
 
 import ru.spbu.math.plok.bench.QueryGenerator;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
-import ru.spbu.math.plok.solver.BasicSolver.UserQuery;
 
 public class Client{
 	private static Logger log = LoggerFactory.getLogger(Client.class);
 
 	private final long queriesCount;			// A
+	private int vectorSize;						// N
 	private long madeQueries;
+
+
 
 
 	@Override
@@ -26,19 +28,22 @@ public class Client{
 	}
 
 	@Inject
-	public Client(@Named("A")int queriesCount){
+	public Client(@Named("A")int queriesCount, @Named("N") int N){
 		this.queriesCount = queriesCount;
 		this.madeQueries = 0;
+		this.vectorSize = N;
 	}
 
-	public HashMap<String, Object> attack(StorageSystem store, HashMap<String, Object> details,  boolean duplicateHistory){
+	public HashMap<String, Object> attack(StorageSystem store, HashMap<String, Object> solution, boolean imitating, Long tFrom, Long tTo){
 		log.debug("Stating quering {} queries from client", queriesCount);
-		QueryGenerator queryGenerator = null;
-		if (duplicateHistory){
-			queryGenerator = new QueryGenerator((ArrayList<UserQuery>) details.get("queries"));
+		QueryGenerator queryGenerator;
+		if (imitating){
+			queryGenerator = new QueryGenerator((ArrayList<Query>)solution.get("queries"));
 		}else{
-			
+			queryGenerator = new QueryGenerator(vectorSize, solution);
 		}
+		queryGenerator.setStart(tFrom);
+		queryGenerator.setEnd(tTo);
 		try{
 			while (madeQueries <= queriesCount){
 				Query q = queryGenerator.nextQuery();
@@ -55,6 +60,6 @@ public class Client{
 			return errorReport;
 		}
 	}
-
+	
 
 }
