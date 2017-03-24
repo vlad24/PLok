@@ -1,14 +1,8 @@
 package ru.spbu.math.plok.bench;
 
-import java.io.IOException;
-import java.util.HashMap;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,204 +11,199 @@ import com.google.common.base.MoreObjects;
 public class Configuraton{
 
 	private static Logger log = LoggerFactory.getLogger(Configuraton.class);
-	private static final String     DEFAULT_SOLVER          = "basic";
-	private static final String  	DEFAULT_REPORT_OUTPUT 	= "./reports/";
-	private static final String 	DEFAULT_STORAGE_PATH	= "./storages";
-	private static final String 	DEFAULT_PHASE_BREAK 	= "2000";
-	private static final String 	DEFAULT_VERBOSITY 		= "info";
-	private static final String 	DEFAULT_S 				= "PLok";
-	private static final String 	DEFAULT_C 				= "0.25";
-	private static final Integer 	DEFAULT_p 				= 10;
-	private static final int     	m 						= Float.BYTES;
+	
+	private static final int VECTOR_ELEMENT_SIZE = Float.BYTES;
+	private static final int QUERY_AMOUNT_FACTOR = 1;
 
 	private boolean inited;
-	private int 			config_N;
-	private Integer 		config_p;
-	private Float 			config_C;
-	private int 			config_T;
-	private String 			config_S;
-	private String 			config_O;
-	private String 			config_H;
-	private Integer 		config_phaseBreak;
-	private String          config_verbosity;
-	private String 			config_storagePath;
-	private String config_solver;
-	private boolean 		config_debug;
-	private int 			calculated_A;
-	private int 			calculated_SIZE;
-	private int 			calculated_cacheSize;
-
-	private CommandLineParser parser;
-	private Option phaseBreak;
-	private Option O; 
-	private Option C;      		
-	private Option N;     		
-	private Option T;    		
-	private Option H;    		
-	private Option S;
-	private Option p;
-	private Option debug;
-	private Option verbosity;
-	private Option storagePath;
-	private Options options;
-	private Option solver;
-	private Option repeatHistory;
-	private boolean config_repeatH;
+	
+	@Option(name="-N",usage="Vector length", required=true)
+	private int    vectorLength;
+	
+	@Option(name="-H",usage="History file", required=true)
+	private String 	historyFile;
+	
+	@Option(name="-T",usage="Attack time", required=true)
+	private int 	attackTime;
+	
+	@Option(name="-C",usage="Cache ratio", required=false)
+	private Float 	cacheRatio = 0.25f;
+	
+	@Option(name="-p",usage="Period",     required=false)
+	private Integer period = 10;
+	
+	
+	@Option(name="-S",usage="Storage type", required=false)
+	private String 	storageType = "PLok";
+	
+	@Option(name="-O",usage="Output", required=false)
+	private String 	outputPath = "./reports/";
+	
+	
+	@Option(name="--phaseBreak",usage="Break between write and read phases(ms)", required=false)
+	private Integer phaseBreakMs = 2000;
+	
+	@Option(name="-v",usage="Verbosity level", required=false)
+	private String  verbosity = "info";
+	
+	@Option(name="-storagePath",usage="Persister file", required=false)
+	private String 	storagePath="./storages";
+	
+	@Option(name="--solver",usage="Solver type", required=false)
+	private String  solverType = "basic";
+	
+	@Option(name="--debug",usage="Debug flag", required=false)
+	private boolean debug;
+	
+	@Option(name="--repeatHistory",usage="if client should attack with history", required=false)
+	private boolean repeatHistory;
+	
+	//Computed fields
+	private int 	queriesAmount;
+	private int 	writeDataSize;
+	private int 	cacheByteSize;
+	private int 	cacheUnitSize;
 
 	public Configuraton(){
-		N      			= new Option("N", true, "vector length"); 							N.setRequired(true);
-		T      			= new Option("T", true, "write time (msec)");						T.setRequired(true);
-		C     	 		= new Option("C", true, "cache ratio");								C.setRequired(false);
-		H      			= new Option("H", true, "history file");			                H.setRequired(true);
-		S				= new Option("S", true, "storage type");							S.setRequired(false);
-		O				= new Option("O", "output", true, "output");						O.setRequired(false);
-		phaseBreak		= new Option("break", true, "break between write and read phases"); phaseBreak.setRequired(false);
-		verbosity		= new Option("verbosity", true, "verbosity level (debug, info)");	verbosity.setRequired(false);
-		solver          = new Option("storagePath", true, "persister file");                solver.setRequired(false);
-		storagePath		= new Option("storagePath", true, "persister file");
-		debug			= new Option("debug", false, "debug mode flag");
-		repeatHistory   = new Option("repeat_history", false, "if client should attack with history");
-		options = new Options().
-				addOption(N).
-				addOption(T).
-				addOption(C).
-				addOption(H).
-				addOption(S).
-				addOption(O).
-				addOption(phaseBreak).
-				addOption(debug).
-				addOption(repeatHistory).
-				addOption(storagePath).
-				addOption(solver).
-				addOption(verbosity);
-		parser = new PosixParser();
 		inited = false;
 	}
 
-	public Configuraton(String[] args) throws IOException, ParseException {
+	public Configuraton(String[] args){
 		super();
 		initConfigs(args);
 	}
 
-	public void initFromArgs(String[] args) throws IOException, ParseException{
-		initConfigs(args);
-	}
-
-	private void initConfigs(String[] args) throws IOException, ParseException{
+	private void initConfigs(String[] args){
 		if (!inited){
-			CommandLine line 		= parser.parse(options, args);
-			config_phaseBreak    	= Integer.valueOf(line.getOptionValue("break", DEFAULT_PHASE_BREAK));
-			config_p 				= DEFAULT_p;
-			config_C 				= Float.valueOf(line.getOptionValue("C", DEFAULT_C));
-			config_N 				= Integer.valueOf(line.getOptionValue("N"));
-			config_T 				= Integer.valueOf(line.getOptionValue("T"));
-			config_H 				= line.getOptionValue("H");
-			config_S 				= line.getOptionValue("S", DEFAULT_S);
-			config_O				= line.getOptionValue("O", DEFAULT_REPORT_OUTPUT);
-			config_solver			= line.getOptionValue("solver", DEFAULT_SOLVER);
-			config_storagePath		= line.getOptionValue("storagePath", DEFAULT_STORAGE_PATH);
-			config_verbosity 		= line.getOptionValue("verbosity", DEFAULT_VERBOSITY);
-			config_debug			= line.hasOption("debug");
-			config_repeatH			= line.hasOption("repeat_history");
-			calculated_SIZE 		= calculateSIZE();
-			calculated_cacheSize	= calculateCacheSize();
-			calculated_A 			= calculateA();
-			inited = true;
+			CmdLineParser parser = new CmdLineParser(this);
+			try {
+				parser.parseArgument(args);
+				writeDataSize = calculateWriteDataSize();
+				cacheByteSize = calculateCacheByteSize();
+				cacheUnitSize = calculateCacheUnitSize();
+				queriesAmount = calculateQueryAmount();
+				inited = true;
+			} catch (CmdLineException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	private int calculateCacheSize() {
-		return (int) (calculated_SIZE * config_C);
+	private int calculateCacheByteSize() {
+		return (int) (writeDataSize * cacheRatio);
 	}
 
-	private int calculateSIZE() {
-		return m * config_N * config_T / config_p;
+	private int calculateWriteDataSize() {
+		// element_size * final_grid_size
+		return VECTOR_ELEMENT_SIZE * (vectorLength * attackTime / period);
+	}
+	
+	private int calculateCacheUnitSize() {
+		return cacheByteSize / VECTOR_ELEMENT_SIZE;
 	}
 
-	private int calculateA() {
-		return 10 * calculated_SIZE / m;
+	private int calculateQueryAmount() {
+		//C * final_grid_size
+		return QUERY_AMOUNT_FACTOR * (vectorLength * attackTime / period);
 	}
 
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 				.omitNullValues()
-				.add("storage", config_S)
-				.add("N", config_N )
-				.add("H", config_H )
-				.add("T", config_T )
-				.add("p", config_p )
-				.add("A", calculated_A )
-				.add("C", config_C )
-				.add("O", config_O )
-				.add("phaseBreak", config_phaseBreak)
-				.add("debug", config_repeatH)
-				.add("debug", config_debug)
+				.add("storageType", storageType)
+				.add("solverType",  solverType)
+				.add("N", vectorLength )
+				.add("H", historyFile )
+				.add("T", attackTime )
+				.add("p", period )
+				.add("C", cacheRatio)
+				.add("Q", queriesAmount )
+				.add("O", outputPath)
+				.add("phaseBreak", phaseBreakMs)
+				.add("debug", debug)
+				.add("repeatHistory", repeatHistory)
 				.toString();
 	}
 
-	public int getPhaseBreak() {
-		return config_phaseBreak;
-	}
 	
-	public int getT() {
-		return config_T;
-	}
 	
-	public String getOutput(){
-		return config_O;
-	}
-	
-	public String getStorage(){
-		return config_S;
-	}
-	
-	public boolean isDebugging(){
-		return config_debug;
+	/*
+	 * Getters and setters go below
+	 */
+	public boolean isInited() {
+		return inited;
 	}
 
-	public int getN() {
-		return config_N;
+	public int getVectorLength() {
+		return vectorLength;
+	}
+
+	public String getHistoryFilePath() {
+		return historyFile;
+	}
+
+	public int getAttackTimeMs() {
+		return attackTime;
+	}
+
+	public Float getCacheRatio() {
+		return cacheRatio;
 	}
 
 	public Integer getPeriod() {
-		return config_p;
+		return period;
 	}
 
-	public int getA() {
-		return calculated_A;
-	}
-	
-	public int getSIZE() {
-		return calculated_SIZE;
-	}
-	
-	public int getCacheByteSize() {
-		return calculated_cacheSize;
+	public String getStorageType() {
+		return storageType;
 	}
 
-	public int getCacheUnitSize() {
-		return calculated_cacheSize / m;
+	public String getOutputPath() {
+		return outputPath;
 	}
 
-	public String getH() {
-		return config_H;
+	public Integer getPhaseBreakMs() {
+		return phaseBreakMs;
+	}
+
+	public String getVerbosityLevel() {
+		return verbosity;
 	}
 
 	public String getStoragePath() {
-		return config_storagePath;
+		return storagePath;
+	}
+
+	public String getSolverType() {
+		return solverType;
+	}
+
+	public boolean isDebugging() {
+		return debug;
+	}
+
+	public boolean isRepeatingHistory() {
+		return repeatHistory;
+	}
+
+	
+	// Calculated fields getters
+	public int getQueriesAmount() {
+		return queriesAmount;
+	}
+
+	public int getWriteDataSize() {
+		return writeDataSize;
+	}
+
+	public int getCacheByteSize() {
+		return cacheByteSize;
 	}
 	
-	public String getVerbosity() {
-		return config_verbosity;
+	public int getCacheUnitSize() {
+		return cacheUnitSize;
 	}
-	
-	public String getSolverType(){
-		return config_solver;
-	}
-	
-	public boolean isRepeatingHistory(){
-		return config_repeatH;
-	}
+
 
 }
