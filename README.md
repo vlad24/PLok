@@ -19,7 +19,8 @@ PLok is a project aimed to investigate dependency of optimal block sizes on quer
 
 
 ### Program configurations
-Command line options
+Command line options:
+
 |  Name         | Description                                   |  Constraints                  |  Required                                     |
 |:-------------:|:--------------------------------------------------------------------:|:------------------------------:|:---------------------------------------------:|
 | N				| vector length  			                       					   | integer ( > 0)			     	|   yes											| 
