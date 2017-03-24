@@ -2,20 +2,27 @@ package ru.spbu.math.plok.model.client;
 
 public class Query {
 
+	@Override
+	public String toString() {
+		return "Query [ time=" + time + "i1=" + indexStart + ", i2=" + indexEnd + ", j1=" + timeStart + ", j2="	+ timeEnd+ "]";
+	}
+
 	int indexStart;
 	int indexEnd;
 	long timeStart;
 	long timeEnd;
+	long time;
 	
-	public Query(int indexStart, int indexEnd, long timeStart, long timeEnd) {
+	public Query(long time, int indexStart, int indexEnd, long timeStart, long timeEnd) {
 		super();
+		this.time = time;
 		this.indexStart = indexStart;
 		this.indexEnd = indexEnd;
 		this.timeStart = timeStart;
 		this.timeEnd = timeEnd;
 	}
 
-	public int getIndexStart() {
+	public int getI1() {
 		return indexStart;
 	}
 
@@ -23,7 +30,7 @@ public class Query {
 		this.indexStart = indexStart;
 	}
 
-	public int getIndexEnd() {
+	public int getI2() {
 		return indexEnd;
 	}
 
@@ -31,7 +38,7 @@ public class Query {
 		this.indexEnd = indexEnd;
 	}
 
-	public long getTimeEnd() {
+	public long getJ2() {
 		return timeEnd;
 	}
 
@@ -39,12 +46,16 @@ public class Query {
 		this.timeEnd = timeEnd;
 	}
 	
-	public long getTimeStart() {
+	public long getJ1() {
 		return timeStart;
 	}
 
 	public void setTimeStart(long timeStart) {
 		this.timeStart = timeStart;
+	}
+	
+	public long getTime(){
+		return time;
 	}
 	
 

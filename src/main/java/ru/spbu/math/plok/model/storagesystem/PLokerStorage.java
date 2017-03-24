@@ -63,6 +63,7 @@ public class PLokerStorage implements StorageSystem{
 		refreshCommonColumn();
 		currentSpecial = new Block(P_S, L_S);
 		nextId = new AtomicInteger(0);
+		log.info("Inited Ploker storage with P={}, L={}, P_S={}, L_S={}", P, L, P_S, L_S);
 	}
 	
 	private void refreshCommonColumn() {
@@ -111,7 +112,7 @@ public class PLokerStorage implements StorageSystem{
 	}
 
 	public List<Block> serve(Query q) throws Exception{
-		List<Integer> ids = index.get(q.getTimeStart(), q.getTimeEnd(), q.getIndexStart(), q.getIndexEnd());
+		List<Integer> ids = index.get(q.getJ1(), q.getJ2(), q.getI1(), q.getI2());
 		List<Block> resultBlocks = new ArrayList<>(); 
 		for (Integer id: ids){
 			blocksReadInTotal++;
@@ -123,9 +124,9 @@ public class PLokerStorage implements StorageSystem{
 	@Override
 	public HashMap<String, Object> getStatistics() {
 		HashMap<String,Object> result = new HashMap<>();
-		result.put("a", blocksReadFromDisk);
-		result.put("A", blocksReadInTotal);
-		result.put("a/A", 100 * (float)blocksReadFromDisk / blocksReadInTotal);
+		result.put("d", blocksReadFromDisk);
+		result.put("Q", blocksReadInTotal);
+		result.put("d/Q", 100 * (float)blocksReadFromDisk / blocksReadInTotal);
 		return result;
 	}
 	

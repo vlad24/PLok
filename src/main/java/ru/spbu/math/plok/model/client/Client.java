@@ -1,12 +1,12 @@
 package ru.spbu.math.plok.model.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import ru.spbu.math.plok.bench.QueryGenerator;
@@ -16,8 +16,10 @@ public class Client{
 	private static Logger log = LoggerFactory.getLogger(Client.class);
 
 	private final long queriesCount;			// A
+	private int vectorSize;						// N
 	private long madeQueries;
-	private QueryGenerator queryGenerator;
+
+
 
 
 	@Override
@@ -26,14 +28,22 @@ public class Client{
 	}
 
 	@Inject
-	public Client(@Named("A")int queriesCount, Provider<QueryGenerator> provider){
+	public Client(@Named("Q")int queriesCount, @Named("N") int N){
 		this.queriesCount = queriesCount;
 		this.madeQueries = 0;
-		this.queryGenerator = provider.get();
+		this.vectorSize = N;
 	}
 
-	public HashMap<String, Object> attack(StorageSystem store){
+	public HashMap<String, Object> attack(StorageSystem store, HashMap<String, Object> solution, boolean imitating, Long tFrom, Long tTo){
 		log.debug("Stating quering {} queries from client", queriesCount);
+		QueryGenerator queryGenerator;
+		if (imitating){
+			queryGenerator = new QueryGenerator((ArrayList<Query>)solution.get("queries"));
+		}else{
+			queryGenerator = new QueryGenerator(vectorSize, solution);
+		}
+		queryGenerator.setStart(tFrom);
+		queryGenerator.setEnd(tTo);
 		try{
 			while (madeQueries <= queriesCount){
 				Query q = queryGenerator.nextQuery();
@@ -50,13 +60,6 @@ public class Client{
 			return errorReport;
 		}
 	}
-
-	public void setQueryTimeBounds(long start, long end) {
-		queryGenerator.setStart(start);
-		queryGenerator.setEnd(end);
-	}
-
-
-
+	
 
 }

@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,12 +16,17 @@ import com.google.common.base.Joiner;
 public class ReportPrinter {
 
 	private static Joiner.MapJoiner mapJoiner = Joiner.on("\n").withKeyValueSeparator("=");
-	private static String REPORT_FILENAME_PATTERN = "report_%d.txt";
+	private static String REPORT_FILENAME_PATTERN = "report_%s.txt";
+	private static SimpleDateFormat ft = new SimpleDateFormat ("yyyy_MM_dd---E__hh_mm_ss");
 
 
-	public static void print(Configurator configurator, HashMap<String, Object> queryReport) throws IOException{
+	public static void print(Configuraton configurator, HashMap<String, Object> queryReport) throws IOException{
 		BufferedWriter outputWriter  = null;
-		Path targetFilePath = Paths.get(configurator.getOutput(), String.format(REPORT_FILENAME_PATTERN, System.currentTimeMillis())).toAbsolutePath();
+		Date currentDate = new Date();
+		Path targetFilePath = Paths.get(
+				configurator.getOutputPath(), 
+				String.format(REPORT_FILENAME_PATTERN, ft.format(currentDate)))
+				.toAbsolutePath();
 		File reportFile = new File(targetFilePath.toString());
 		reportFile.getParentFile().mkdirs();
 		if (!reportFile.exists()){
