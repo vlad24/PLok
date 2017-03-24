@@ -28,7 +28,7 @@ public class Client{
 	}
 
 	@Inject
-	public Client(@Named("A")int queriesCount, @Named("N") int N){
+	public Client(@Named("Q")int queriesCount, @Named("N") int N){
 		this.queriesCount = queriesCount;
 		this.madeQueries = 0;
 		this.vectorSize = N;
