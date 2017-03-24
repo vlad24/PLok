@@ -5,8 +5,6 @@ import java.util.HashMap;
 
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.model.client.UserChoice.Policy;
 import ru.spbu.math.plok.statutils.Stat;
@@ -39,8 +37,6 @@ public class QueryGenerator {
 	}
 	
 	public Query nextQuery(){
-		if (!inited)
-			throw new IllegalStateException();
 		if (imitaing){
 			Query q = userQueriesCopy.get((int) (yielded++ % userQueriesCopy.size()));
 			return new Query(TIME_UNKNOWN, q.getI1(), q.getI2(), q.getJ1(), q.getJ2());
@@ -67,6 +63,9 @@ public class QueryGenerator {
 				j1 = Stat.getRandomUniform(Math.max(0, T - c), T) ;
 				j2 = T;
 			}
+			//
+			//i1 = N-3; i2 = N; j1 = 0; j2 = T/2;
+			//
 			log.debug("QUERY:({},{},{},{}) // time_delta:{}, index_range:{}", i1, i2, j1, j2, (j2 - j1 + 1) , (i2 - i1 + 1));
 			return new Query(T, i1, i2, j1, j2);
 		}
