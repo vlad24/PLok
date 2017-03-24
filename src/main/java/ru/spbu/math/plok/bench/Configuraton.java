@@ -29,22 +29,20 @@ public class Configuraton{
 	@Option(name="-C",usage="Cache ratio", required=false)
 	private Float 	cacheRatio = 0.25f;
 	
-	@Option(name="-p",usage="Period",     required=false)
+	@Option(name="-p",usage="idle between two subsequent writes (msec)", required=false)
 	private Integer period = 10;
 	
-	
 	@Option(name="-S",usage="Storage type", required=false)
-	private String 	storageType = "PLok";
+	private String 	storageType = "plok";
 	
 	@Option(name="-O",usage="Output", required=false)
 	private String 	outputPath = "./reports/";
 	
+	@Option(name="-v",usage="Verbosity level", required=false)
+	private String  verbosity = "info";
 	
 	@Option(name="--phaseBreak",usage="Break between write and read phases(ms)", required=false)
 	private Integer phaseBreakMs = 2000;
-	
-	@Option(name="-v",usage="Verbosity level", required=false)
-	private String  verbosity = "info";
 	
 	@Option(name="-storagePath",usage="Persister file", required=false)
 	private String 	storagePath="./storages";

@@ -28,12 +28,12 @@ Command line options:
 | T				| write time (msec) 							                       | integer	( > 0)				|	yes											| 
 | C				| cache ratio 								                           | float (between 0.0 and 1.0)	|	no (default: "0,25")						| 
 | p				| idle between two subsequent writes (msec)                            | int (> 0)		                |	no (default: 1)                             | 
-| S				| storage type						                       			   | string (sql, plok)			    |	no (default: "ploker")						| 
+| S				| storage type						                       			   | string (sql, plok)			    |	no (default: "plok")						| 
 | O				| output folder path						                           | string (path)		            |	no (default: "./reports")	                | 
-| phaseBreak	| break between write and read phases(msec) 	                       | integer ( > 0)				    |	no (default: "2000")						| 
 | v				| verbosity level								                       | string (info, debug, fine...)	|	no (default: "info")						| 
-| storagePath 	| storage path									                       | string (path)				    |	no (default: "./storages"")                 |
-| solverType 	| storage path									                       | string (path)				    |	no (default: "./storages"")                 |
+| phaseBreak	| break between write and read phases(msec) 	                       | integer ( > 0)				    |	no (default: "2000")						| 
+| storagePath 	| storage path									                       | string (path)				    |	no (default: "./storages")                  |
+| solver 	    | solver type									                       | string (basic, ...)		    |	no (default: "basic")                       |
 | debug			| debug mode flag 								                       | flag						    |	no (default: false)							| 
 | repeatHistory | flag, indicating if provided history should be repeated by generator | flag						    |	no (default: false)							| 
 
