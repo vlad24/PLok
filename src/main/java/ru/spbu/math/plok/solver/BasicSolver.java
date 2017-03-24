@@ -11,13 +11,8 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 import ru.spbu.math.plok.model.client.Query;
-import ru.spbu.math.plok.model.client.UserChoice;
 import ru.spbu.math.plok.model.client.UserChoice.Policy;
-import ru.spbu.math.plok.statutils.Stat;
 
 
 public class BasicSolver extends Solver{
@@ -26,8 +21,7 @@ public class BasicSolver extends Solver{
 	private HParser parser;
 	
 	
-	@Inject
-	public BasicSolver(@Named("H") String historyFile){
+	public BasicSolver(String historyFile){
 		super(historyFile);
 
 	}
@@ -36,25 +30,28 @@ public class BasicSolver extends Solver{
 		this.parser = new HParser();
 		File historyFile = new File(Paths.get(H).toAbsolutePath().toString());
 		HashMap<String, Object> report = analyzeFileData(historyFile);
+		//Change!
+		report.put("P", 2);
+		report.put("L", 3);
 		return report;
 	}
 	
 	
 	private HashMap<String, Object> analyzeFileData(File file) throws IOException {
 		String line;
-		int lineNumber = 1;
-		int validLineNumber = 1;
-		int iMax  = Integer.MIN_VALUE;
-		int iMin  = Integer.MAX_VALUE;
-		long jMin  = Long.MAX_VALUE;;
-		long jMax  = Long.MIN_VALUE;
-		long tBeg = Long.MIN_VALUE;
-		long tEnd = Long.MAX_VALUE;
+		int lineNumber = 0;
+		int iMax       = Integer.MIN_VALUE;
+		int iMin       = Integer.MAX_VALUE;
+		long jMin      = Long.MAX_VALUE;;
+		long jMax      = Long.MIN_VALUE;
+		long tBeg      = Long.MIN_VALUE;
+		long tEnd      = Long.MAX_VALUE;
 		boolean hintsProvided = false;
 		HashMap<String, Object> report  = new HashMap<>();
 		ArrayList<Query>    queries = new ArrayList<>();
 		try(BufferedReader reader = new BufferedReader(new FileReader(file))){
 			while ((line = reader.readLine()) != null){
+				lineNumber++;
 				if (parser.isValidHistoryLine(line)){
 					Query query = parser.getNextUserQuery(line);
 					queries.add(query);
@@ -70,22 +67,20 @@ public class BasicSolver extends Solver{
 						iMax = query.getI2();
 					if (query.getJ2() >= jMax)
 						jMax = query.getJ2();
-					validLineNumber++;
-				}else if (validLineNumber == 1){
+				}else if (parser.isHint(line)){
 					String[] hints = parser.checkAndParseHints(line);
-					 if (hints != null){
-						 hintsProvided = true;
-						 report.put("iHint", hints[0]);
-						 report.put("jHint", hints[0]);
-					 }
-					validLineNumber++;
+					if (hints != null){
+						hintsProvided = true;
+						report.put("iHint", hints[0]);
+						report.put("jHint", hints[1]);
+					}
 				}else{
-					log.info("Line {} ignored: {}", validLineNumber, line);
+					log.info("Line {} ignored: {}", lineNumber, line);
 				}
 			}
 			report.put("iMin", iMin);
-			report.put("jMin", jMin);
 			report.put("iMax", iMax);
+			report.put("jMin", jMin);
 			report.put("jMax", jMax);
 			report.put("queries", queries);
 			if (!hintsProvided){

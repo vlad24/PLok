@@ -9,9 +9,8 @@ public abstract class Solver {
 	
 	protected String H;
 	
-	@Inject
-	public Solver(@Named("H") String historyFile){
-		
+	public Solver(String historyFile){
+		H = historyFile;
 	}
 	public abstract HashMap<String, Object> solvePLTask() throws Exception;
 	
