@@ -1,5 +1,7 @@
 package ru.spbu.math.plok.bench;
 
+import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,47 +18,53 @@ import ru.spbu.math.plok.solver.Solver;
 public class AppConfig extends AbstractModule {
 
 	private final static Logger log = LoggerFactory.getLogger(AppConfig.class);
-	
+
 	private Configuraton configs;
-	
-	public AppConfig(Configuraton configurator) {
+	private Solver solver;
+	private HashMap<String, Object> solution;
+
+	public AppConfig(Configuraton configurator) throws Exception {
 		configs = configurator;
+		solver  = initializeSolver();
+		solution = solver.solvePLTask();
 	}
 
 	public void configure() {
-		bindConstant().annotatedWith(Names.named("N")).to(configs.getN());
-		bindConstant().annotatedWith(Names.named("T")).to(configs.getT());
-		bindConstant().annotatedWith(Names.named("H")).to(configs.getH());
-		bindConstant().annotatedWith(Names.named("A")).to(configs.getA());
+		bindConstant().annotatedWith(Names.named("N")).to(configs.getVectorLength());
+		bindConstant().annotatedWith(Names.named("T")).to(configs.getAttackTimeMs());
+		bindConstant().annotatedWith(Names.named("Q")).to(configs.getQueriesAmount());
+		bindConstant().annotatedWith(Names.named("P")).to((Integer)solution.get("P"));
+		bindConstant().annotatedWith(Names.named("L")).to((Integer)solution.get("L"));
 		bindConstant().annotatedWith(Names.named("p")).to(configs.getPeriod());
-		bindConstant().annotatedWith(Names.named("cacheUnitSize")).to(configs.getCacheUnitSize());
 		bindConstant().annotatedWith(Names.named("storagePath")).to(configs.getStoragePath());
-		initStorage();
-		initVerbosity();
-		initSolver();
-	}
-	
-	private void initSolver() {
-		if (configs.getSolverType().equalsIgnoreCase("basic"))
-			bind(Solver.class).to(BasicSolver.class);
-		else {
-			bind(Solver.class).to(BasicSolver.class);
-		}
-		
+		bindConstant().annotatedWith(Names.named("cacheUnitSize")).to(configs.getCacheUnitSize());
+		bindStorageType();
+		bindVerbosityLevel();
 	}
 
-	private void initStorage() {
-		if (configs.getStorage().equalsIgnoreCase("sql"))
+	private Solver initializeSolver() {
+		log.info("In order to configurate all complonets PL task should be solved");
+		if (configs.getSolverType().equalsIgnoreCase("basic")){
+			log.info("Basic Solver set.");
+			return new BasicSolver(configs.getHistoryFilePath());
+		}else {
+			return null;
+		}
+
+	}
+
+	private void bindStorageType() {
+		if (configs.getStorageType().equalsIgnoreCase("sql"))
 			bind(StorageSystem.class).to(SQLStorage.class);
 		else {
 			bind(StorageSystem.class).to(PLokerStorage.class);
 		}
 	}
 
-	private void initVerbosity() {
-		String verbosity = configs.getVerbosity();
+	private void bindVerbosityLevel() {
+		String verbosity = configs.getVerbosityLevel();
 		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("ROOT");
-		
+
 		if      (configs.isDebugging()){
 			rootLogger.setLevel(Level.DEBUG);
 		}
@@ -71,12 +79,10 @@ public class AppConfig extends AbstractModule {
 		}
 	}
 
-	public void setPL(int P, int L){
-		bindConstant().annotatedWith(Names.named("P")).to(P);
-		bindConstant().annotatedWith(Names.named("L")).to(L);
+	
+	public HashMap<String, Object> getSolution() {
+		return solution;
 	}
-	
-	
 	
 
 }
