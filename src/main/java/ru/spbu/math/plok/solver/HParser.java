@@ -4,9 +4,9 @@ import ru.spbu.math.plok.model.client.Query;
 
 public class HParser {
 	
-	private static final String HINTS_SEPARATOR   = "/";
-	private static final String ELEMENT_SEPARATOR = ",";
-	private static final String HINT_STRING       = "!";
+	private static final String HINTS_SEPARATOR       = "/";
+	private static final String ELEMENT_SEPARATOR     = ",";
+	private static final String HINT_STRING_INDICATOR = "!";
 	
 	public Query getNextUserQuery(String line) {
 		String[] row = line.replace(" ", "").split(ELEMENT_SEPARATOR);
@@ -20,18 +20,18 @@ public class HParser {
 
 	public String[] checkAndParseHints(String line){
 		if (line.contains(HINTS_SEPARATOR)){
-			String[] hints = line.split(HINTS_SEPARATOR);
+			String[] hints = line.substring(1).split(HINTS_SEPARATOR);
 			if (hints.length != 2)
-				throw new IllegalArgumentException("PMF file format exception: first line is in incorrect format");
+				throw new IllegalArgumentException("Hint format exception: not correct number of hints");
 			return hints;
 		}else{
-			return null;
+			throw new IllegalArgumentException("Hint format exception: no hints separator " + HINTS_SEPARATOR);
 		}
 	}
 
 
 	public boolean isHint(String line) {
-		return line.startsWith(HINT_STRING);
+		return line.startsWith(HINT_STRING_INDICATOR);
 	}
 }
 
