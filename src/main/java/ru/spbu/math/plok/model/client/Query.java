@@ -57,6 +57,14 @@ public class Query {
 	public long getTime(){
 		return time;
 	}
+
+	public int getILength() {
+		return indexEnd - indexStart + 1;
+	}
+	
+	public long getJLength() {
+		return timeEnd - timeStart + 1;
+	}
 	
 
 }
