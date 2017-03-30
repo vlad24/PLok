@@ -34,7 +34,7 @@ public class Index {
 		this.P = P;
 		this.L = L;
 		this.L_S = N % L;
-		this.P_S = P * L / L_S;
+		this.P_S = (L_S != 0) ? (P * L / L_S) : 0;
 		grid = new ArrayList<>();
 		grid.add(new ArrayList<Integer>());
 		specialGrid = new ArrayList<>();

@@ -39,7 +39,7 @@ public class FilePersistentStorage {
 		this.P 		= P;
 		this.L 		= L;
 		this.L_S 	= N % L;
-		this.P_S 	= P * L / L_S;
+		this.P_S 	= (L_S != 0)? (P * L / L_S) : 0;
 		this.blockSize =	
 				1 + 													//additional byte to store whether block is special or common
 				BlockHeader.BYTES +										//header

@@ -58,7 +58,7 @@ public class PLokerStorage implements StorageSystem{
 		this.L = L;
 		this.N = N;
 		this.L_S = N % L;
-		this.P_S = P * L / L_S;
+		this.P_S = (L_S != 0)? (P * L / L_S) : 0;
 		currentCommonBlocks = new ArrayList<>(N / L);
 		refreshCommonColumn();
 		currentSpecial = new Block(P_S, L_S);
