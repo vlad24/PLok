@@ -1,4 +1,4 @@
-package ru.spbu.math.plok.statutils;
+package ru.spbu.math.plok.utils;
 
 import java.util.ArrayList;
 import java.util.List;

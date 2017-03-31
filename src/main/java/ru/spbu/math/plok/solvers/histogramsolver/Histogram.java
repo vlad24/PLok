@@ -1,15 +1,22 @@
 package ru.spbu.math.plok.solvers.histogramsolver;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ru.spbu.math.plok.utils.Pair;
 
 /**
  * @author vlad
  * Histogram helper class
  */
 class Histogram<K extends Number>{
+	private final static Logger log = LoggerFactory.getLogger(Histogram.class);
 
 	private DecimalFormat floatTrimmer = new DecimalFormat("#.###");
 	private TreeMap<K, Integer> rawOccs;
@@ -20,6 +27,8 @@ class Histogram<K extends Number>{
 	private double max;
 	private int[] binnedOccs;
 	private double binWidth;
+
+	private HashMap<Integer, Pair<K>> binsBounds;
 
 	@Override
 	public String toString() {
@@ -52,6 +61,7 @@ class Histogram<K extends Number>{
 		this.rawOccs = new TreeMap<K, Integer>();
 		this.binnedOccs = new int[binCount];
 		this.observations = data.size();
+		//this.binsBounds = new HashMap<Integer, Pair<K>>();
 		buildHistogram(data);
 	}
 
@@ -64,8 +74,15 @@ class Histogram<K extends Number>{
 	}
 	
 	private void normalize() {
+		log.debug("Normalizing...");
+		int percentage = 0;
 		for (K k : rawOccs.keySet()){
-			//set new
+			percentage = (int)((100.0 * rawOccs.get(k)) / observations);
+			rawOccs.put(k, percentage);
+		}
+		for (int i = 0; i < binnedOccs.length; i++){
+			percentage = (int)((100.0 * binnedOccs[i]) / observations);
+			binnedOccs[i] = percentage;
 		}
 	}
 
@@ -74,14 +91,14 @@ class Histogram<K extends Number>{
 	}
 
 	private void addBinned(K k) {
-		int bin = binify(k);
-		binnedOccs[bin]++;
+		int binId = toBinId(k);
+		binnedOccs[binId]++;
 	}
 
 
-	private int binify(K k) {
-		double x = k.doubleValue();
-		return (int)((x - min) / binWidth);
+	private int toBinId(K k) {
+		double kAsDouble = k.doubleValue();
+		return (int)((kAsDouble - min) / binWidth);
 	}
 
 	private void addRaw(K x){
@@ -105,6 +122,22 @@ class Histogram<K extends Number>{
 			}
 		}
 		return result;
+	}
+	
+	public Pair<Double> getBinBounds(int id){
+		return new Pair<Double>(id * binWidth, (id + 1) * binWidth);
+	}
+	
+	public int getMaxBinId(){
+		int maxOcc = Integer.MAX_VALUE;
+		int maxBin = -1;
+		for (int j = 0; j < binCount; j++){
+			if (binnedOccs[j] > maxOcc){
+				maxOcc = binnedOccs[j];
+				maxBin = j;
+			}
+		}
+		return maxBin;
 	}
 
 	public Integer getRawOccurence(K key){

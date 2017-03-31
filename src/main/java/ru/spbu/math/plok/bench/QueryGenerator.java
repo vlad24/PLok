@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.model.client.UserChoice.Policy;
-import ru.spbu.math.plok.statutils.Stat;
+import ru.spbu.math.plok.utils.Stat;
 
 public class QueryGenerator {
 	
