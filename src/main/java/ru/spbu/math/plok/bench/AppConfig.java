@@ -12,8 +12,8 @@ import ch.qos.logback.classic.Level;
 import ru.spbu.math.plok.model.storagesystem.PLokerStorage;
 import ru.spbu.math.plok.model.storagesystem.SQLStorage;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
-import ru.spbu.math.plok.solver.BasicSolver;
-import ru.spbu.math.plok.solver.Solver;
+import ru.spbu.math.plok.solvers.Solver;
+import ru.spbu.math.plok.solvers.histogramsolver.BasicSolver;
 
 public class AppConfig extends AbstractModule {
 

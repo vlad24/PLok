@@ -1,4 +1,4 @@
-package ru.spbu.math.plok.solver;
+package ru.spbu.math.plok.solvers.histogramsolver;
 
 import ru.spbu.math.plok.model.client.Query;
 
