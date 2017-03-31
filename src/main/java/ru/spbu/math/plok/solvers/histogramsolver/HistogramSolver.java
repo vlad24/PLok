@@ -89,9 +89,9 @@ public class HistogramSolver extends Solver{
 					log.info("Line {} ignored: {}", lineNumber, line);
 				}
 			}
-			buildHistograms(queries);
+			buildHistograms();
 			if (!hintsProvided){
-				guessPolicies(queries);
+				guessPolicies();
 			}
 			log.debug(i1Hist.toString());
 			log.debug(i2Hist.toString());
@@ -125,7 +125,7 @@ public class HistogramSolver extends Solver{
 			jMax = query.getJ2();
 	}
 
-	private void buildHistograms(List<Query> queries) {
+	private void buildHistograms() {
 		ArrayList<Integer> i1Data = new ArrayList<Integer>(queries.size());
 		ArrayList<Integer> i2Data = new ArrayList<Integer>(queries.size());
 		ArrayList<Long>    j1Data = new ArrayList<Long>(queries.size());
@@ -164,10 +164,22 @@ public class HistogramSolver extends Solver{
 		}
 	}
 
-	private void guessPolicies(ArrayList<Query> queries) {
+	private void guessPolicies() {
 		// TODO implement
-		this.iPolicy = Policy.FullTrack;
+		guessIPolicy();
+		guessJPolicy();
+	}
+
+	private void guessJPolicy() {
+		// TODO Auto-generated method stub
 		this.jPolicy = Policy.FullTrack;
+		
+	}
+
+	private void guessIPolicy() {
+		// TODO Auto-generated method stub
+		this.iPolicy = Policy.FullTrack;
+		
 	}
 
 	private void calculatePL() {
