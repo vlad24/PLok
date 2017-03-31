@@ -47,6 +47,19 @@ class Histogram<K extends Number>{
 		}
 		return b.toString();
 	}
+	
+	private String binDataStringHistogram() {
+		StringBuilder b = new StringBuilder("\n");
+		b.append(name).append("\n");
+		for (int i = 0; i < binCount; i++){
+			b.append(getBinBounds(i).toString()).append(":\t");
+			for (int j = 0; j < binnedOccs[i]; j++){
+				b.append("=");
+			}
+			b.append("\n");
+		}
+		return b.toString();
+	}
 
 
 
@@ -151,7 +164,7 @@ class Histogram<K extends Number>{
 		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
 			sum += entry.getValue().doubleValue();
 		}
-		return sum/getDistinctObservationsAmount();
+		return sum / getDistinctObservationsAmount();
 	}
 
 	public int getDistinctObservationsAmount(){
