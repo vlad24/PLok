@@ -171,20 +171,30 @@ public class HistogramSolver extends Solver{
 	}
 
 	private void guessJPolicy() {
-		// TODO Auto-generated method stub
-		this.jPolicy = Policy.FullTrack;
+		// TODO simple logic
+		int lastBinJR = jRHist.getAmountOfBins() - 1;
+		if (jRHist.getMaxCountBinId() == lastBinJR &&
+				jRHist.getBinCount(lastBinJR) - jRHist.getBinCount(lastBinJR - 1) > 15){
+			this.jPolicy = Policy.LateTracking;
+		}else{
+			this.jPolicy = Policy.FullTrack;
+		}
 		
 	}
 
 	private void guessIPolicy() {
-		// TODO Auto-generated method stub
-		this.iPolicy = Policy.FullTrack;
+		// TODO detect extremes
+		if (i1Hist.isFlatEnough() && i2Hist.isFlatEnough()){
+			this.iPolicy = Policy.FullTrack;
+		}else{
+			this.iPolicy = Policy.RangeInterest;
+		}
 		
 	}
 
 	private void calculatePL() {
 		//TODO implement smarter!
-		P = jLHist.getKeyWithMaxOccurence().intValue();
-		L = iLHist.getKeyWithMaxOccurence();
+		P = jLHist.getMaxCountRaw().intValue();
+		L = iLHist.getMaxCountRaw();
 	}
 }
