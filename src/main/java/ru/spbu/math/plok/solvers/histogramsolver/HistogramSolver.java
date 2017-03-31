@@ -45,6 +45,7 @@ public class HistogramSolver extends Solver{
 
 	public HistogramSolver(String historyFile, int cacheUnitSize){
 		super(historyFile);
+		this.cacheUnitSize = cacheUnitSize;
 	}
 
 	public HashMap<String, Object> solvePLTask() throws IOException {
