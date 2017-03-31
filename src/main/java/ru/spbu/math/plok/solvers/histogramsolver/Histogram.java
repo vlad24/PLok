@@ -1,8 +1,6 @@
 package ru.spbu.math.plok.solvers.histogramsolver;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -32,10 +30,10 @@ class Histogram<K extends Number>{
 
 	@Override
 	public String toString() {
-		return rawDataStringHistogram();
+		return toStringAsRaw();
 	}
 
-	public String rawDataStringHistogram() {
+	public String toStringAsRaw() {
 		StringBuilder b = new StringBuilder("\n");
 		b.append(name).append("\n");
 		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
@@ -48,7 +46,7 @@ class Histogram<K extends Number>{
 		return b.toString();
 	}
 	
-	private String binDataStringHistogram() {
+	private String toStringAsBins() {
 		StringBuilder b = new StringBuilder("\n");
 		b.append(name).append("\n");
 		for (int i = 0; i < binCount; i++){
@@ -83,10 +81,10 @@ class Histogram<K extends Number>{
 			addRaw(k);
 			addBinned(k);
 		}
-		normalize();
+		normalizeToPercents();
 	}
 	
-	private void normalize() {
+	private void normalizeToPercents() {
 		log.debug("Normalizing histograms...");
 		int percentage = 0;
 		for (K k : rawOccs.keySet()){
@@ -102,16 +100,15 @@ class Histogram<K extends Number>{
 	private int calcOptimalBinAmount(List<K> data, K min, K max) {
 		return (int) Math.sqrt(data.size());
 	}
+	
+	private int toBinId(K k) {
+		double kAsDouble = k.doubleValue();
+		return (int)((kAsDouble - min) / binWidth);
+	}
 
 	private void addBinned(K k) {
 		int binId = toBinId(k);
 		binnedOccs[binId]++;
-	}
-
-
-	private int toBinId(K k) {
-		double kAsDouble = k.doubleValue();
-		return (int)((kAsDouble - min) / binWidth);
 	}
 
 	private void addRaw(K x){
@@ -125,7 +122,7 @@ class Histogram<K extends Number>{
 	}
 
 	//Raw data
-	public K getKeyWithMaxOccurence(){
+	public K getMaxCountRaw(){
 		K result = null;
 		int maxOccurence = Integer.MIN_VALUE;
 		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
@@ -141,7 +138,7 @@ class Histogram<K extends Number>{
 		return new Pair<Double>(id * binWidth, (id + 1) * binWidth);
 	}
 	
-	public int getMaxBinId(){
+	public int getMaxCountBinId(){
 		int maxOcc = Integer.MAX_VALUE;
 		int maxBin = -1;
 		for (int j = 0; j < binCount; j++){
@@ -153,25 +150,29 @@ class Histogram<K extends Number>{
 		return maxBin;
 	}
 
-	public Integer getRawOccurence(K key){
+	public Integer getBinCount(int binId){
+		return binnedOccs[binId];
+	}
+	
+	public Integer getRawCount(K key){
 		Integer occurence = rawOccs.get(key);
 		return occurence == null ? 0 : occurence;
 	}
 
 
-	public double getRawAvgOccurence(){
-		double sum = 0;
-		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
-			sum += entry.getValue().doubleValue();
-		}
-		return sum / getDistinctObservationsAmount();
-	}
+//	public double getRawAvg(){
+//		double sum = 0;
+//		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
+//			sum += entry.getValue().doubleValue();
+//		}
+//		return sum / getDistinctObservationsAmount();
+//	}
 
 	public int getDistinctObservationsAmount(){
 		return rawOccs.keySet().size();
 	}
 
-	public int getBinCount() {
+	public int getAmountOfBins() {
 		return binCount;
 	}
 
