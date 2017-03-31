@@ -44,9 +44,9 @@ public class PLokerStorage implements StorageSystem{
 	public PLokerStorage(@Named("N")int N,  @Named("P")int P,  @Named("L")int L, @Named("cacheUnitSize") int cacheSizeInUnits, Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
 		super();
 		storage = persStorage.get();
-		//TODO specify in which units cache size is calculated
+		int cacheSizeInBlocks = cacheSizeInUnits / (P * L);
 		cache = CacheBuilder.newBuilder()
-				.maximumSize(cacheSizeInUnits)
+				.maximumSize(cacheSizeInBlocks)
 				.build(new CacheLoader<Integer, Block>() {
 					@Override
 					public Block load(Integer key) throws Exception {
