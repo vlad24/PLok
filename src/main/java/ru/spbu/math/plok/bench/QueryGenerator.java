@@ -6,7 +6,7 @@ import java.util.HashMap;
 import org.slf4j.LoggerFactory;
 
 import ru.spbu.math.plok.model.client.Query;
-import ru.spbu.math.plok.model.client.UserChoice.Policy;
+import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 import ru.spbu.math.plok.utils.Stat;
 
 public class QueryGenerator {

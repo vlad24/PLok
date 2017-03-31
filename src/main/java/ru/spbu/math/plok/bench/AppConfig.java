@@ -13,7 +13,7 @@ import ru.spbu.math.plok.model.storagesystem.PLokerStorage;
 import ru.spbu.math.plok.model.storagesystem.SQLStorage;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
 import ru.spbu.math.plok.solvers.Solver;
-import ru.spbu.math.plok.solvers.histogramsolver.BasicSolver;
+import ru.spbu.math.plok.solvers.histogramsolver.HistogramSolver;
 
 public class AppConfig extends AbstractModule {
 
@@ -44,9 +44,9 @@ public class AppConfig extends AbstractModule {
 
 	private Solver initializeSolver() {
 		log.info("In order to configurate all complonets PL task should be solved");
-		if (configs.getSolverType().equalsIgnoreCase("basic")){
-			log.info("Basic Solver set.");
-			return new BasicSolver(configs.getHistoryFilePath());
+		if (configs.getSolverType().equalsIgnoreCase("histogram")){
+			log.info("Histogram Solver set.");
+			return new HistogramSolver(configs.getHistoryFilePath(), configs.getCacheUnitSize());
 		}else {
 			return null;
 		}
@@ -65,7 +65,7 @@ public class AppConfig extends AbstractModule {
 		String verbosity = configs.getVerbosityLevel();
 		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("ROOT");
 
-		if      (configs.isDebugging()){
+		if(configs.isDebugging()){
 			rootLogger.setLevel(Level.DEBUG);
 		}
 		else if (verbosity.equalsIgnoreCase(Level.DEBUG.toString())){

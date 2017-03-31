@@ -27,15 +27,14 @@ class Histogram<K extends Number>{
 	private double max;
 	private int[] binnedOccs;
 	private double binWidth;
-
-	private HashMap<Integer, Pair<K>> binsBounds;
+	//private HashMap<Integer, Pair<K>> binsBounds;
 
 	@Override
 	public String toString() {
 		return rawDataStringHistogram();
 	}
 
-	private String rawDataStringHistogram() {
+	public String rawDataStringHistogram() {
 		StringBuilder b = new StringBuilder("\n");
 		b.append(name).append("\n");
 		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
@@ -70,7 +69,7 @@ class Histogram<K extends Number>{
 		this.min = min.doubleValue();
 		this.max = max.doubleValue();
 		this.binCount = calcOptimalBinAmount(data, min, max);
-		this.binWidth = 1 + Math.ceil((this.max - this.min) / binCount); 
+		this.binWidth = Math.ceil((this.max - this.min) / binCount); 
 		this.rawOccs = new TreeMap<K, Integer>();
 		this.binnedOccs = new int[binCount];
 		this.observations = data.size();
@@ -87,7 +86,7 @@ class Histogram<K extends Number>{
 	}
 	
 	private void normalize() {
-		log.debug("Normalizing...");
+		log.debug("Normalizing histograms...");
 		int percentage = 0;
 		for (K k : rawOccs.keySet()){
 			percentage = (int)((100.0 * rawOccs.get(k)) / observations);

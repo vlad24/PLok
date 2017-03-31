@@ -13,21 +13,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.spbu.math.plok.model.client.Query;
-import ru.spbu.math.plok.model.client.UserChoice.Policy;
 import ru.spbu.math.plok.solvers.Solver;
+import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 
 
-public class BasicSolver extends Solver{
+public class HistogramSolver extends Solver{
 
-	private final static Logger log = LoggerFactory.getLogger(BasicSolver.class);
+	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
 	private HParser parser;
+	private int    cacheUnitSize;
 	private int    iMax  = Integer.MIN_VALUE;
 	private int    iMin  = Integer.MAX_VALUE;
 	private long   jMin  = Long.MAX_VALUE;;
 	private long   jMax  = Long.MIN_VALUE;
 	private long   tBeg  = Long.MIN_VALUE;
 	private long   tEnd  = Long.MAX_VALUE;
-	private Policy iPolicy ;
+	private Policy iPolicy;
 	private Policy jPolicy;
 	private int P;
 	private int L;
@@ -42,9 +43,8 @@ public class BasicSolver extends Solver{
 	private ArrayList<Query> queries;
 
 
-	public BasicSolver(String historyFile){
+	public HistogramSolver(String historyFile, int cacheUnitSize){
 		super(historyFile);
-
 	}
 
 	public HashMap<String, Object> solvePLTask() throws IOException {

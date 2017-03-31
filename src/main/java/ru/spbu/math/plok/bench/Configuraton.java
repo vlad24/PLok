@@ -12,7 +12,7 @@ public class Configuraton{
 
 	private static Logger log = LoggerFactory.getLogger(Configuraton.class);
 	
-	private static final int VECTOR_ELEMENT_SIZE = Float.BYTES;
+	private static final int VECTOR_UNIT_BYTE_SIZE = Float.BYTES;
 	private static final int QUERY_AMOUNT_FACTOR = 1;
 
 	private boolean inited;
@@ -48,7 +48,7 @@ public class Configuraton{
 	private String 	storagePath="./storages";
 	
 	@Option(name="--solver",usage="Solver type", required=false)
-	private String  solverType = "basic";
+	private String  solverType = "histogram";
 	
 	@Option(name="--debug",usage="Debug flag", required=false)
 	private boolean debug;
@@ -88,16 +88,16 @@ public class Configuraton{
 	}
 
 	private int calculateCacheByteSize() {
-		return (int) (writeDataSize * cacheRatio);
+		return (int) (Math.ceil(writeDataSize * cacheRatio));
 	}
 
 	private int calculateWriteDataSize() {
 		// element_size * final_grid_size
-		return VECTOR_ELEMENT_SIZE * (vectorLength * attackTime / period);
+		return VECTOR_UNIT_BYTE_SIZE * (vectorLength * attackTime / period);
 	}
 	
 	private int calculateCacheUnitSize() {
-		return cacheByteSize / VECTOR_ELEMENT_SIZE;
+		return cacheByteSize / VECTOR_UNIT_BYTE_SIZE;
 	}
 
 	private int calculateQueryAmount() {
