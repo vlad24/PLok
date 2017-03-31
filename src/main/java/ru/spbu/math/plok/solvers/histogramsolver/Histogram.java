@@ -2,6 +2,7 @@ package ru.spbu.math.plok.solvers.histogramsolver;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -168,6 +169,10 @@ class Histogram<K extends Number>{
 
 	public int getDistinctObservationsAmount(){
 		return rawOccs.keySet().size();
+	}
+
+	public int getBinCount() {
+		return binCount;
 	}
 
 
