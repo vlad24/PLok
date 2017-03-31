@@ -175,6 +175,15 @@ class Histogram<K extends Number>{
 	public int getAmountOfBins() {
 		return binCount;
 	}
+	
+	public boolean isFlatEnough(){
+		for (int i = 1; i < binnedOccs.length; i++) {
+			if (binnedOccs[i] - binnedOccs[i - 1] > 15){
+				return false;
+			}
+		}
+		return true;
+	}
 
 
 }
