@@ -33,7 +33,7 @@ Command line options:
 | v				| verbosity level								                       | string (info, debug, fine...)	|	no (default: "info")						| 
 | phaseBreak	| break between write and read phases(msec) 	                       | integer ( > 0)				    |	no (default: "2000")						| 
 | storagePath 	| storage path									                       | string (path)				    |	no (default: "./storages")                  |
-| solver 	    | solver type									                       | string (basic, ...)		    |	no (default: "basic")                       |
+| solver 	    | solver type									                       | string (basic, ...)		    |	no (default: "histogram")                       |
 | debug			| debug mode flag 								                       | flag						    |	no (default: false)							| 
 | repeatHistory | flag, indicating if provided history should be repeated by generator | flag						    |	no (default: false)							| 
 
