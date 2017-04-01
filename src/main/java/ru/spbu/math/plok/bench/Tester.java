@@ -20,9 +20,8 @@ public class Tester {
 
 	public static void main(String[] args) throws Exception {
 		log.debug("Tester started");
-		log.debug("Configuring and solving...");
 		Configuraton configuraton = new Configuraton(args);
-		System.out.println(configuraton);
+		log.info(configuraton.toString());
 		if (!configuraton.isDebugging()){
 			AppConfig appConfig              = new AppConfig(configuraton);
 			HashMap<String, Object> solution = appConfig.getSolution();
@@ -40,8 +39,18 @@ public class Tester {
 					configuraton.isRepeatingHistory(), (Long)generatorReport.get("tFrom"), (Long)generatorReport.get("tTo"));
 			log.info("Client has finished!");
 			ReportPrinter.print(configuraton, queryReport);
+		}else{
+			log.debug("In debug mode");
+			debug(configuraton);
 		}
 		log.info("All done!");
+	}
+
+
+	private static void debug(Configuraton configuration) throws Exception {
+		AppConfig appConfig              = new AppConfig(configuration);
+		HashMap<String, Object> solution = appConfig.getSolution();
+		log.debug(solution.toString());
 	}
 
 
