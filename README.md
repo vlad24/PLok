@@ -37,7 +37,12 @@ Command line options:
 | debug			| debug mode flag 								                       | flag						    |	no (default: false)							| 
 | repeatHistory | flag, indicating if provided history should be repeated by generator | flag						    |	no (default: false)							| 
 
-## Output example
+### Launch example
+```{java}
+java -jar PLok -H "hs/h1.csv" -N 10 -T 2000  --phaseBreak 100 -C 0.01  -p 1 -v debug
+```
+
+## Output
 
 After launch a report file (in report folder) named "report_${invocationTime}.txt" will be generated with the following metrics provided:
 
