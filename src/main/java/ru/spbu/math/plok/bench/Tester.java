@@ -20,28 +20,28 @@ public class Tester {
 
 	public static void main(String[] args) throws Exception {
 		log.debug("Tester started");
-		Configuration configuraton = new Configuration(args);
-		log.info(configuraton.toString());
-		if (!configuraton.isDebugging()){
-			AppConfig appConfig              = new AppConfig(configuraton);
+		Configuration configuration = new Configuration(args);
+		log.info(configuration.toString());
+		if (!configuration.isDebugging()){
+			AppConfig appConfig              = new AppConfig(configuration);
 			HashMap<String, Object> solution = appConfig.getSolution();
 			Injector injector                = Guice.createInjector(appConfig);
 			Generator generator              = injector.getInstance(Generator.class);
 			Client client 		             = injector.getInstance(Client.class);
 			StorageSystem store              = injector.getInstance(StorageSystem.class);
-			log.info("Letting the generator to attack for {} msec", configuraton.getAttackTimeMs());
+			log.info("Letting the generator to attack for {} msec", configuration.getAttackTimeMs());
 			HashMap<String, Object> generatorReport = generator.attack(store);
 			log.info("Stored {} blocks", store.getBlockCount());
-			log.info("Let's have a break for {} msec", configuraton.getPhaseBreakMs());
-			TimeUnit.MILLISECONDS.sleep(configuraton.getPhaseBreakMs());
+			log.info("Let's have a break for {} msec", configuration.getPhaseBreakMs());
+			TimeUnit.MILLISECONDS.sleep(configuration.getPhaseBreakMs());
 			log.info("Break is over. Starting client...");
 			HashMap<String, Object> queryReport = client.attack(store, solution, 
-					configuraton.isRepeatingHistory(), (Long)generatorReport.get("tFrom"), (Long)generatorReport.get("tTo"));
+					configuration.isRepeatingHistory(), (Long)generatorReport.get("tFrom"), (Long)generatorReport.get("tTo"));
 			log.info("Client has finished!");
-			ReportPrinter.print(configuraton, queryReport);
+			ReportPrinter.print(configuration, queryReport);
 		}else{
 			log.debug("In debug mode");
-			debug(configuraton);
+			debug(configuration);
 		}
 		log.info("All done!");
 	}
