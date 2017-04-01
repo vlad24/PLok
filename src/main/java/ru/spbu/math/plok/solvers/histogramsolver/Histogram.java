@@ -30,7 +30,9 @@ class Histogram<K extends Number>{
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(toStringAsRaw()).append("\n\n").append(toStringAsBins()).append("\n").toString();
+		return new StringBuilder().append(toStringAsRaw())
+				.append("\n_______________________________\n")
+				.append(toStringAsBins()).append("\n").toString();
 	}
 
 	public String toStringAsRaw() {
