@@ -165,7 +165,6 @@ public class HistogramSolver extends Solver{
 	}
 
 	private void guessPolicies() {
-		// TODO implement
 		guessIPolicy();
 		guessJPolicy();
 	}
@@ -174,7 +173,7 @@ public class HistogramSolver extends Solver{
 		// TODO simple logic
 		int lastBinJR = jRHist.getAmountOfBins() - 1;
 		if (jRHist.getMaxCountBinId() == lastBinJR &&
-				jRHist.getBinCount(lastBinJR) - jRHist.getBinCount(lastBinJR - 1) > 15){
+		    jRHist.getBinCount(lastBinJR) - jRHist.getBinCount(lastBinJR - 1) > 15){
 			this.jPolicy = Policy.LateTracking;
 		}else{
 			this.jPolicy = Policy.FullTrack;
@@ -187,13 +186,14 @@ public class HistogramSolver extends Solver{
 		if (i1Hist.isFlatEnough() && i2Hist.isFlatEnough()){
 			this.iPolicy = Policy.FullTrack;
 		}else{
+			// TODO detect ranges
 			this.iPolicy = Policy.RangeInterest;
 		}
 		
 	}
 
 	private void calculatePL() {
-		//TODO implement smarter!
+		//TODO implement smarter! Account cacheUnit size and policies
 		P = jLHist.getMaxCountRaw().intValue();
 		L = iLHist.getMaxCountRaw();
 	}
