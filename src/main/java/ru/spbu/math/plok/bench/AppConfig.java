@@ -19,11 +19,11 @@ public class AppConfig extends AbstractModule {
 
 	private final static Logger log = LoggerFactory.getLogger(AppConfig.class);
 
-	private Configuraton configs;
+	private Configuration configs;
 	private Solver solver;
 	private HashMap<String, Object> solution;
 
-	public AppConfig(Configuraton configurator) throws Exception {
+	public AppConfig(Configuration configurator) throws Exception {
 		configs = configurator;
 		solver  = initializeSolver();
 		solution = solver.solvePLTask();

@@ -20,7 +20,7 @@ public class Tester {
 
 	public static void main(String[] args) throws Exception {
 		log.debug("Tester started");
-		Configuraton configuraton = new Configuraton(args);
+		Configuration configuraton = new Configuration(args);
 		log.info(configuraton.toString());
 		if (!configuraton.isDebugging()){
 			AppConfig appConfig              = new AppConfig(configuraton);
@@ -47,7 +47,7 @@ public class Tester {
 	}
 
 
-	private static void debug(Configuraton configuration) throws Exception {
+	private static void debug(Configuration configuration) throws Exception {
 		AppConfig appConfig              = new AppConfig(configuration);
 		HashMap<String, Object> solution = appConfig.getSolution();
 		log.debug(solution.toString());

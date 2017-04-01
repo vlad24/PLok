@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
-public class Configuraton{
+public class Configuration{
 
-	private static Logger log = LoggerFactory.getLogger(Configuraton.class);
+	private static Logger log = LoggerFactory.getLogger(Configuration.class);
 	
 	private static final int VECTOR_UNIT_BYTE_SIZE = Float.BYTES;
 	private static final int QUERY_AMOUNT_FACTOR = 1;
@@ -62,11 +62,11 @@ public class Configuraton{
 	private int 	cacheByteSize;
 	private int 	cacheUnitSize;
 
-	public Configuraton(){
+	public Configuration(){
 		inited = false;
 	}
 
-	public Configuraton(String[] args){
+	public Configuration(String[] args){
 		super();
 		initConfigs(args);
 	}
