@@ -142,13 +142,13 @@ public class HistogramSolver extends Solver{
 			jLData.add(query.getJLength());
 			jRData.add((double)query.getJ2() / query.getTime());	
 		}
-		i1Hist = new Histogram<Integer>("i1 histogram", i1Data, iMin, iMax );
-		j1Hist = new Histogram<Long>   ("j1 histogram", j1Data, jMin, jMax);
-		i2Hist = new Histogram<Integer>("i2 histogram", i2Data, iMin, iMax);
-		j2Hist = new Histogram<Long>   ("j2 histogram", j2Data, jMin, jMax);
-		iLHist = new Histogram<Integer>("index range length histogram",         iLData, 0,   iMax - iMin + 1);
-		jLHist = new Histogram<Long>   ("time range length histogram",          jLData, 0L,  jMax - jMin + 1);
-		jRHist = new Histogram<Double> ("relative time range length histogram", jRData, 0.0, 1.0);
+		i1Hist = new Histogram<Integer>("i1 histogram", i1Data, iMin, iMax, true );
+		j1Hist = new Histogram<Long>   ("j1 histogram", j1Data, jMin, jMax, true);
+		i2Hist = new Histogram<Integer>("i2 histogram", i2Data, iMin, iMax, true);
+		j2Hist = new Histogram<Long>   ("j2 histogram", j2Data, jMin, jMax, true);
+		iLHist = new Histogram<Integer>("index range length histogram",         iLData, 0,   iMax - iMin + 1, true);
+		jLHist = new Histogram<Long>   ("time range length histogram",          jLData, 0L,  jMax - jMin + 1, true);
+		jRHist = new Histogram<Double> ("relative time range length histogram", jRData, 0.0, 1.0, false);
 
 	}
 

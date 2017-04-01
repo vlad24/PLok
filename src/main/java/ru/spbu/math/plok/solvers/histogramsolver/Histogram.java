@@ -1,6 +1,7 @@
 package ru.spbu.math.plok.solvers.histogramsolver;
 
 import java.text.DecimalFormat;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -21,11 +22,13 @@ class Histogram<K extends Number>{
 	private TreeMap<K, Integer> rawOccs;
 	private String name;
 	private int observations;
-	private int binCount;
+	private int binAmount;
 	private double min;
 	private double max;
 	private int[] binnedOccs;
 	private double binWidth;
+
+	private boolean isDiscrete;
 	//private HashMap<Integer, Pair<K>> binsBounds;
 
 	@Override
@@ -51,7 +54,7 @@ class Histogram<K extends Number>{
 	private String toStringAsBins() {
 		StringBuilder b = new StringBuilder("\n");
 		b.append(name).append("\n");
-		for (int i = 0; i < binCount; i++){
+		for (int i = 0; i < binAmount; i++){
 			b.append(getBinBounds(i).toString()).append(":\t");
 			for (int j = 0; j < binnedOccs[i]; j++){
 				b.append("=");
@@ -64,19 +67,21 @@ class Histogram<K extends Number>{
 
 
 
-	public Histogram(String name, List<K> data, K min, K max) {
+	public Histogram(String name, List<K> data, K min, K max, boolean isDiscrete) {
 		super();
 		this.name = name;
+		this.isDiscrete = isDiscrete;
 		this.min = min.doubleValue();
 		this.max = max.doubleValue();
-		this.binCount = calcOptimalBinAmount(data, min, max);
-		this.binWidth = Math.ceil((this.max - this.min) / binCount); 
+		computeOptimalBins(data, min, max);
+		log.debug("Min {}, max {}. For {} bin amount is {}. Bin width is {}", min, max, data.size(), binAmount, binWidth);
 		this.rawOccs = new TreeMap<K, Integer>();
-		this.binnedOccs = new int[binCount];
+		this.binnedOccs = new int[binAmount];
 		this.observations = data.size();
 		//this.binsBounds = new HashMap<Integer, Pair<K>>();
 		buildHistogram(data);
 	}
+
 
 	private void buildHistogram(List<K> data) {
 		for (K k : data){
@@ -99,13 +104,21 @@ class Histogram<K extends Number>{
 		}
 	}
 
-	private int calcOptimalBinAmount(List<K> data, K min, K max) {
-		return (int) Math.sqrt(data.size());
+	private void computeOptimalBins(List<K> data, K min, K max) {
+		if (!isDiscrete){
+			this.binAmount = (int)Math.sqrt(data.size());
+		}else{
+			int distincts = new HashSet<K>(data).size();
+			this.binAmount = (int)Math.sqrt(2 + distincts);
+		}
+		this.binWidth = (this.max - this.min) / binAmount;
 	}
 	
 	private int toBinId(K k) {
 		double kAsDouble = k.doubleValue();
-		return (int)((kAsDouble - min) / binWidth);
+		int binId = (int)((kAsDouble - min) / binWidth);
+		log.debug("Bin id for {} is {}", k, binId);
+		return binId;
 	}
 
 	private void addBinned(K k) {
@@ -143,7 +156,7 @@ class Histogram<K extends Number>{
 	public int getMaxCountBinId(){
 		int maxOcc = Integer.MAX_VALUE;
 		int maxBin = -1;
-		for (int j = 0; j < binCount; j++){
+		for (int j = 0; j < binAmount; j++){
 			if (binnedOccs[j] > maxOcc){
 				maxOcc = binnedOccs[j];
 				maxBin = j;
@@ -175,7 +188,7 @@ class Histogram<K extends Number>{
 	}
 
 	public int getAmountOfBins() {
-		return binCount;
+		return binAmount;
 	}
 	
 	public boolean isFlatEnough(){
