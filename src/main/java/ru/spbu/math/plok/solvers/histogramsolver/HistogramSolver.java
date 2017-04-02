@@ -173,7 +173,7 @@ public class HistogramSolver extends Solver{
 		// TODO simple logic
 		int lastBinJR = jRHist.getAmountOfBins() - 1;
 		if (jRHist.getMaxCountBinId() == lastBinJR &&
-		    jRHist.getBinCount(lastBinJR) - jRHist.getBinCount(lastBinJR - 1) > 15){
+		    jRHist.getBin(lastBinJR).getOccurences() - jRHist.getBin(lastBinJR - 1).getOccurences() > 15){
 			this.jPolicy = Policy.LateTracking;
 		}else{
 			this.jPolicy = Policy.FullTrack;
