@@ -142,7 +142,7 @@ public class HistogramSolver extends Solver{
 			jLData.add(query.getJLength());
 			jRData.add((double)query.getJ2() / query.getTime());	
 		}
-		i1Hist = new Histogram<Integer>("i1 histogram", i1Data, iMin, iMax );
+		i1Hist = new Histogram<Integer>("i1 histogram", i1Data, iMin, iMax);
 		j1Hist = new Histogram<Long>   ("j1 histogram", j1Data, jMin, jMax);
 		i2Hist = new Histogram<Integer>("i2 histogram", i2Data, iMin, iMax);
 		j2Hist = new Histogram<Long>   ("j2 histogram", j2Data, jMin, jMax);
