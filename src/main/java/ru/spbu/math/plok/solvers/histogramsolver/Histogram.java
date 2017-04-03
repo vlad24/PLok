@@ -10,7 +10,7 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.spbu.math.plok.utils.Pair;
+import ru.spbu.math.plok.solvers.histogramsolver.Bin.ValueType;
 
 /**
  * @author vlad
@@ -19,114 +19,110 @@ import ru.spbu.math.plok.utils.Pair;
 class Histogram<K extends Number>{
 	private final static Logger log = LoggerFactory.getLogger(Histogram.class);
 
-	private DecimalFormat floatTrimmer = new DecimalFormat("#.###");
-	private TreeMap<K, Integer> rawOccs;
-	private String name;
-	private int observations;
 	private int binCount;
-	private double min;
-	private double max;
 	private ArrayList<Bin> bins;
 	private double binWidth;
-
-	private boolean isDiscrete;
-
-	@Override
-	public String toString() {
-		return new StringBuilder().append(toStringAsRaw())
-				.append("\n_______________________________\n")
-				.append(toStringAsBins()).append("\n").toString();
-	}
-
-	public String toStringAsRaw() {
-		StringBuilder b = new StringBuilder("\n");
-		b.append(name).append("\n");
-		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
-			b.append(entry.getKey()).append(":\t");
-			for (int i = 0; i < entry.getValue(); i++){
-				b.append("=");
-			}
-			b.append("\n");
-		}
-		return b.toString();
-	}
+	private double binOffset;
 	
-	private String toStringAsBins() {
-		StringBuilder b = new StringBuilder("\n");
-		b.append(name).append("\n");
-		for (int i = 0; i < binCount; i++){
-			b.append(getBinBounds(i).toString()).append(":\t");
-			for (int j = 0; j < bins.get(i).getOccurences(); j++){
-				b.append("=");
-			}
-			b.append("\n");
-		}
-		return b.toString();
-	}
+	private DecimalFormat floatTrimmer = new DecimalFormat("#.###");
+	private boolean isDiscrete;
+	private double max;
+	private double min;
+	private String name;
+	private int observations;
 
-
+	private TreeMap<K, Integer> rawOccs;
 
 
 	public Histogram(String name, List<K> data, K min, K max) {
 		super();
-		this.isDiscrete = !(min instanceof Double || min instanceof Float);  
-		this.name = name;
-		this.min = min.doubleValue();
-		this.max = max.doubleValue();
-		this.rawOccs = new TreeMap<K, Integer>();
+		this.isDiscrete   = !(min instanceof Double || min instanceof Float);  
+		this.name         = name;
+		this.min          = min.doubleValue();
+		this.max          = max.doubleValue();
 		this.observations = data.size();
-		this.bins = new ArrayList<>();
+		this.rawOccs      = new TreeMap<K, Integer>();
+		this.bins         = new ArrayList<>();
+		log.debug("Constructing {} histogram for data: {}", name, data);
 		buildRawHistogram(data);
+		log.debug(toStringAsRaw());
 		buildEquiWidthBinHistogram(data);
+		//log.debug(toStringAsBins());
 		normalizeToPercents();
+		log.debug(toStringAsBins());
 	}
 
 	private void buildEquiWidthBinHistogram(List<K> data) {
+		binOffset = 0;
 		if (isDiscrete){
+			log.debug("Got discrete data");
+			binOffset = 0.5;
+			//                M - m
+			// max ( 1,  ------------------- )
+			//            { sqrt(2 + d) }
 			int distincts = new HashSet<K>(data).size();
-			this.binWidth = Math.max(1, Math.ceil((max - min) / Math.ceil(Math.sqrt(2 + distincts))));
-			this.binCount = (int) Math.ceil((max - min) / binWidth);
+			log.debug("Distinct values: {} ", distincts);
+			this.binWidth = Math.max(1, (max - min) / Math.ceil(Math.sqrt(2 + distincts)));
+			log.debug("Bin width: {} ", binWidth);
+			this.binCount = (int) Math.ceil((max - min + 1) / binWidth);
+			log.debug("Bin count: {} ", binCount);
 		}else{
 			this.binCount = (int) Math.sqrt(data.size()); 
 			this.binWidth = Math.ceil((this.max - this.min) / binCount);
-			for (int i = 0; i < binCount; i++){
-				bins.add(new Bin(i, min + i * binWidth, min + (i + 1) * binWidth, 0));
-			}
-			for (K k : data){
-				bins.get(toBinId(k)).add();
-			}
+		}
+		for (int i = 0; i < binCount; i++){
+			double left  = -binOffset + min + i * binWidth;
+			double right = left + binWidth;
+			if (left > max)
+				break;
+			bins.add(new Bin(i, left, right, 0));
+			log.debug("{}th bin {} added", i, bins.get(i));
+		}
+		for (K k : data){
+			int id = binify(k);
+			bins.get(id).incrementValue();
 		}
 	}
 	
-	private int toBinId(K k) {
-		double kAsDouble = k.doubleValue();
-		return (int)((kAsDouble - min) / binWidth);
-	}
-
 	private void buildRawHistogram(List<K> data) {
 		for (K k : data){
-			K key = (!isDiscrete) ? k : (K)Double.valueOf(floatTrimmer.format(k.doubleValue()));
+			@SuppressWarnings("unchecked")
+			K key = (!isDiscrete)?  k : (K)Double.valueOf(floatTrimmer.format(k.doubleValue()));
 			Integer oldValue = rawOccs.get(key);
-			int newValue = oldValue == null ? 1 : oldValue + 1;
-			rawOccs.put(key, newValue);
+			rawOccs.put(key, (oldValue == null)? 1 : oldValue + 1);
 		}
 	}
 	
-	private void normalizeToPercents() {
-		log.debug("Normalizing histograms...");
-		int percentage = 0;
-		for (K k : rawOccs.keySet()){
-			percentage = (int)((100.0 * rawOccs.get(k)) / observations);
-			rawOccs.put(k, percentage);
-		}
-		for (Bin bin : bins){
-			percentage = (int)((100.0 * bin.getOccurences()) / observations);
-			bin.setOccurences(percentage);
-		}
+	public int getAmountOfBins() {
+		return binCount;
+	}
+
+	public Bin getBin(int binId){
+		return bins.get(binId);
+	}
+	
+	public ArrayList<Bin> getBins(){
+		return bins;
+	}
+	
+	public int getDistinctObservationsAmount(){
+		return rawOccs.keySet().size();
 	}
 
 	
 	//Raw data
+	
+	public int getMaxCountBinId(){
+		int maxOcc = Integer.MAX_VALUE;
+		int maxBin = -1;
+		for (int j = 0; j < binCount; j++){
+			if (bins.get(j).getOccurences() > maxOcc){
+				maxOcc = bins.get(j).getOccurences();
+				maxBin = j;
+			}
+		}
+		return maxBin;
+	}
 	
 	public K getMaxCountRaw(){
 		K result = null;
@@ -140,44 +136,11 @@ class Histogram<K extends Number>{
 		return result;
 	}
 	
-	public Pair<Double> getBinBounds(int id){
-		return new Pair<Double>(id * binWidth, (id + 1) * binWidth);
-	}
-	
-	public int getMaxCountBinId(){
-		int maxOcc = Integer.MAX_VALUE;
-		int maxBin = -1;
-		for (int j = 0; j < binCount; j++){
-			if (bins.get(j).getOccurences() > maxOcc){
-				maxOcc = bins.get(j).getOccurences();
-				maxBin = j;
-			}
-		}
-		return maxBin;
-	}
-
-	public Bin getBin(int binId){
-		return bins.get(binId);
-	}
-	
-	public ArrayList<Bin> getBins(){
-		return bins;
-	}
-	
 	public Integer getRawCount(K key){
 		Integer occurence = rawOccs.get(key);
 		return occurence == null ? 0 : occurence;
 	}
 
-
-	public int getDistinctObservationsAmount(){
-		return rawOccs.keySet().size();
-	}
-
-	public int getAmountOfBins() {
-		return binCount;
-	}
-	
 	public boolean isFlatEnough(){
 		for (int i = 1; i < bins.size(); i++) {
 			if (bins.get(i).getOccurences() - bins.get(i - 1).getOccurences() > 15){
@@ -185,6 +148,71 @@ class Histogram<K extends Number>{
 			}
 		}
 		return true;
+	}
+	
+	private void normalizeToPercents() {
+		log.debug("Normalizing histograms...");
+		int percentage = 0;
+		for (K k : rawOccs.keySet()){
+			percentage = (int)((100.0 * rawOccs.get(k)) / observations);
+			rawOccs.put(k, percentage);
+		}
+		int maxBinId      = -1;
+		int maxPercentage = -1;
+		int percentageSum = 0;
+		for (Bin bin : bins){
+			percentage = (int)((100.0 * bin.getOccurences()) / observations);
+			bin.setValueType(ValueType.PERCENTAGE);
+			bin.setValue(percentage);
+			if (percentage > maxPercentage){
+				maxPercentage = percentage;
+				maxBinId = bin.getId();
+			}
+			percentageSum += percentage;
+		}
+		if (percentageSum < 100){
+			assert (percentageSum == 99);
+			getBin(maxBinId).incrementValue();
+		}
+	}
+	
+	private int binify(K k) {
+		double kAsDouble = k.doubleValue();
+		return (int)((kAsDouble - (min - binOffset)) / binWidth);
+	}
+
+
+	@Override
+	public String toString() {
+		return new StringBuilder().append(toStringAsRaw())
+				.append("\n_______________________________\n")
+				.append(toStringAsBins()).append("\n").toString();
+	}
+
+	private String toStringAsBins() {
+		StringBuilder b = new StringBuilder("\nBINNED\n");
+		b.append(name).append("\n");
+		for (Bin bin : bins){
+			b.append(bin.toString()).append(":\t\t");
+			for (int j = 0; j < bin.getOccurences(); j++){
+				b.append("=");
+			}
+			b.append("\n");
+		}
+		return b.toString();
+	}
+	
+	public String toStringAsRaw() {
+		StringBuilder b = new StringBuilder("\nRAW OCCURENCES\n");
+		b.append(name).append("\n");
+		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
+			b.append(entry.getKey()).append(":\t");
+			for (int i = 0; i < entry.getValue(); i++){
+				b.append("=");
+			}
+			b.append("\n");
+		}
+		return b.toString();
 	}
 
 

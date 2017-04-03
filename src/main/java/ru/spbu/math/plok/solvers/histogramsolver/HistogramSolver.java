@@ -59,7 +59,7 @@ public class HistogramSolver extends Solver{
 		report.put("L", L);
 		report.put("iMin", iMin);
 		report.put("jMin", jMin);
-		report.put("iMax", jMax);
+		report.put("iMax", iMax);
 		report.put("jMax", jMax);
 		report.put("queries", queries);
 		return report;
