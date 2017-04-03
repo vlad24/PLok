@@ -118,7 +118,7 @@ public class HistogramSolver extends Solver{
 		if (query.getI1() <= iMin)
 			iMin = query.getI1();
 		if (query.getJ1() <= jMin)
-			jMin = query.getI2();
+			jMin = query.getJ1();
 		if (query.getI2() >= iMax)
 			iMax = query.getI2();
 		if (query.getJ2() >= jMax)
