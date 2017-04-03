@@ -43,29 +43,22 @@ class Histogram<K extends Number>{
 		this.observations = data.size();
 		this.rawOccs      = new TreeMap<K, Integer>();
 		this.bins         = new ArrayList<>();
-		log.debug("Constructing {} histogram for data: {}", name, data);
+		log.debug("Constructing {} for data: {}", name, data);
 		buildRawHistogram(data);
-		log.debug(toStringAsRaw());
 		buildEquiWidthBinHistogram(data);
-		//log.debug(toStringAsBins());
 		normalizeToPercents();
-		log.debug(toStringAsBins());
 	}
 
 	private void buildEquiWidthBinHistogram(List<K> data) {
 		binOffset = 0;
 		if (isDiscrete){
-			log.debug("Got discrete data");
 			binOffset = 0.5;
-			//                M - m
-			// max ( 1,  ------------------- )
-			//            { sqrt(2 + d) }
 			int distincts = new HashSet<K>(data).size();
-			log.debug("Distinct values: {} ", distincts);
 			this.binWidth = Math.max(1, (max - min) / Math.ceil(Math.sqrt(2 + distincts)));
-			log.debug("Bin width: {} ", binWidth);
 			this.binCount = (int) Math.ceil((max - min + 1) / binWidth);
-			log.debug("Bin count: {} ", binCount);
+			log.debug("Distinct values: {} ", distincts);
+			log.debug("Bin width:       {} ", binWidth);
+			log.debug("Bin count:       {} ", binCount);
 		}else{
 			this.binCount = (int) Math.sqrt(data.size()); 
 			this.binWidth = Math.ceil((this.max - this.min) / binCount);
@@ -76,18 +69,19 @@ class Histogram<K extends Number>{
 			if (left > max)
 				break;
 			bins.add(new Bin(i, left, right, 0));
-			log.debug("{}th bin {} added", i, bins.get(i));
+			log.debug("{}th bin {} inited", i, bins.get(i));
 		}
 		for (K k : data){
 			int id = binify(k);
 			bins.get(id).incrementValue();
 		}
+		log.debug("All bins have been filled");
 	}
 	
 	private void buildRawHistogram(List<K> data) {
 		for (K k : data){
 			@SuppressWarnings("unchecked")
-			K key = (!isDiscrete)?  k : (K)Double.valueOf(floatTrimmer.format(k.doubleValue()));
+			K key = (isDiscrete)?  k : (K)Double.valueOf(floatTrimmer.format(k.doubleValue()));
 			Integer oldValue = rawOccs.get(key);
 			rawOccs.put(key, (oldValue == null)? 1 : oldValue + 1);
 		}
@@ -184,35 +178,43 @@ class Histogram<K extends Number>{
 
 	@Override
 	public String toString() {
-		return new StringBuilder().append(toStringAsRaw())
-				.append("\n_______________________________\n")
-				.append(toStringAsBins()).append("\n").toString();
+		return new StringBuilder()
+				.append("\n\n\n")
+				.append(toStringAsRaw())
+				.append("\n'''''''''''''''''''''''''''''''''''''''''''''''\n")
+				.append(toStringAsBins()).append("\n")
+				.append("\n\n\n")
+				.toString();
 	}
 
 	private String toStringAsBins() {
-		StringBuilder b = new StringBuilder("\nBINNED\n");
-		b.append(name).append("\n");
+		StringBuilder result = new StringBuilder();
+		result.append("\n").append(name).append(" ").append("[EQU_WIDTH_BINNED]")
+		.append(isDiscrete? "{discrete}" : "{continuous}")
+		.append("\n");
 		for (Bin bin : bins){
-			b.append(bin.toString()).append(":\t\t");
+			result.append(bin.toString()).append(":\t");
 			for (int j = 0; j < bin.getOccurences(); j++){
-				b.append("=");
+				result.append("=");
 			}
-			b.append("\n");
+			result.append("\n");
 		}
-		return b.toString();
+		return result.toString();
 	}
 	
 	public String toStringAsRaw() {
-		StringBuilder b = new StringBuilder("\nRAW OCCURENCES\n");
-		b.append(name).append("\n");
+		StringBuilder result = new StringBuilder();
+		result.append("\n").append(name).append(" ").append("[RAW]")
+		.append(isDiscrete? "{discrete}" : "{continuous}")
+		.append("\n");
 		for (Map.Entry<K, Integer> entry : rawOccs.entrySet()){
-			b.append(entry.getKey()).append(":\t");
+			result.append(entry.getKey()).append(":\t");
 			for (int i = 0; i < entry.getValue(); i++){
-				b.append("=");
+				result.append("=");
 			}
-			b.append("\n");
+			result.append("\n");
 		}
-		return b.toString();
+		return result.toString();
 	}
 
 
