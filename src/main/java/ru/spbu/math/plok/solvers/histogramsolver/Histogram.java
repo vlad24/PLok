@@ -107,7 +107,7 @@ class Histogram<K extends Number>{
 	//Raw data
 	
 	public Bin getMaxBin(){
-		int maxOcc = Integer.MAX_VALUE;
+		int maxOcc = Integer.MIN_VALUE;
 		Bin maxBin = null;
 		for (Bin bin : bins){
 			if (bin.getValue() > maxOcc){
