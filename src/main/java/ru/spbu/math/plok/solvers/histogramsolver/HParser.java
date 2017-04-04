@@ -4,9 +4,10 @@ import ru.spbu.math.plok.model.client.Query;
 
 public class HParser {
 	
-	public static final String HINTS_SEPARATOR       = "/";
-	public static final String ELEMENT_SEPARATOR     = ",";
-	public static final String HINT_STRING_INDICATOR = "!";
+	public static final String COMMENT_STRING_INDICATOR = "#";
+	public static final String HINT_STRING_INDICATOR    = "!";
+	public static final String HINTS_SEPARATOR          = "/";
+	public static final String ELEMENT_SEPARATOR        = ",";
 	
 	public Query getNextUserQuery(String line) {
 		String[] row = line.replace(" ", "").split(ELEMENT_SEPARATOR);
@@ -15,7 +16,7 @@ public class HParser {
 
 
 	public boolean isValidHistoryLine(String line) {
-		return !isHint(line) && line.contains(ELEMENT_SEPARATOR);
+		return !isHint(line) && !isComment(line) && line.contains(ELEMENT_SEPARATOR);
 	}
 
 	public String[] checkAndParseHints(String line){
@@ -32,6 +33,10 @@ public class HParser {
 
 	public boolean isHint(String line) {
 		return line.startsWith(HINT_STRING_INDICATOR);
+	}
+	
+	private boolean isComment(String line) {
+		return line.startsWith(COMMENT_STRING_INDICATOR);
 	}
 }
 
