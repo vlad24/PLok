@@ -64,10 +64,10 @@ public class HistoryFileGenerator{
 			String[] params = paramsString.split(HParser.HINTS_SEPARATOR);
 			int currentParam = 0;
 			if (iPolicy == Policy.HOT_RANGES){
-				queryGeneratorParams.put(Solver.I_POLICY_HR_RANGES_KEY, params[currentParam]);
+				queryGeneratorParams.put(Solver.I_POLICY_HR_RANGES_KEY, params[currentParam++]);
 			}
 			if (jPolicy == Policy.RECENT_TRACKING){
-				
+				queryGeneratorParams.put(Solver.J_POLICY_RT_WINDOW_KEY, params[currentParam++]);
 			}
 		}
 		return queryGeneratorParams;
