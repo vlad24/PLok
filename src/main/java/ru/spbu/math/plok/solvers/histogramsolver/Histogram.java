@@ -2,6 +2,7 @@ package ru.spbu.math.plok.solvers.histogramsolver;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,10 @@ class Histogram<K extends Number>{
 		for (int i = 0; i < binCount; i++){
 			double left  = -binOffset + min + i * binWidth;
 			double right = left + binWidth;
+			if (left > max + SMALL_VALUE){
+				binCount = bins.size();
+				break;
+			}
 			bins.add(new Bin(i, left, right, 0));
 			log.debug("{}th bin {} inited", i, bins.get(i));
 		}
@@ -99,6 +104,39 @@ class Histogram<K extends Number>{
 		return binCount;
 	}
 
+	public int getLastNonZeroBin() {
+		int result = 0;
+		for (Bin bin : bins){
+			if (bin.getValue() > SMALL_VALUE){
+				result = bin.getId();
+			}
+		}
+		return result;
+	}
+	
+	public List<Bin> getLocalMaximas(){
+		double[] leftDers = new double[binCount];
+		double[] rightDers = new double[binCount];
+		leftDers[0]             = SMALL_VALUE;
+		rightDers[binCount - 1] = SMALL_VALUE;
+		for (int i = 1; i < binCount - 1; i++){
+			leftDers[i]  = (bins.get(i).getValue() - bins.get(i - 1).getValue()) / binWidth;
+			rightDers[i] = (bins.get(i).getValue() - bins.get(i + 1).getValue()) / binWidth;
+		}
+		leftDers[binCount - 1] = (bins.get(binCount - 1).getValue() - bins.get(binCount - 2).getValue()) / binWidth; 
+		rightDers[0]           = (bins.get(0).getValue() - bins.get(1).getValue()) / binWidth; 
+		log.debug(Arrays.toString(leftDers));
+		log.debug(Arrays.toString(rightDers));
+		List<Bin> maximas = new ArrayList<>(binCount);
+		for (Bin bin : bins){
+			if (leftDers[bin.getId()] > 0 && rightDers[bin.getId()] > 0){
+				maximas.add(bin);
+			}
+		}
+		return maximas;
+		
+	}
+	
 	public Bin getBin(int binId){
 		return bins.get(binId);
 	}
@@ -126,7 +164,7 @@ class Histogram<K extends Number>{
 		return maxBin;
 	}
 	
-	public K getMaxCountRaw(){
+	public K getMaxRaw(){
 		K result = null;
 		double maxOccurence = Double.MIN_VALUE;
 		for (Map.Entry<K, Double> entry : rawOccs.entrySet()){
@@ -138,24 +176,39 @@ class Histogram<K extends Number>{
 		return result;
 	}
 	
+	public K getMaxRawForBin(int binId){
+		K lefter  = rawOccs.ceilingKey((K)Double.valueOf(getBin(binId).getLeft()));
+		K righter = rawOccs.floorKey((K)Double.valueOf(getBin(binId).getRight() + SMALL_VALUE));
+		K result = null;
+		double maxOccurence = Double.MIN_VALUE;
+		for (Map.Entry<K, Double> entry : rawOccs.subMap(lefter, righter).entrySet()){
+			if (entry.getValue() >= maxOccurence){
+				maxOccurence = entry.getValue();
+				result = entry.getKey();
+			}
+		}
+		return result;
+	}
+	
+	
 	public double getRawValue(K key){
 		Double occurence = rawOccs.get(key);
 		return occurence == null ? 0 : occurence;
 	}
 
 	public void normalizeToPercents() {
-		log.debug("Normalizing {} to percents");
+		log.debug("Normalizing {} to percents", name);
 		double percentage = 0;
 		for (K k : rawOccs.keySet()){
 			percentage = (100.0 * rawOccs.get(k)) / observations;
 			rawOccs.put(k, percentage);
 		}
-		log.debug("Raw representation of {} normalized");
+		log.debug("Raw representation of {} normalized", name);
 		for (Bin bin : bins){
 			percentage = (100.0 * bin.getValue()) / observations;
 			bin.setValue(percentage);
 		}
-		log.debug("Binned representation of {} normalized");
+		log.debug("Binned representation of {} normalized", name);
 		this.valueType = ValueType.PERCENTAGE;
 	}
 	
@@ -216,6 +269,7 @@ class Histogram<K extends Number>{
 		}
 		return result.toString();
 	}
+
 
 
 }

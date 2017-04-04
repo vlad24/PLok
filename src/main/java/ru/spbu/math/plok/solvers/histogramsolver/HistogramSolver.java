@@ -178,11 +178,13 @@ public class HistogramSolver extends Solver{
 	}
 
 	private void guessJPolicy() {
-		// TODO simple logic
+		log.debug("" + jRHist.getLocalMaximas());
+		log.debug("" + iLHist.getLocalMaximas());
+		log.debug("" + jLHist.getLocalMaximas());
 		Bin maxBin = jRHist.getMaxBin();
-		int lastBinId = jRHist.getAmountOfBins() - 1;
-		if (maxBin.getId() == lastBinId &&
-		    maxBin.getValue() - jRHist.getBin(lastBinId - 1).getValue() > J_THRESHOLD){
+		int lastNzId = jRHist.getLastNonZeroBin();
+		if (maxBin.getId() == lastNzId &&
+		    maxBin.getValue() - jRHist.getBin(lastNzId - 1).getValue() > J_THRESHOLD){
 			this.jPolicy = Policy.RECENT_TRACKING;
 		}else{
 			this.jPolicy = Policy.FULL_TRACKING;
@@ -213,7 +215,8 @@ public class HistogramSolver extends Solver{
 
 	private void calculatePL() {
 		//TODO implement smarter! Account cacheUnit size and policies
-		P = jLHist.getMaxCountRaw().intValue();
-		L = iLHist.getMaxCountRaw();
+		log.debug("Calculating P and L for {} cache unit size and {} and {} policies", cacheUnitSize, iPolicy, jPolicy);
+		P = jLHist.getMaxRaw().intValue();
+		L = iLHist.getMaxRaw();
 	}
 }
