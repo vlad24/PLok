@@ -106,14 +106,13 @@ class Histogram<K extends Number>{
 	
 	//Raw data
 	
-	
-	public int getMaxCountBinId(){
+	public Bin getMaxBin(){
 		int maxOcc = Integer.MAX_VALUE;
-		int maxBin = -1;
-		for (int j = 0; j < binCount; j++){
-			if (bins.get(j).getOccurences() > maxOcc){
-				maxOcc = bins.get(j).getOccurences();
-				maxBin = j;
+		Bin maxBin = null;
+		for (Bin bin : bins){
+			if (bin.getValue() > maxOcc){
+				maxOcc = bin.getValue();
+				maxBin = bin;
 			}
 		}
 		return maxBin;
@@ -136,15 +135,6 @@ class Histogram<K extends Number>{
 		return occurence == null ? 0 : occurence;
 	}
 
-	public boolean isFlatEnough(){
-		for (int i = 1; i < bins.size(); i++) {
-			if (bins.get(i).getOccurences() - bins.get(i - 1).getOccurences() > 15){
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	private void normalizeToPercents() {
 		log.debug("Normalizing histograms...");
 		int percentage = 0;
@@ -156,7 +146,7 @@ class Histogram<K extends Number>{
 		int maxPercentage = -1;
 		int percentageSum = 0;
 		for (Bin bin : bins){
-			percentage = (int)((100.0 * bin.getOccurences()) / observations);
+			percentage = (int)((100.0 * bin.getValue()) / observations);
 			bin.setValueType(ValueType.PERCENTAGE);
 			bin.setValue(percentage);
 			if (percentage > maxPercentage){
@@ -195,7 +185,7 @@ class Histogram<K extends Number>{
 		.append("\n");
 		for (Bin bin : bins){
 			result.append(bin.toString()).append(":\t");
-			for (int j = 0; j < bin.getOccurences(); j++){
+			for (int j = 0; j < bin.getValue(); j++){
 				result.append("=");
 			}
 			result.append("\n");
