@@ -4,9 +4,9 @@ import ru.spbu.math.plok.model.client.Query;
 
 public class HParser {
 	
-	private static final String HINTS_SEPARATOR       = "/";
-	private static final String ELEMENT_SEPARATOR     = ",";
-	private static final String HINT_STRING_INDICATOR = "!";
+	public static final String HINTS_SEPARATOR       = "/";
+	public static final String ELEMENT_SEPARATOR     = ",";
+	public static final String HINT_STRING_INDICATOR = "!";
 	
 	public Query getNextUserQuery(String line) {
 		String[] row = line.replace(" ", "").split(ELEMENT_SEPARATOR);
