@@ -177,7 +177,7 @@ public class HistogramSolver extends Solver{
 		    maxBin.getValue() - jRHist.getBin(lastBinId - 1).getValue() > J_THRESHOLD){
 			this.jPolicy = Policy.RECENT_TRACKING;
 		}else{
-			this.jPolicy = Policy.FULL_TRACK;
+			this.jPolicy = Policy.FULL_TRACKING;
 		}
 		
 	}
@@ -185,7 +185,7 @@ public class HistogramSolver extends Solver{
 	private void guessIPolicy() {
 		// TODO detect extremes
 		if (isFlatEnough(i1Hist) && isFlatEnough(i2Hist)){
-			this.iPolicy = Policy.FULL_TRACK;
+			this.iPolicy = Policy.FULL_TRACKING;
 		}else{
 			// TODO detect ranges
 			this.iPolicy = Policy.HOT_RANGES;

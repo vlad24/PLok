@@ -47,14 +47,14 @@ public class QueryGenerator {
 				long j2 = time;
 				Policy iPolicy = (Policy) genParams.get(Solver.I_POLICY_KEY);
 				Policy jPolicy = (Policy) genParams.get(Solver.J_POLICY_KEY);
-				if (iPolicy == Policy.FULL_TRACK){
+				if (iPolicy == Policy.FULL_TRACKING){
 					i1 = (int) Stat.getRandomUniform(0,  N - 1);
 					i2 = (int) Stat.getRandomUniform(i1, N - 1);
 				}else if (iPolicy == Policy.HOT_RANGES) {
 					i1 = (int) Stat.getRandomUniform(0,  N - 1);
 					i2 = (int) Stat.getRandomUniform(i1, N - 1);
 				}
-				if (jPolicy == Policy.FULL_TRACK){
+				if (jPolicy == Policy.FULL_TRACKING){
 					j1 = Stat.getRandomUniform(timeStart, time);
 					j2 = Stat.getRandomUniform(j1,        time);
 				}else if (jPolicy == Policy.RECENT_TRACKING){
