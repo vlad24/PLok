@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,8 @@ import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 
 public class HistogramSolver extends Solver{
 
+	private static final int FLAT_THRESHOLD = 15;
+	private static final int J_THRESHOLD = 15;
 	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
 	private HParser parser;
 	private int    cacheUnitSize;
@@ -109,7 +110,6 @@ public class HistogramSolver extends Solver{
 		}
 	}
 
-
 	private void relaxExtremes(Query query) {
 		if (query.getTime() <= tBeg)
 			tBeg = query.getTime();
@@ -171,9 +171,10 @@ public class HistogramSolver extends Solver{
 
 	private void guessJPolicy() {
 		// TODO simple logic
-		int lastBinJR = jRHist.getAmountOfBins() - 1;
-		if (jRHist.getMaxCountBinId() == lastBinJR &&
-		    jRHist.getBin(lastBinJR).getOccurences() - jRHist.getBin(lastBinJR - 1).getOccurences() > 15){
+		Bin maxBin = jRHist.getMaxBin();
+		int lastBinId = jRHist.getAmountOfBins() - 1;
+		if (maxBin.getId() == lastBinId &&
+		    maxBin.getValue() - jRHist.getBin(lastBinId - 1).getValue() > J_THRESHOLD){
 			this.jPolicy = Policy.LateTracking;
 		}else{
 			this.jPolicy = Policy.FullTrack;
@@ -183,13 +184,23 @@ public class HistogramSolver extends Solver{
 
 	private void guessIPolicy() {
 		// TODO detect extremes
-		if (i1Hist.isFlatEnough() && i2Hist.isFlatEnough()){
+		if (isFlatEnough(i1Hist) && isFlatEnough(i2Hist)){
 			this.iPolicy = Policy.FullTrack;
 		}else{
 			// TODO detect ranges
 			this.iPolicy = Policy.RangeInterest;
 		}
 		
+	}
+	
+	public boolean isFlatEnough(Histogram<? extends Number> histogram){
+		ArrayList<Bin> bins = histogram.getBins();
+		for (int i = 1; i < bins.size(); i++) {
+			if (bins.get(i).getValue() - bins.get(i - 1).getValue() > FLAT_THRESHOLD){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void calculatePL() {
