@@ -149,7 +149,14 @@ public class HistogramSolver extends Solver{
 		iLHist = new Histogram<Integer>("index range length histogram",         iLData, 0,   iMax - iMin + 1);
 		jLHist = new Histogram<Long>   ("time range length histogram",          jLData, 0L,  jMax - jMin + 1);
 		jRHist = new Histogram<Double> ("relative time range length histogram", jRData, 0.0, 1.0);
-
+		
+		i1Hist.normalizeToPercents();
+		j1Hist.normalizeToPercents();
+		i2Hist.normalizeToPercents();
+		j2Hist.normalizeToPercents();
+		iLHist.normalizeToPercents();
+		jLHist.normalizeToPercents();
+		jRHist.normalizeToPercents();
 	}
 
 
@@ -165,6 +172,7 @@ public class HistogramSolver extends Solver{
 	}
 
 	private void guessPolicies() {
+		log.debug("Guessing policies...");
 		guessIPolicy();
 		guessJPolicy();
 	}
