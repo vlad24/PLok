@@ -1,6 +1,8 @@
 package ru.spbu.math.plok.utils;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 
 import ru.spbu.math.plok.bench.QueryGenerator;
@@ -30,26 +32,31 @@ public class HistoryFileGenerator{
 			}
 			File output = new File(fileName);
 			FileWriter writer = new FileWriter(output);
-			writer.write("#Created at " + System.currentTimeMillis() + ")\n");
+			writer.write(
+					new StringBuilder()
+					.append("#Created by HistoryFileGenerator at ").append(new Date().toString()).append("\n")
+					.append("#Parameters: ").append(Arrays.toString(args)).append("\n")
+					.toString()
+					);
 			HashMap<String, Object> qGenParams = packParams(iPolicy, jPolicy, paramsString);
 			QueryGenerator queryGenerator = new QueryGenerator(N, qGenParams);
 			queryGenerator.setStart(1);
-			for (int t = 0; t < timeEnd; t++){
+			for (int t = 1; t <= timeEnd; t++){
 				Query q = queryGenerator.nextQuery(t);
 				writer.write(
-					new StringBuilder()
-					.append(q.getTime()).append(HParser.ELEMENT_SEPARATOR)
-					.append(q.getI1())  .append(HParser.ELEMENT_SEPARATOR)
-					.append(q.getI2())  .append(HParser.ELEMENT_SEPARATOR)
-					.append(q.getJ1())  .append(HParser.ELEMENT_SEPARATOR)
-					.append(q.getJ2())  .append(HParser.ELEMENT_SEPARATOR)
-					.append("\n")
-					.toString()
-				);
+						new StringBuilder()
+						.append(q.getTime()).append(HParser.ELEMENT_SEPARATOR)
+						.append(q.getI1())  .append(HParser.ELEMENT_SEPARATOR)
+						.append(q.getI2())  .append(HParser.ELEMENT_SEPARATOR)
+						.append(q.getJ1())  .append(HParser.ELEMENT_SEPARATOR)
+						.append(q.getJ2())
+						.append("\n")
+						.toString()
+						);
 			}
 			writer.flush();
 			writer.close();
-			 
+
 		}else{
 			throw new Exception("No output file specified!");
 		}
@@ -67,7 +74,7 @@ public class HistoryFileGenerator{
 				queryGeneratorParams.put(Solver.I_POLICY_HR_RANGES_KEY, params[currentParam++]);
 			}
 			if (jPolicy == Policy.RECENT_TRACKING){
-				queryGeneratorParams.put(Solver.J_POLICY_RT_WINDOW_KEY, params[currentParam++]);
+				queryGeneratorParams.put(Solver.J_POLICY_RT_WINDOW_KEY, Long.valueOf(params[currentParam++]));
 			}
 		}
 		return queryGeneratorParams;
