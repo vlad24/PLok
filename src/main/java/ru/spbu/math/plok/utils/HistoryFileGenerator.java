@@ -34,10 +34,8 @@ public class HistoryFileGenerator{
 			HashMap<String, Object> qGenParams = packParams(iPolicy, jPolicy, paramsString);
 			QueryGenerator queryGenerator = new QueryGenerator(N, qGenParams);
 			queryGenerator.setStart(1);
-			queryGenerator.setEnd(timeEnd);
-			queryGenerator.windUp();
 			for (int t = 0; t < timeEnd; t++){
-				Query q = queryGenerator.nextQuery();
+				Query q = queryGenerator.nextQuery(t);
 				writer.write(
 					new StringBuilder()
 					.append(q.getTime()).append(HParser.ELEMENT_SEPARATOR)
