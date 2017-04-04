@@ -11,6 +11,7 @@ import com.google.inject.name.Named;
 
 import ru.spbu.math.plok.bench.QueryGenerator;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
+import ru.spbu.math.plok.solvers.Solver;
 
 public class Client{
 	private static Logger log = LoggerFactory.getLogger(Client.class);
@@ -38,15 +39,16 @@ public class Client{
 		log.debug("Stating quering {} queries from client", queriesCount);
 		QueryGenerator queryGenerator;
 		if (imitating){
-			queryGenerator = new QueryGenerator((ArrayList<Query>)solution.get("queries"));
+			queryGenerator = new QueryGenerator((ArrayList<Query>)solution.get(Solver.QUERIES_KEY));
 		}else{
 			queryGenerator = new QueryGenerator(vectorSize, solution);
 		}
 		queryGenerator.setStart(tFrom);
-		queryGenerator.setEnd(tTo);
 		try{
-			while (madeQueries <= queriesCount){
-				Query q = queryGenerator.nextQuery();
+			long time = tFrom;
+			while(madeQueries <= queriesCount) {
+				time = Math.min(time + 1, tTo);
+				Query q = queryGenerator.nextQuery(time);
 				store.serve(q);
 				madeQueries++;
 				log.debug("Progress = {}%", 100.0 * (float)madeQueries/queriesCount);
