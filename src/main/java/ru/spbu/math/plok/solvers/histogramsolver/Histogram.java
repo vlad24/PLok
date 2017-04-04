@@ -182,6 +182,9 @@ class Histogram<K extends Number>{
 		.append(isDiscrete? "{discrete}" : "{continuous}")
 		.append("\n");
 		for (Bin bin : bins){
+			if (bin.getValue() < 1){
+				continue;
+			}
 			result.append(bin.toString())
 			.append(valueType == ValueType.PERCENTAGE ? "%" : "pcs")
 			.append(":\t\t|");
@@ -199,6 +202,9 @@ class Histogram<K extends Number>{
 		.append(isDiscrete? "{discrete}" : "{continuous}")
 		.append("\n");
 		for (Map.Entry<K, Double> entry : rawOccs.entrySet()){
+			if (entry.getValue() < 1){
+				continue;
+			}
 			result.append(entry.getKey())
 			.append("[").append(entry.getValue()).append("]")
 			.append(valueType == ValueType.PERCENTAGE ? "%" : "pcs")
