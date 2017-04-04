@@ -52,7 +52,7 @@ public class Bin {
 		this.left = left;
 	}
 	
-	public int getOccurences() {
+	public int getValue() {
 		return value;
 	}
 	
