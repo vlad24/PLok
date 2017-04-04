@@ -45,8 +45,8 @@ public class QueryGenerator {
 				int i2 = N - 1;
 				long j1 = 0;
 				long j2 = time;
-				Policy iPolicy = (Policy) genParams.get(Solver.I_POLICY_KEY);
-				Policy jPolicy = (Policy) genParams.get(Solver.J_POLICY_KEY);
+				Policy iPolicy = Policy.valueOf((String)(genParams.get(Solver.I_POLICY_KEY)));
+				Policy jPolicy = Policy.valueOf((String)(genParams.get(Solver.J_POLICY_KEY)));
 				if (iPolicy == Policy.FULL_TRACKING){
 					i1 = (int) Stat.getRandomUniform(0,  N - 1);
 					i2 = (int) Stat.getRandomUniform(i1, N - 1);
@@ -59,8 +59,8 @@ public class QueryGenerator {
 					j2 = Stat.getRandomUniform(j1,        time);
 				}else if (jPolicy == Policy.RECENT_TRACKING){
 					Long w = (Long) genParams.get(Solver.J_POLICY_RT_WINDOW_KEY);
-					j1 = Stat.getRandomUniform(Math.max(0, time - w), time) ;
 					j2 = time;
+					j1 = Math.max(0, j2 - w + 1 - Stat.getRandomUniform(0, 2));
 				}
 				yielded++;
 				//i1 = N-3; i2 = N; j1 = 0; j2 = T/2;
