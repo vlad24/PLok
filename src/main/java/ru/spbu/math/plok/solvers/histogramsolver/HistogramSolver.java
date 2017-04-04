@@ -56,13 +56,13 @@ public class HistogramSolver extends Solver{
 		analyzeFileData(historyFile);
 		calculatePL();
 		log.debug("Calculated P={}, L={}", P , L);
-		report.put("P", P);
-		report.put("L", L);
-		report.put("iMin", iMin);
-		report.put("jMin", jMin);
-		report.put("iMax", iMax);
-		report.put("jMax", jMax);
-		report.put("queries", queries);
+		report.put(P_KEY,       P);
+		report.put(L_KEY,       L);
+		report.put(I_MIN_KEY,   iMin);
+		report.put(J_MIN_KEY,   jMin);
+		report.put(I_MAX_KEY,   iMax);
+		report.put(J_MAX_KEY,   jMax);
+		report.put(QUERIES_KEY, queries);
 		return report;
 	}
 
@@ -175,9 +175,9 @@ public class HistogramSolver extends Solver{
 		int lastBinId = jRHist.getAmountOfBins() - 1;
 		if (maxBin.getId() == lastBinId &&
 		    maxBin.getValue() - jRHist.getBin(lastBinId - 1).getValue() > J_THRESHOLD){
-			this.jPolicy = Policy.LateTracking;
+			this.jPolicy = Policy.RECENT_TRACKING;
 		}else{
-			this.jPolicy = Policy.FullTrack;
+			this.jPolicy = Policy.FULL_TRACK;
 		}
 		
 	}
@@ -185,10 +185,10 @@ public class HistogramSolver extends Solver{
 	private void guessIPolicy() {
 		// TODO detect extremes
 		if (isFlatEnough(i1Hist) && isFlatEnough(i2Hist)){
-			this.iPolicy = Policy.FullTrack;
+			this.iPolicy = Policy.FULL_TRACK;
 		}else{
 			// TODO detect ranges
-			this.iPolicy = Policy.RangeInterest;
+			this.iPolicy = Policy.HOT_RANGES;
 		}
 		
 	}
