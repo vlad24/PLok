@@ -106,6 +106,7 @@ class Histogram<K extends Number>{
 	
 	//Raw data
 	
+	
 	public int getMaxCountBinId(){
 		int maxOcc = Integer.MAX_VALUE;
 		int maxBin = -1;
