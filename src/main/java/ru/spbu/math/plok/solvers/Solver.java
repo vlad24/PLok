@@ -18,6 +18,8 @@ public abstract class Solver {
 	public static final String J_POLICY_KEY = "jPolicy";
 	public static final String I_POLICY_HR_RANGES_KEY = "iPolicy_HR_ranges";
 	public static final String J_POLICY_RT_WINDOW_KEY = "jPolicy_RT_window";
+	public static final String POLICIES_PARAMS = "policies_params";
+	
 	
 	
 	protected String H;

@@ -11,6 +11,9 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.spbu.math.plok.utils.Pair;
+import ru.spbu.math.plok.utils.Triplet;
+
 /**
  * @author vlad
  * Histogram helper class
@@ -114,22 +117,32 @@ class Histogram<K extends Number>{
 		return result;
 	}
 	
-	public List<Bin> getLocalMaximas(){
-		double[] leftDers = new double[binCount];
-		double[] rightDers = new double[binCount];
+	public double[] getLeftDerivatives(){
+		double[] leftDers  = new double[binCount];
 		leftDers[0]             = SMALL_VALUE;
-		rightDers[binCount - 1] = SMALL_VALUE;
-		for (int i = 1; i < binCount - 1; i++){
+		for (int i = 1; i < binCount; i++){
 			leftDers[i]  = (bins.get(i).getValue() - bins.get(i - 1).getValue()) / binWidth;
+		}
+		log.debug(Arrays.toString(leftDers));
+		return leftDers;
+	}
+	
+	public double[] getRightDerivatives(){
+		double[] rightDers = new double[binCount];
+		for (int i = 0; i < binCount - 1; i++){
 			rightDers[i] = (bins.get(i).getValue() - bins.get(i + 1).getValue()) / binWidth;
 		}
-		leftDers[binCount - 1] = (bins.get(binCount - 1).getValue() - bins.get(binCount - 2).getValue()) / binWidth; 
-		rightDers[0]           = (bins.get(0).getValue() - bins.get(1).getValue()) / binWidth; 
-		log.debug(Arrays.toString(leftDers));
+		rightDers[binCount - 1] = SMALL_VALUE;
 		log.debug(Arrays.toString(rightDers));
+		return rightDers;
+	}
+	
+	public List<Bin> getLocalMaximas(){
+		double[] leftDer  = getLeftDerivatives();
+		double[] rightDer = getRightDerivatives();
 		List<Bin> maximas = new ArrayList<>(binCount);
 		for (Bin bin : bins){
-			if (leftDers[bin.getId()] > 0 && rightDers[bin.getId()] > 0){
+			if (leftDer[bin.getId()] > 0 && rightDer[bin.getId()] > 0){
 				maximas.add(bin);
 			}
 		}
@@ -137,11 +150,34 @@ class Histogram<K extends Number>{
 		
 	}
 	
+	public List<Triplet<Integer>> getIslands(){
+		double[] leftDer  = getLeftDerivatives();
+		List<Triplet<Integer>> islands = new ArrayList<Triplet<Integer>>();
+		int beg = 0;
+		int end = 0;
+		int cur = beg;
+		int top = 0;
+		while (cur < bins.size()) {
+			beg = cur;
+			while (cur < leftDer.length && leftDer[cur] > 0 ){
+				cur++;
+			}
+			top = cur - 1;
+			while (cur < leftDer.length && leftDer[cur] <= 0){
+				cur++;
+			}
+			end = cur - 1;
+			//validate island
+			islands.add(new Triplet<Integer>(beg, top,  end));
+		}
+		return islands;
+	}
+	
 	public Bin getBin(int binId){
 		return bins.get(binId);
 	}
 	
-	public ArrayList<Bin> getBins(){
+	public List<Bin> getBins(){
 		return bins;
 	}
 	

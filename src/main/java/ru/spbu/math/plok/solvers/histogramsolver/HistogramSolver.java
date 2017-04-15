@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +16,12 @@ import org.slf4j.LoggerFactory;
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
+import ru.spbu.math.plok.utils.Triplet;
 
 
 public class HistogramSolver extends Solver{
 
+	private static final String POLICIES_PARAMS = null;
 	private static final int FLAT_THRESHOLD = 15;
 	private static final int J_THRESHOLD = 15;
 	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
@@ -31,6 +35,7 @@ public class HistogramSolver extends Solver{
 	private long   tEnd  = Long.MAX_VALUE;
 	private Policy iPolicy;
 	private Policy jPolicy;
+	private Map<String, Object> policiesParams;
 	private int P;
 	private int L;
 
@@ -47,6 +52,7 @@ public class HistogramSolver extends Solver{
 	public HistogramSolver(String historyFile, int cacheUnitSize){
 		super(historyFile);
 		this.cacheUnitSize = cacheUnitSize;
+		this.policiesParams = new HashMap<>();
 	}
 
 	public HashMap<String, Object> solvePLTask() throws IOException {
@@ -63,6 +69,7 @@ public class HistogramSolver extends Solver{
 		report.put(I_MAX_KEY,   iMax);
 		report.put(J_MAX_KEY,   jMax);
 		report.put(QUERIES_KEY, queries);
+		report.put(POLICIES_PARAMS, policiesParams);
 		return report;
 	}
 
@@ -178,14 +185,12 @@ public class HistogramSolver extends Solver{
 	}
 
 	private void guessJPolicy() {
-		log.debug("" + jRHist.getLocalMaximas());
-		log.debug("" + iLHist.getLocalMaximas());
-		log.debug("" + jLHist.getLocalMaximas());
 		Bin maxBin = jRHist.getMaxBin();
 		int lastNzId = jRHist.getLastNonZeroBin();
 		if (maxBin.getId() == lastNzId &&
 		    maxBin.getValue() - jRHist.getBin(lastNzId - 1).getValue() > J_THRESHOLD){
 			this.jPolicy = Policy.RECENT_TRACKING;
+			this.policiesParams.put(J_POLICY_RT_WINDOW_KEY, jRHist.getMaxRawForBin(maxBin.getId()));
 		}else{
 			this.jPolicy = Policy.FULL_TRACKING;
 		}
@@ -193,18 +198,19 @@ public class HistogramSolver extends Solver{
 	}
 
 	private void guessIPolicy() {
-		// TODO detect extremes
 		if (isFlatEnough(i1Hist) && isFlatEnough(i2Hist)){
 			this.iPolicy = Policy.FULL_TRACKING;
 		}else{
-			// TODO detect ranges
+			List<Triplet<Integer>> islands = this.iLHist.getIslands();
+			// TODO validate islands
 			this.iPolicy = Policy.HOT_RANGES;
+			policiesParams.put(I_POLICY_HR_RANGES_KEY, islands);
 		}
 		
 	}
 	
 	public boolean isFlatEnough(Histogram<? extends Number> histogram){
-		ArrayList<Bin> bins = histogram.getBins();
+		List<Bin> bins = histogram.getBins();
 		for (int i = 1; i < bins.size(); i++) {
 			if (bins.get(i).getValue() - bins.get(i - 1).getValue() > FLAT_THRESHOLD){
 				return false;
