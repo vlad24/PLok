@@ -21,10 +21,12 @@ import ru.spbu.math.plok.utils.Triplet;
 
 public class HistogramSolver extends Solver{
 
-	private static final String POLICIES_PARAMS = null;
+	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
+
+	private static final double ISLAND_THRESHOLD = 1.5;
 	private static final int FLAT_THRESHOLD = 15;
 	private static final int J_THRESHOLD = 15;
-	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
+	
 	private HParser parser;
 	private int    cacheUnitSize;
 	private int    iMax  = Integer.MIN_VALUE;
@@ -38,7 +40,7 @@ public class HistogramSolver extends Solver{
 	private Map<String, Object> policiesParams;
 	private int P;
 	private int L;
-
+	
 	private Histogram<Integer> i1Hist;
 	private Histogram<Integer> i2Hist;
 	private Histogram<Integer> iLHist;
@@ -202,7 +204,17 @@ public class HistogramSolver extends Solver{
 			this.iPolicy = Policy.FULL_TRACKING;
 		}else{
 			List<Triplet<Integer>> islands = this.iLHist.getIslands();
-			// TODO validate islands
+			for (Triplet<Integer> island : islands){
+//				int left = island.getFirst();
+//				int top = island.getSecond();
+//				int right = island.getThird();
+//				if (left != right){
+//					double maxEdge = Math.max(iLHist.getBin(left).getValue(), iLHist.getBin(right).getValue());
+//					if (iLHist.getBin(top).getValue() / maxEdge >= ISLAND_THRESHOLD ){
+//						
+//					}
+//				}
+			}
 			this.iPolicy = Policy.HOT_RANGES;
 			policiesParams.put(I_POLICY_HR_RANGES_KEY, islands);
 		}
