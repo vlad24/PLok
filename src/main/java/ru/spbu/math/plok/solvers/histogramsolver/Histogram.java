@@ -11,8 +11,8 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.spbu.math.plok.utils.Pair;
-import ru.spbu.math.plok.utils.Triplet;
+import ru.spbu.math.plok.utils.structures.Pair;
+import ru.spbu.math.plok.utils.structures.Triplet;
 
 /**
  * @author vlad

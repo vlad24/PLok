@@ -1,4 +1,4 @@
-package ru.spbu.math.plok.utils;
+package ru.spbu.math.plok.utils.structures;
 
 public class Pair<T> {
 	

@@ -2,9 +2,6 @@ package ru.spbu.math.plok.solvers;
 
 import java.util.HashMap;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
 public abstract class Solver {
 	
 	public static final String P_KEY       = "P";
