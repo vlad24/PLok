@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
+import ru.spbu.math.plok.utils.structures.Pair;
 import ru.spbu.math.plok.utils.structures.SegmentTreeLazy;
 import ru.spbu.math.plok.utils.structures.Triplet;
 
@@ -25,10 +26,11 @@ public class HistogramSolver extends Solver {
 
 	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
 
-	@SuppressWarnings("unused")
-	private static final double ISLAND_THRESHOLD = 1.5;
+	private static final int ISLAND_WIDTH_THRESHOLD = 4;
+	private static final int ISLAND_HEIGHT_THRESHOLD = 15;
 	private static final int FLAT_THRESHOLD = 15;
 	private static final int J_THRESHOLD = 15;
+
 
 	private HParser parser;
 	private int cacheUnitSize;
@@ -52,10 +54,18 @@ public class HistogramSolver extends Solver {
 	private Histogram<Double>  jRHist;
 	private ArrayList<Query>   queries;
 
+	private Comparator<Triplet<Integer>> heightComparator;
+
 	public HistogramSolver(String historyFile, int cacheUnitSize) {
 		super(historyFile);
 		this.cacheUnitSize = cacheUnitSize;
 		this.policiesParams = new HashMap<>();
+		heightComparator = new Comparator<Triplet<Integer>>() {
+			@Override
+			public int compare(Triplet<Integer> o1, Triplet<Integer> o2) {
+				return Integer.compare(o1.getSecond(), o2.getSecond());
+			}
+		};
 	}
 
 	public HashMap<String, Object> solvePLTask() throws IOException {
@@ -100,10 +110,12 @@ public class HistogramSolver extends Solver {
 				}
 			}
 			buildHistograms();
+			printAllHistograms();
 			if (!hintsProvided) {
 				guessPolicies();
 			}
-			printAllHistograms();
+			log.debug("Estimated iPolicy: {}", iPolicy);
+			log.debug("Estimated jPolicy: {}", jPolicy);
 		} catch (IOException er) {
 			log.error("Error at line {}: {}", lineNumber, er);
 			throw er;
@@ -117,8 +129,6 @@ public class HistogramSolver extends Solver {
 		log.debug(jLHist.toString());
 		log.debug(jRHist.toString());
 		log.debug(iAHist.toString());
-		log.debug("Estimated iPolicy: {}", iPolicy);
-		log.debug("Estimated jPolicy: {}", jPolicy);
 	}
 
 	private void relaxExtremes(Query query) {
@@ -199,43 +209,26 @@ public class HistogramSolver extends Solver {
 	}
 
 	private void guessIPolicy() {
-		if (isFlatEnough(i1Hist) && isFlatEnough(iLHist)) {
-			this.iPolicy = Policy.FULL_TRACKING;
-		} else {
-			List<Triplet<Integer>> islands = this.iLHist.getIslands();
-			islands.sort(new Comparator<Triplet<Integer>>() {
-				@Override
-				public int compare(Triplet<Integer> o1, Triplet<Integer> o2) {
-					return Integer.compare(o1.getSecond(), o2.getSecond());
+		List<Triplet<Integer>> islands = this.iAHist.getIslands();
+		islands.sort(heightComparator);
+		log.debug("Got islands for iAHist:" + islands);
+		List<Pair<Integer>> hotRanges = new ArrayList<>();
+		for (Triplet<Integer> island : islands) {
+			if (island.getSecond() > ISLAND_HEIGHT_THRESHOLD){
+				if (island.getThird()- island.getFirst() > ISLAND_WIDTH_THRESHOLD){
+					int a = ((Long) iAHist.getMaxRawForBin(island.getSecond() - ISLAND_HEIGHT_THRESHOLD / 2)).intValue();
+					int b = ((Long) iAHist.getMaxRawForBin(island.getSecond() + ISLAND_HEIGHT_THRESHOLD / 2)).intValue();
+					hotRanges.add(new Pair<Integer>(a, b));
 				}
-			});
-//			for (Triplet<Integer> island : islands) {
-//				int left = island.getFirst();
-//				int top = island.getSecond();
-//				int right = island.getThird();
-//				if (left != right){
-//					double maxEdge = Math.max(iLHist.getBin(left).getValue(),
-//							iLHist.getBin(right).getValue());
-//					if (iLHist.getBin(top).getValue() / maxEdge >=
-//							ISLAND_THRESHOLD ){
-//
-//					}
-//				}
-//			}
-			this.iPolicy = Policy.HOT_RANGES;
-			policiesParams.put(I_POLICY_HR_RANGES_KEY, islands);
-		}
-
-	}
-
-	public boolean isFlatEnough(Histogram<? extends Number> histogram) {
-		List<Bin> bins = histogram.getBins();
-		for (int i = 1; i < bins.size(); i++) {
-			if (bins.get(i).getValue() - bins.get(i - 1).getValue() > FLAT_THRESHOLD) {
-				return false;
 			}
 		}
-		return true;
+		if (!hotRanges.isEmpty()){
+			this.iPolicy = Policy.HOT_RANGES;
+			policiesParams.put(I_POLICY_HR_RANGES_KEY, hotRanges);
+		}else{
+			this.iPolicy = Policy.FULL_TRACKING;
+		}
+
 	}
 
 	private void calculatePL() {

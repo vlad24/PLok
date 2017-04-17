@@ -137,7 +137,6 @@ class Histogram<K extends Number>{
 		for (int i = 1; i < binCount; i++){
 			leftDers[i]  = (bins.get(i).getValue() - bins.get(i - 1).getValue()) / binWidth;
 		}
-		log.debug(Arrays.toString(leftDers));
 		return leftDers;
 	}
 	
@@ -147,7 +146,6 @@ class Histogram<K extends Number>{
 			rightDers[i] = (bins.get(i).getValue() - bins.get(i + 1).getValue()) / binWidth;
 		}
 		rightDers[binCount - 1] = SMALL_VALUE;
-		log.debug(Arrays.toString(rightDers));
 		return rightDers;
 	}
 	
@@ -181,8 +179,14 @@ class Histogram<K extends Number>{
 				cur++;
 			}
 			end = cur - 1;
-			//validate island
 			islands.add(new Triplet<Integer>(beg, top,  end));
+			log.debug("Detected island {} with such values:", islands.get(islands.size() - 1));
+			for (int i = beg; i <= end; i++){
+				log.debug("{}", getBin(i).toString());
+			}
+			//TODO rm
+			if (end < binCount-1){ log.debug("next {}", getBin(end + 1));}
+			if (beg > 0)         { log.debug("prev {}", getBin(beg - 1));}
 		}
 		return islands;
 	}
