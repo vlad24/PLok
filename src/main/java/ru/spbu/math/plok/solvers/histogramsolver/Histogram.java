@@ -163,22 +163,25 @@ class Histogram<K extends Number>{
 	}
 	
 	public List<Triplet<Integer>> getIslands(){
-		double[] leftDer  = getLeftDerivatives();
+		double[] ders  = getLeftDerivatives();
 		List<Triplet<Integer>> islands = new ArrayList<Triplet<Integer>>();
 		int beg = 0;
-		int end = 0;
-		int cur = beg;
 		int top = 0;
+		int end = 0;
+		int cur = 0;
 		while (cur < bins.size()) {
 			beg = cur;
-			while (cur < leftDer.length && leftDer[cur] > 0 ){
+			top = cur;
+			while (cur < ders.length && ders[cur] >= 0){
+				top = cur;
+				cur++;
+				
+			}
+			end = cur;
+			while (cur < ders.length && ders[cur] < 0){
+				end = cur;
 				cur++;
 			}
-			top = cur - 1;
-			while (cur < leftDer.length && leftDer[cur] <= 0){
-				cur++;
-			}
-			end = cur - 1;
 			islands.add(new Triplet<Integer>(beg, top,  end));
 			log.debug("Detected island {} with such values:", islands.get(islands.size() - 1));
 			for (int i = beg; i <= end; i++){
