@@ -14,7 +14,7 @@ public class Bin {
 		.append(String.format("%.2f", left))
 		.append(",")
 		.append(String.format("%.2f", right))
-		.append("# ").append(value)
+		.append("# ").append(String.format("%.2f", value))
 		.append("]")
 		.toString()
 		;

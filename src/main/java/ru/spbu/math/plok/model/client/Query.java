@@ -4,7 +4,7 @@ public class Query {
 
 	@Override
 	public String toString() {
-		return "Query [ time=" + time + "i1=" + indexStart + ", i2=" + indexEnd + ", j1=" + timeStart + ", j2="	+ timeEnd+ "]";
+		return "Query [ time=" + time + " i1=" + indexStart + ", i2=" + indexEnd + ", j1=" + timeStart + ", j2="	+ timeEnd+ "]";
 	}
 
 	int indexStart;

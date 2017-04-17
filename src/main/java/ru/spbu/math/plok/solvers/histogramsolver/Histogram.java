@@ -46,18 +46,32 @@ class Histogram<K extends Number>{
 
 	public Histogram(String name, List<K> data, K min, K max) {
 		super();
-		this.isDiscrete   = !(min instanceof Double || min instanceof Float);  
+		log.debug("Constructing {} for data: {}", name, data);
+		if (min == null || max == null){
+			this.max = Double.MIN_VALUE;
+			this.min = Double.MAX_VALUE;
+			for (K k : data){
+				if (k.doubleValue() > this.max){
+					this.max = k.doubleValue();
+				}
+				else if (k.doubleValue() < this.min)
+					this.min = k.doubleValue();
+			}
+		}else{
+			this.min          = min.doubleValue();
+			this.max          = max.doubleValue();
+		}
 		this.name         = name;
-		this.min          = min.doubleValue();
-		this.max          = max.doubleValue();
+		this.isDiscrete   = !(data.get(0) instanceof Double || data.get(0) instanceof Float);  
 		this.observations = data.size();
 		this.rawOccs      = new TreeMap<K, Double>();
 		this.bins         = new ArrayList<>();
-		log.debug("Constructing {} for data: {}", name, data);
 		buildRawHistogram(data);
+		log.debug("Raw histogram built");
 		buildEquiWidthBinHistogram(data);
-		log.debug("Raw histograms built");
+		log.debug("Binned histogram built");
 	}
+
 
 	private void buildEquiWidthBinHistogram(List<K> data) {
 		binOffset = 0;
@@ -270,10 +284,15 @@ class Histogram<K extends Number>{
 		result.append("\n").append(name).append(" ").append("[EQU_WIDTH_BINNED]")
 		.append(isDiscrete? "{discrete}" : "{continuous}")
 		.append("\n");
+		boolean inZeroLine = false;
 		for (Bin bin : bins){
 			if (bin.getValue() < 1){
+				if (!inZeroLine)
+					result.append(":\n:\n");
+				inZeroLine = true;
 				continue;
 			}
+			inZeroLine = false;
 			result.append(bin.toString())
 			.append(valueType == ValueType.PERCENTAGE ? "%" : "pcs")
 			.append(":\t\t|");
@@ -295,7 +314,7 @@ class Histogram<K extends Number>{
 				continue;
 			}
 			result.append(entry.getKey())
-			.append("[").append(entry.getValue()).append("]")
+			.append("[").append(String.format("%.2f", entry.getValue())).append("]")
 			.append(valueType == ValueType.PERCENTAGE ? "%" : "pcs")
 			.append(":\t\t|");
 			for (int i = 1; i <= entry.getValue(); i++){

@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
+import ru.spbu.math.plok.utils.structures.SegmentTreeLazy;
 import ru.spbu.math.plok.utils.structures.Triplet;
 
 public class HistogramSolver extends Solver {
@@ -46,6 +48,7 @@ public class HistogramSolver extends Solver {
 	private Histogram<Long>    j1Hist;
 	private Histogram<Integer> iLHist;
 	private Histogram<Long>    jLHist;
+	private Histogram<Long>    iAHist;
 	private Histogram<Double>  jRHist;
 	private ArrayList<Query>   queries;
 
@@ -100,18 +103,22 @@ public class HistogramSolver extends Solver {
 			if (!hintsProvided) {
 				guessPolicies();
 			}
-			log.debug(i1Hist.toString());
-			log.debug(j1Hist.toString());
-			log.debug(iLHist.toString());
-			log.debug(jLHist.toString());
-			log.debug(jRHist.toString());
-			log.debug("Estimated iPolicy: {}", iPolicy);
-			log.debug("Estimated jPolicy: {}", jPolicy);
-
-		} catch (Exception er) {
+			printAllHistograms();
+		} catch (IOException er) {
 			log.error("Error at line {}: {}", lineNumber, er);
 			throw er;
 		}
+	}
+
+	private void printAllHistograms() {
+		log.debug(i1Hist.toString());
+		log.debug(j1Hist.toString());
+		log.debug(iLHist.toString());
+		log.debug(jLHist.toString());
+		log.debug(jRHist.toString());
+		log.debug(iAHist.toString());
+		log.debug("Estimated iPolicy: {}", iPolicy);
+		log.debug("Estimated jPolicy: {}", jPolicy);
 	}
 
 	private void relaxExtremes(Query query) {
@@ -131,32 +138,35 @@ public class HistogramSolver extends Solver {
 
 	private void buildHistograms() {
 		ArrayList<Integer> i1Data = new ArrayList<Integer>(queries.size());
-		ArrayList<Integer> i2Data = new ArrayList<Integer>(queries.size());
-		ArrayList<Long> j1Data = new ArrayList<Long>(queries.size());
-		ArrayList<Long> j2Data = new ArrayList<Long>(queries.size());
+		ArrayList<Long>    j1Data = new ArrayList<Long>(queries.size());
 		ArrayList<Integer> iLData = new ArrayList<Integer>(queries.size());
-		ArrayList<Long> jLData = new ArrayList<Long>(queries.size());
-		ArrayList<Double> jRData = new ArrayList<Double>(queries.size());
+		ArrayList<Long>    jLData = new ArrayList<Long>(queries.size());
+		SegmentTreeLazy    iAData = new SegmentTreeLazy(new long[1 + iMax]);
+		ArrayList<Double>  jRData = new ArrayList<Double>(queries.size());
+		long sumIQ = 0;
 		for (Query query : queries) {
 			i1Data.add(query.getI1());
-			i2Data.add(query.getI2());
 			j1Data.add(query.getJ1());
-			j2Data.add(query.getJ2());
 			iLData.add(query.getILength());
 			jLData.add(query.getJLength());
 			jRData.add((double) query.getJ2() / query.getTime());
+			iAData.incrementAt(query.getI1(), query.getI2());
+			sumIQ += query.getILength();
+			assert (iAData.getSumAt(0, iMax) == sumIQ);
 		}
 		i1Hist = new Histogram<Integer>("I1 HISTOGRAM", i1Data, iMin, iMax);
 		j1Hist = new Histogram<Long>("J1 HISTOGRAM", j1Data, jMin, jMax);
 		iLHist = new Histogram<Integer>("INDEX RANGE LENGTH HISTOGRAM", iLData, 0, iMax - iMin + 1);
 		jLHist = new Histogram<Long>("TIME RANGE LENGTH HISTOGRAM", jLData, 0L, jMax - jMin + 1);
 		jRHist = new Histogram<Double>("RELATIVE TIME RANGE LENGTH HISTOGRAM", jRData, 0.0, 1.0);
-
+		iAData.commitUpdates();
+		iAHist = new Histogram<Long>("ABSOLUTE I HISTOGRAM", Arrays.asList(iAData.getCleanLeafLine()), null, null);
 		i1Hist.normalizeToPercents();
 		j1Hist.normalizeToPercents();
 		iLHist.normalizeToPercents();
 		jLHist.normalizeToPercents();
 		jRHist.normalizeToPercents();
+		iAHist.normalizeToPercents();
 	}
 
 	private void setPolicies(String iHint, String jHint) {
