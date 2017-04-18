@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
+import ru.spbu.math.plok.MapKeyNames;
 import ru.spbu.math.plok.bench.QueryGenerator;
 import ru.spbu.math.plok.model.client.Query;
-import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.HParser;
 import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 
@@ -65,16 +65,16 @@ public class HistoryFileGenerator{
 
 	private static HashMap<String, Object> packParams(Policy iPolicy, Policy jPolicy, String paramsString) {
 		HashMap<String, Object> queryGeneratorParams = new HashMap<>();
-		queryGeneratorParams.put(Solver.I_POLICY_KEY, iPolicy.toString());
-		queryGeneratorParams.put(Solver.J_POLICY_KEY, jPolicy.toString());
+		queryGeneratorParams.put(MapKeyNames.I_POLICY_KEY, iPolicy.toString());
+		queryGeneratorParams.put(MapKeyNames.J_POLICY_KEY, jPolicy.toString());
 		if (paramsString != null){
 			String[] params = paramsString.split(HParser.HINTS_SEPARATOR);
 			int currentParam = 0;
 			if (iPolicy == Policy.HOT_RANGES){
-				queryGeneratorParams.put(Solver.I_POLICY_HR_RANGES_KEY, params[currentParam++]);
+				queryGeneratorParams.put(MapKeyNames.I_POLICY_HR_RANGES_KEY, params[currentParam++]);
 			}
 			if (jPolicy == Policy.RECENT_TRACKING){
-				queryGeneratorParams.put(Solver.J_POLICY_RT_WINDOW_KEY, Long.valueOf(params[currentParam++]));
+				queryGeneratorParams.put(MapKeyNames.J_POLICY_RT_WINDOW_KEY, Long.valueOf(params[currentParam++]));
 			}
 		}
 		return queryGeneratorParams;

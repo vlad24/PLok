@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import ru.spbu.math.plok.MapKeyNames;
+import ru.spbu.math.plok.NamedProps;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
 
 public class Generator{
@@ -31,7 +33,7 @@ public class Generator{
 	}
 
 	@Inject
-	public Generator(@Named("N")int vectorSize, @Named("p")int period, @Named("T")int writeTime) throws FileNotFoundException {
+	public Generator(@Named(NamedProps.N)int vectorSize, @Named(NamedProps.PERIOD)int period, @Named(NamedProps.T)int writeTime) throws FileNotFoundException {
 		super();
 		this.delay = period;
 		this.writeTime = writeTime;
@@ -70,17 +72,17 @@ public class Generator{
 			}
 			long callFinish = System.currentTimeMillis();
 			log.debug("T is actually: {}", callFinish - callStart);
-			report.put("attackStart", callStart);
-			report.put("attackEnd", callFinish);
-			report.put("tFrom", vectors.get(0).getTimestamp());
-			report.put("tTo",   vectors.get(vectors.size() - 1).getTimestamp());
+			report.put(MapKeyNames.CALL_START, callStart);
+			report.put(MapKeyNames.CALL_FINISH, callFinish);
+			report.put(MapKeyNames.TIME_FROM, vectors.get(0).getTimestamp());
+			report.put(MapKeyNames.TIME_TO,   vectors.get(vectors.size() - 1).getTimestamp());
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Problem {}!", e.getMessage());
 			report.put("error", e.getMessage());
 		}finally{
 			stopAttack();
-			System.out.println("Finally stored:" + store.getBlockCount() + " blocks");
+			log.info("Finally stored {} blocks", store.getBlockCount());
 		}
 		return report; 
 	}

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import ru.spbu.math.plok.NamedProps;
 import ru.spbu.math.plok.model.generator.Vector;
 
 /**
@@ -33,7 +34,8 @@ public class FilePersistentStorage {
 	private final FileChannel channel;
 
 	@Inject
-	public FilePersistentStorage(@Named("storagePath") String storagePath, @Named("N") int N, @Named("P") int P, @Named("L") int L) throws IOException {
+	public FilePersistentStorage(@Named(NamedProps.N) int N, @Named(NamedProps.P) int P, 
+			@Named(NamedProps.L) int L, @Named(NamedProps.STORAGE_PATH) String storagePath) throws IOException {
 		super();
 		this.storagePath = Paths.get(storagePath).toAbsolutePath().toString();
 		this.P 		= P;

@@ -9,9 +9,10 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import ru.spbu.math.plok.MapKeyNames;
+import ru.spbu.math.plok.NamedProps;
 import ru.spbu.math.plok.bench.QueryGenerator;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
-import ru.spbu.math.plok.solvers.Solver;
 
 public class Client{
 	private static Logger log = LoggerFactory.getLogger(Client.class);
@@ -29,17 +30,18 @@ public class Client{
 	}
 
 	@Inject
-	public Client(@Named("Q")int queriesCount, @Named("N") int N){
+	public Client(@Named(NamedProps.Q)int queriesCount, @Named(NamedProps.N) int N){
 		this.queriesCount = queriesCount;
 		this.madeQueries = 0;
 		this.vectorSize = N;
 	}
 
+	@SuppressWarnings("unchecked")
 	public HashMap<String, Object> attack(StorageSystem store, HashMap<String, Object> solution, boolean imitating, Long tFrom, Long tTo){
 		log.debug("Stating quering {} queries from client", queriesCount);
 		QueryGenerator queryGenerator;
 		if (imitating){
-			queryGenerator = new QueryGenerator((ArrayList<Query>)solution.get(Solver.QUERIES_KEY));
+			queryGenerator = new QueryGenerator((ArrayList<Query>)solution.get(MapKeyNames.QUERIES_KEY));
 		}else{
 			queryGenerator = new QueryGenerator(vectorSize, solution);
 		}

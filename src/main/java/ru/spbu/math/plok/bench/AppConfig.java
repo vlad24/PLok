@@ -9,6 +9,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
 import ch.qos.logback.classic.Level;
+import ru.spbu.math.plok.MapKeyNames;
+import ru.spbu.math.plok.NamedProps;
 import ru.spbu.math.plok.model.storagesystem.PLokerStorage;
 import ru.spbu.math.plok.model.storagesystem.SQLStorage;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
@@ -30,14 +32,15 @@ public class AppConfig extends AbstractModule {
 	}
 
 	public void configure() {
-		bindConstant().annotatedWith(Names.named("N")).to(configs.getVectorLength());
-		bindConstant().annotatedWith(Names.named("T")).to(configs.getAttackTimeMs());
-		bindConstant().annotatedWith(Names.named("Q")).to(configs.getQueriesAmount());
-		bindConstant().annotatedWith(Names.named("P")).to((Integer)solution.get("P"));
-		bindConstant().annotatedWith(Names.named("L")).to((Integer)solution.get("L"));
-		bindConstant().annotatedWith(Names.named("p")).to(configs.getPeriod());
-		bindConstant().annotatedWith(Names.named("storagePath")).to(configs.getStoragePath());
-		bindConstant().annotatedWith(Names.named("cacheUnitSize")).to(configs.getCacheUnitSize());
+		bindConstant().annotatedWith(Names.named(NamedProps.N)).to(configs.getVectorLength());
+		bindConstant().annotatedWith(Names.named(NamedProps.T)).to(configs.getAttackTimeMs());
+		bindConstant().annotatedWith(Names.named(NamedProps.Q)).to(configs.getQueriesAmount());
+		bindConstant().annotatedWith(Names.named(NamedProps.P)).to((Integer)solution.get(MapKeyNames.P_KEY));
+		bindConstant().annotatedWith(Names.named(NamedProps.L)).to((Integer)solution.get(MapKeyNames.L_KEY));
+		bindConstant().annotatedWith(Names.named(NamedProps.IS_FILLED_FROM_UP)).to((Boolean)solution.get(MapKeyNames.IS_FILLED_FROM_UP_KEY));
+		bindConstant().annotatedWith(Names.named(NamedProps.PERIOD)).to(configs.getPeriod());
+		bindConstant().annotatedWith(Names.named(NamedProps.STORAGE_PATH)).to(configs.getStoragePath());
+		bindConstant().annotatedWith(Names.named(NamedProps.CACHE_UNIT_SIZE)).to(configs.getCacheUnitSize());
 		bindStorageType();
 		bindVerbosityLevel();
 	}
@@ -46,7 +49,7 @@ public class AppConfig extends AbstractModule {
 		log.info("In order to configurate all complonets PL task should be solved");
 		if (configs.getSolverType().equalsIgnoreCase("histogram")){
 			log.info("Histogram Solver set.");
-			return new HistogramSolver(configs.getHistoryFilePath(), configs.getCacheUnitSize());
+			return new HistogramSolver(configs.getVectorLength(), configs.getHistoryFilePath(), configs.getCacheUnitSize());
 		}else {
 			return null;
 		}

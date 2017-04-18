@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import ru.spbu.math.plok.MapKeyNames;
 import ru.spbu.math.plok.model.client.Client;
 import ru.spbu.math.plok.model.generator.Generator;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
@@ -35,10 +36,13 @@ public class Tester {
 			log.info("Let's have a break for {} msec", configuration.getPhaseBreakMs());
 			TimeUnit.MILLISECONDS.sleep(configuration.getPhaseBreakMs());
 			log.info("Break is over. Starting client...");
-			HashMap<String, Object> queryReport = client.attack(store, solution, 
-					configuration.isRepeatingHistory(), (Long)generatorReport.get("tFrom"), (Long)generatorReport.get("tTo"));
+			HashMap<String, Object> clientReport = client.attack(store, solution, 
+					configuration.isRepeatingHistory(), (Long)generatorReport.get(MapKeyNames.TIME_FROM),
+					(Long)generatorReport.get(MapKeyNames.TIME_TO));
 			log.info("Client has finished!");
-			ReportPrinter.print(configuration, queryReport);
+			String reportFilePath = ReportPrinter.print(configuration, clientReport);
+			log.info("Report has been printed to {}", reportFilePath);
+			log.info("Target ratio: {}%", clientReport.get(MapKeyNames.TARGET_RATIO));
 		}else{
 			log.debug("In debug mode");
 			debug(configuration);

@@ -15,12 +15,13 @@ import com.google.common.base.Joiner;
 
 public class ReportPrinter {
 
+	
 	private static Joiner.MapJoiner mapJoiner = Joiner.on("\n").withKeyValueSeparator("=");
 	private static String REPORT_FILENAME_PATTERN = "report_%s.txt";
 	private static SimpleDateFormat ft = new SimpleDateFormat ("yyyy_MM_dd---E__hh_mm_ss");
 
 
-	public static void print(Configuration configurator, HashMap<String, Object> queryReport) throws IOException{
+	public static String print(Configuration configurator, HashMap<String, Object> queryReport) throws IOException{
 		BufferedWriter outputWriter  = null;
 		Date currentDate = new Date();
 		Path targetFilePath = Paths.get(
@@ -35,11 +36,13 @@ public class ReportPrinter {
 		outputWriter = new BufferedWriter(new FileWriter(reportFile));
 		outputWriter.write("#Configurator:\n" + configurator.toString() + "\n");
 		if (queryReport != null){
-			outputWriter.write("#Results:\n" + mapJoiner.join((Map<?, ?>) queryReport) + "\n");
+			String result = mapJoiner.join((Map<?, ?>) queryReport);
+			outputWriter.write("#Results:\n" + result + "\n");
 		}else{
 			outputWriter.write("#Results:\n No report generated. Check program logs. \n");
 		}
 		outputWriter.flush();
 		outputWriter.close();
+		return targetFilePath.toString();
 	}
 }

@@ -12,9 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JRootPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.spbu.math.plok.MapKeyNames;
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
@@ -56,8 +59,8 @@ public class HistogramSolver extends Solver {
 
 	private Comparator<Triplet<Integer>> heightComparator;
 
-	public HistogramSolver(String historyFile, int cacheUnitSize) {
-		super(historyFile);
+	public HistogramSolver(int N, String historyFile, int cacheUnitSize) {
+		super(N, historyFile);
 		this.cacheUnitSize = cacheUnitSize;
 		this.policiesParams = new HashMap<>();
 		heightComparator = new Comparator<Triplet<Integer>>() {
@@ -75,14 +78,17 @@ public class HistogramSolver extends Solver {
 		analyzeFileData(historyFile);
 		calculatePL();
 		log.debug("Calculated P={}, L={}", P, L);
-		report.put(P_KEY, P);
-		report.put(L_KEY, L);
-		report.put(I_MIN_KEY, iMin);
-		report.put(J_MIN_KEY, jMin);
-		report.put(I_MAX_KEY, iMax);
-		report.put(J_MAX_KEY, jMax);
-		report.put(QUERIES_KEY, queries);
-		report.put(POLICIES_PARAMS, policiesParams);
+		report.put(MapKeyNames.P_KEY,                 P);
+		report.put(MapKeyNames.L_KEY,                 L);
+		report.put(MapKeyNames.IS_FILLED_FROM_UP_KEY, true);
+		report.put(MapKeyNames.I_MIN_KEY,             iMin);
+		report.put(MapKeyNames.J_MIN_KEY,             jMin);
+		report.put(MapKeyNames.I_MAX_KEY,             iMax);
+		report.put(MapKeyNames.J_MAX_KEY,             jMax);
+		report.put(MapKeyNames.QUERIES_KEY,           queries);
+		report.put(MapKeyNames.I_POLICY_KEY,          iPolicy);
+		report.put(MapKeyNames.J_POLICY_KEY,          jPolicy);
+		report.put(MapKeyNames.POLICIES_PARAMS,       policiesParams);
 		return report;
 	}
 
@@ -201,7 +207,9 @@ public class HistogramSolver extends Solver {
 		int lastNzId = jRHist.getLastNonZeroBin();
 		if (maxBin.getId() == lastNzId && maxBin.getValue() - jRHist.getBin(lastNzId - 1).getValue() > J_THRESHOLD) {
 			this.jPolicy = Policy.RECENT_TRACKING;
-			this.policiesParams.put(J_POLICY_RT_WINDOW_KEY, jRHist.getMaxRawForBin(maxBin.getId()));
+			Long rtWindow = jLHist.getMaxRaw();
+			log.debug("RT:{}", rtWindow);
+			this.policiesParams.put(MapKeyNames.J_POLICY_RT_WINDOW_KEY, rtWindow);
 		} else {
 			this.jPolicy = Policy.FULL_TRACKING;
 		}
@@ -224,7 +232,7 @@ public class HistogramSolver extends Solver {
 		}
 		if (!hotRanges.isEmpty()){
 			this.iPolicy = Policy.HOT_RANGES;
-			policiesParams.put(I_POLICY_HR_RANGES_KEY, hotRanges);
+			policiesParams.put(MapKeyNames.I_POLICY_HR_RANGES_KEY, hotRanges);
 		}else{
 			this.iPolicy = Policy.FULL_TRACKING;
 		}

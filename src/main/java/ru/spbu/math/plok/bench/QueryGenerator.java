@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 import org.slf4j.LoggerFactory;
 
+import ru.spbu.math.plok.MapKeyNames;
 import ru.spbu.math.plok.model.client.Query;
-import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 import ru.spbu.math.plok.utils.Stat;
 
@@ -45,8 +45,8 @@ public class QueryGenerator {
 				int i2 = N - 1;
 				long j1 = 0;
 				long j2 = time;
-				Policy iPolicy = Policy.valueOf((String)(genParams.get(Solver.I_POLICY_KEY)));
-				Policy jPolicy = Policy.valueOf((String)(genParams.get(Solver.J_POLICY_KEY)));
+				Policy iPolicy = (Policy)(genParams.get(MapKeyNames.I_POLICY_KEY));
+				Policy jPolicy = (Policy)(genParams.get(MapKeyNames.J_POLICY_KEY));
 				if (iPolicy == Policy.FULL_TRACKING){
 					i1 = (int) Stat.getRandomUniform(0,  N - 1);
 					i2 = (int) Stat.getRandomUniform(i1, N - 1);
@@ -58,7 +58,8 @@ public class QueryGenerator {
 					j1 = Stat.getRandomUniform(timeStart, time);
 					j2 = Stat.getRandomUniform(j1,        time);
 				}else if (jPolicy == Policy.RECENT_TRACKING){
-					Long w = (Long) genParams.get(Solver.J_POLICY_RT_WINDOW_KEY);
+					Long w = (Long) ((HashMap<String,Object>)genParams.get(MapKeyNames.POLICIES_PARAMS)).get(MapKeyNames.J_POLICY_RT_WINDOW_KEY);
+					assert (w != null); 
 					j2 = time;
 					j1 = Math.max(0, j2 - w + 1 - Stat.getRandomUniform(0, 2));
 				}

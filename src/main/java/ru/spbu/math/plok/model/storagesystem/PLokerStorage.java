@@ -16,6 +16,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
+import ru.spbu.math.plok.MapKeyNames;
+import ru.spbu.math.plok.NamedProps;
 import ru.spbu.math.plok.model.client.Query;
 import ru.spbu.math.plok.model.generator.Vector;
 
@@ -33,15 +35,20 @@ public class PLokerStorage implements StorageSystem{
 	private Block currentSpecial;
 	private AtomicInteger nextId;
 
+	
 	private int N = -1; 
 	private int P = -1; 
 	private int L = -1; 
 	private int L_S;
 	private int P_S;
+	private boolean isFilledFromUp = true;
 
 
 	@Inject
-	public PLokerStorage(@Named("N")int N,  @Named("P")int P,  @Named("L")int L, @Named("cacheUnitSize") int cacheSizeInUnits, Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
+	public PLokerStorage(@Named(NamedProps.N)int N,  @Named(NamedProps.P)int P,	@Named(NamedProps.L)int L,
+			@Named(NamedProps.IS_FILLED_FROM_UP) boolean isFilledFromUp,
+			@Named(NamedProps.CACHE_UNIT_SIZE) int cacheSizeInUnits, 
+			Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
 		super();
 		storage = persStorage.get();
 		int cacheSizeInBlocks = cacheSizeInUnits / (P * L);
@@ -60,6 +67,7 @@ public class PLokerStorage implements StorageSystem{
 		this.N = N;
 		this.L_S = N % L;
 		this.P_S = (L_S != 0)? (P * L / L_S) : 0;
+		this.isFilledFromUp = isFilledFromUp;
 		currentCommonBlocks = new ArrayList<>(N / L);
 		refreshCommonColumn();
 		currentSpecial = new Block(P_S, L_S);
@@ -83,22 +91,12 @@ public class PLokerStorage implements StorageSystem{
 		putSpecialPart(vector);
 	}
 
-	private void putSpecialPart(Vector vector) throws IOException {
-		if (L_S != 0){
-			if (currentSpecial.tryAdd(vector.cutCopy(vector.getLength() - L_S, vector.getLength() - 1))){
-				currentSpecial.autoFillHeader(getNextId(currentSpecial), vector.getLength() - L_S);
-				index.put(currentSpecial);
-				storage.add(currentSpecial);
-				currentSpecial = new Block(P_S, L_S);
-			}
-		}
-	}
-
 	private void putCommonPart(Vector vector) throws IOException {
 		boolean commonBlocksFilled = false;
+		int startPoint = (isFilledFromUp)? 0 : L_S;
 		for (int i = 0; i < N / L; i++){
-			int up = L * i;
-			int down = L * (i + 1) - 1;
+			int up   = startPoint + L * i;
+			int down = up + L - 1; 
 			Block block = currentCommonBlocks.get(i);
 			if (block.tryAdd(vector.cutCopy(up, down))){
 				commonBlocksFilled = true;
@@ -109,6 +107,18 @@ public class PLokerStorage implements StorageSystem{
 		}
 		if (commonBlocksFilled){
 			refreshCommonColumn();
+		}
+	}
+	
+	private void putSpecialPart(Vector vector) throws IOException {
+		int startPoint = (isFilledFromUp)? vector.getLength() - L_S : 0;
+		if (L_S != 0){
+			if (currentSpecial.tryAdd(vector.cutCopy(startPoint, startPoint + L_S - 1))){
+				currentSpecial.autoFillHeader(getNextId(currentSpecial), vector.getLength() - L_S);
+				index.put(currentSpecial);
+				storage.add(currentSpecial);
+				currentSpecial = new Block(P_S, L_S);
+			}
 		}
 	}
 
@@ -125,9 +135,9 @@ public class PLokerStorage implements StorageSystem{
 	@Override
 	public HashMap<String, Object> getStatistics() {
 		HashMap<String,Object> result = new HashMap<>();
-		result.put("d", blocksReadFromDisk);
-		result.put("Q", blocksReadInTotal);
-		result.put("d/Q", 100 * (float)blocksReadFromDisk / blocksReadInTotal);
+		result.put(MapKeyNames.BLOCKS_READ_FROM_DISK, blocksReadFromDisk);
+		result.put(MapKeyNames.BLOCKS_READ_IN_TOTAL, blocksReadInTotal);
+		result.put(MapKeyNames.TARGET_RATIO, 100 * (float)blocksReadFromDisk / blocksReadInTotal);
 		return result;
 	}
 	

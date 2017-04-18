@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import ru.spbu.math.plok.NamedProps;
+
 
 public class Index {
 	private final static Logger log = LoggerFactory.getLogger(Index.class);
@@ -27,7 +29,7 @@ public class Index {
 
 
 	@Inject
-	public Index(@Named("N")int N,  @Named("P")int P,  @Named("L")int L,  @Named("p")int period) {
+	public Index(@Named(NamedProps.N)int N,  @Named(NamedProps.P)int P,  @Named(NamedProps.L)int L,  @Named(NamedProps.PERIOD)int period) {
 		super();
 		this.p = period;
 		this.N = N;
@@ -47,6 +49,11 @@ public class Index {
 				+ ", grid=" + grid + ", specialGrid=" + specialGrid + "]";
 	}
 
+	
+	public int getBlockCount() {
+		return blockCount;
+	}
+	
 	
 	public void put(Block entry) {
 		put(entry.getHeader());
@@ -129,8 +136,5 @@ public class Index {
 		return specialGrid.subList(leftBlockIndex, rightBlockIndex + 1);
 	}
 
-	
-	public int getBlockCount() {
-		return blockCount;
-	}
+
 }
