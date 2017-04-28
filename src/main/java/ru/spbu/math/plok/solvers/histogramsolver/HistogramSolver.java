@@ -1,10 +1,6 @@
 package ru.spbu.math.plok.solvers.histogramsolver;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -12,13 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JRootPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.spbu.math.plok.MapKeyNames;
+import ru.spbu.math.plok.bench.UserConfiguration;
 import ru.spbu.math.plok.model.client.Query;
+import ru.spbu.math.plok.solvers.HistoryAnalysisReport;
 import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 import ru.spbu.math.plok.utils.structures.Pair;
@@ -35,33 +31,25 @@ public class HistogramSolver extends Solver {
 	private static final int J_THRESHOLD = 15;
 
 
-	private HParser parser;
 	private int cacheUnitSize;
-	private int iMax = Integer.MIN_VALUE;
-	private int iMin = Integer.MAX_VALUE;
-	private long jMin = Long.MAX_VALUE;;
-	private long jMax = Long.MIN_VALUE;
-	private long tBeg = Long.MIN_VALUE;
-	private long tEnd = Long.MAX_VALUE;
+	private HistoryAnalysisReport hReport;
 	private Policy iPolicy;
 	private Policy jPolicy;
 	private Map<String, Object> policiesParams;
-	private int P;
 	private int L;
+	private int P;
 
+	private Comparator<Triplet<Integer>> heightComparator;
 	private Histogram<Integer> i1Hist;
 	private Histogram<Long>    j1Hist;
 	private Histogram<Integer> iLHist;
 	private Histogram<Long>    jLHist;
 	private Histogram<Long>    iAHist;
 	private Histogram<Double>  jRHist;
-	private ArrayList<Query>   queries;
 
-	private Comparator<Triplet<Integer>> heightComparator;
 
-	public HistogramSolver(int N, String historyFile, int cacheUnitSize) {
-		super(N, historyFile);
-		this.cacheUnitSize = cacheUnitSize;
+	public HistogramSolver(HistoryAnalysisReport hReport, int cacheSizeInUnits) {
+		this.cacheUnitSize = cacheSizeInUnits;
 		this.policiesParams = new HashMap<>();
 		heightComparator = new Comparator<Triplet<Integer>>() {
 			@Override
@@ -69,63 +57,29 @@ public class HistogramSolver extends Solver {
 				return Integer.compare(o1.getSecond(), o2.getSecond());
 			}
 		};
+		this.hReport = hReport;
 	}
 
 	public HashMap<String, Object> solvePLTask() throws IOException {
-		this.parser = new HParser();
-		File historyFile = new File(Paths.get(H).toAbsolutePath().toString());
 		HashMap<String, Object> report = new HashMap<>();
-		analyzeFileData(historyFile);
+		buildHistograms();
+		printAllHistograms();
+		if (hReport.areHintsProvided()){
+			setPolicies(hReport.getHints().get(MapKeyNames.I_POLICY_KEY), hReport.getHints().get(MapKeyNames.J_POLICY_KEY));
+		}else{
+			guessPolicies();
+			log.debug("Estimated iPolicy: {}", iPolicy);
+			log.debug("Estimated jPolicy: {}", jPolicy);
+		}
 		calculatePL();
 		log.debug("Calculated P={}, L={}", P, L);
 		report.put(MapKeyNames.P_KEY,                 P);
 		report.put(MapKeyNames.L_KEY,                 L);
 		report.put(MapKeyNames.IS_FILLED_FROM_UP_KEY, true);
-		report.put(MapKeyNames.I_MIN_KEY,             iMin);
-		report.put(MapKeyNames.J_MIN_KEY,             jMin);
-		report.put(MapKeyNames.I_MAX_KEY,             iMax);
-		report.put(MapKeyNames.J_MAX_KEY,             jMax);
-		report.put(MapKeyNames.QUERIES_KEY,           queries);
 		report.put(MapKeyNames.I_POLICY_KEY,          iPolicy);
 		report.put(MapKeyNames.J_POLICY_KEY,          jPolicy);
 		report.put(MapKeyNames.POLICIES_PARAMS,       policiesParams);
 		return report;
-	}
-
-	private void analyzeFileData(File file) throws IOException {
-		String line;
-		int lineNumber = 0;
-		boolean hintsProvided = false;
-		queries = new ArrayList<>();
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-			while ((line = reader.readLine()) != null) {
-				lineNumber++;
-				if (parser.isValidHistoryLine(line)) {
-					Query query = parser.getNextUserQuery(line);
-					queries.add(query);
-					relaxExtremes(query);
-				} else if (parser.isHint(line)) {
-					log.debug("Hints detected!");
-					String[] hints = parser.checkAndParseHints(line);
-					if (hints != null) {
-						hintsProvided = true;
-						setPolicies(hints[0], hints[1]);
-					}
-				} else {
-					log.info("Line {} ignored: {}", lineNumber, line);
-				}
-			}
-			buildHistograms();
-			printAllHistograms();
-			if (!hintsProvided) {
-				guessPolicies();
-			}
-			log.debug("Estimated iPolicy: {}", iPolicy);
-			log.debug("Estimated jPolicy: {}", jPolicy);
-		} catch (IOException er) {
-			log.error("Error at line {}: {}", lineNumber, er);
-			throw er;
-		}
 	}
 
 	private void printAllHistograms() {
@@ -137,30 +91,15 @@ public class HistogramSolver extends Solver {
 		log.debug(iAHist.toString());
 	}
 
-	private void relaxExtremes(Query query) {
-		if (query.getTime() <= tBeg)
-			tBeg = query.getTime();
-		if (query.getTime() >= tEnd)
-			tBeg = query.getTime();
-		if (query.getI1() <= iMin)
-			iMin = query.getI1();
-		if (query.getJ1() <= jMin)
-			jMin = query.getJ1();
-		if (query.getI2() >= iMax)
-			iMax = query.getI2();
-		if (query.getJ2() >= jMax)
-			jMax = query.getJ2();
-	}
-
 	private void buildHistograms() {
-		ArrayList<Integer> i1Data = new ArrayList<Integer>(queries.size());
-		ArrayList<Long>    j1Data = new ArrayList<Long>(queries.size());
-		ArrayList<Integer> iLData = new ArrayList<Integer>(queries.size());
-		ArrayList<Long>    jLData = new ArrayList<Long>(queries.size());
-		SegmentTreeLazy    iAData = new SegmentTreeLazy(new long[1 + iMax]);
-		ArrayList<Double>  jRData = new ArrayList<Double>(queries.size());
+		ArrayList<Integer> i1Data = new ArrayList<Integer>(hReport.getQueries().size());
+		ArrayList<Long>    j1Data = new ArrayList<Long>(hReport.getQueries().size());
+		ArrayList<Integer> iLData = new ArrayList<Integer>(hReport.getQueries().size());
+		ArrayList<Long>    jLData = new ArrayList<Long>(hReport.getQueries().size());
+		SegmentTreeLazy    iAData = new SegmentTreeLazy(new long[1 + hReport.getiMax()]);
+		ArrayList<Double>  jRData = new ArrayList<Double>(hReport.getQueries().size());
 		long sumIQ = 0;
-		for (Query query : queries) {
+		for (Query query : hReport.getQueries()) {
 			i1Data.add(query.getI1());
 			j1Data.add(query.getJ1());
 			iLData.add(query.getILength());
@@ -168,12 +107,12 @@ public class HistogramSolver extends Solver {
 			jRData.add((double) query.getJ2() / query.getTime());
 			iAData.incrementAt(query.getI1(), query.getI2());
 			sumIQ += query.getILength();
-			assert (iAData.getSumAt(0, iMax) == sumIQ);
+			assert (iAData.getSumAt(0, hReport.getiMax()) == sumIQ);
 		}
-		i1Hist = new Histogram<Integer>("I1 HISTOGRAM", i1Data, iMin, iMax);
-		j1Hist = new Histogram<Long>("J1 HISTOGRAM", j1Data, jMin, jMax);
-		iLHist = new Histogram<Integer>("INDEX RANGE LENGTH HISTOGRAM", iLData, 0, iMax - iMin + 1);
-		jLHist = new Histogram<Long>("TIME RANGE LENGTH HISTOGRAM", jLData, 0L, jMax - jMin + 1);
+		i1Hist = new Histogram<Integer>("I1 HISTOGRAM", i1Data, hReport.getiMin(), hReport.getiMax());
+		j1Hist = new Histogram<Long>("J1 HISTOGRAM",    j1Data, hReport.getjMin(), hReport.getjMax());
+		iLHist = new Histogram<Integer>("INDEX RANGE LENGTH HISTOGRAM", iLData, 0, hReport.getiMax() - hReport.getiMin() + 1);
+		jLHist = new Histogram<Long>("TIME RANGE LENGTH HISTOGRAM", jLData, 0L, hReport.getjMax() - hReport.getjMin() + 1);
 		jRHist = new Histogram<Double>("RELATIVE TIME RANGE LENGTH HISTOGRAM", jRData, 0.0, 1.0);
 		iAData.commitUpdates();
 		iAHist = new Histogram<Long>("ABSOLUTE I HISTOGRAM", Arrays.asList(iAData.getCleanLeafLine()), null, null);

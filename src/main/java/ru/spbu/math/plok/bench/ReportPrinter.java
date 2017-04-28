@@ -21,7 +21,7 @@ public class ReportPrinter {
 	private static SimpleDateFormat ft = new SimpleDateFormat ("yyyy_MM_dd---E__hh_mm_ss");
 
 
-	public static String print(Configuration configurator, HashMap<String, Object> queryReport) throws IOException{
+	public static String print(UserConfiguration configurator, Map<String, Object> queryReport) throws IOException{
 		BufferedWriter outputWriter  = null;
 		Date currentDate = new Date();
 		Path targetFilePath = Paths.get(

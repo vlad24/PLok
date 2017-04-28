@@ -25,8 +25,8 @@ public class PLokerStorage implements StorageSystem{
 
 	private final static Logger log = LoggerFactory.getLogger(PLokerStorage.class);
 	
-	private final LoadingCache<Integer, Block> cache;
-	private final FilePersistentStorage storage;
+	private final LoadingCache<Long, Block> cache;
+	private final FilePersistentStorage peristor;
 	private Index index;
 	protected long blocksReadFromDisk;
 	protected long blocksReadInTotal;
@@ -42,21 +42,24 @@ public class PLokerStorage implements StorageSystem{
 	private int L_S;
 	private int P_S;
 	private boolean isFilledFromUp = true;
+	private boolean realDiskIO;
+
 
 
 	@Inject
 	public PLokerStorage(@Named(NamedProps.N)int N,  @Named(NamedProps.P)int P,	@Named(NamedProps.L)int L,
 			@Named(NamedProps.IS_FILLED_FROM_UP) boolean isFilledFromUp,
+			@Named(NamedProps.TEST_MODE) boolean isInTestMode,
 			@Named(NamedProps.CACHE_UNIT_SIZE) int cacheSizeInUnits, 
 			Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
 		super();
-		storage = persStorage.get();
+		peristor = persStorage.get();
 		int cacheSizeInBlocks = cacheSizeInUnits / (P * L);
 		cache = CacheBuilder.newBuilder()
 				.maximumSize(cacheSizeInBlocks)
-				.build(new CacheLoader<Integer, Block>() {
+				.build(new CacheLoader<Long, Block>() {
 					@Override
-					public Block load(Integer key) throws Exception {
+					public Block load(Long key) throws Exception {
 						blocksReadFromDisk++;
 						return readFromDisk(key);
 					}
@@ -68,11 +71,12 @@ public class PLokerStorage implements StorageSystem{
 		this.L_S = N % L;
 		this.P_S = (L_S != 0)? (P * L / L_S) : 0;
 		this.isFilledFromUp = isFilledFromUp;
+		this.realDiskIO  = !isInTestMode;
 		currentCommonBlocks = new ArrayList<>(N / L);
 		refreshCommonColumn();
 		currentSpecial = new Block(P_S, L_S);
 		nextId = new AtomicInteger(0);
-		log.info("Inited Ploker storage with P={}, L={}, P_S={}, L_S={}", P, L, P_S, L_S);
+		log.info("Inited Ploker storage with N={} P={}, L={}, P_S={}, L_S={}, realDiskIO={}",N, P, L, P_S, L_S, realDiskIO);
 	}
 	
 	private void refreshCommonColumn() {
@@ -83,7 +87,11 @@ public class PLokerStorage implements StorageSystem{
 	}
 
 	protected Block readFromDisk(long key) throws IOException {
-		return this.storage.get(key);
+		if (realDiskIO){
+			return this.peristor.get(key);
+		}else{
+			return new Block(P, L).withHeader(new BlockHeader(key, -1, -1, -1, -1));
+		}
 	}
 
 	public void put(Vector vector) throws IOException {
@@ -102,7 +110,9 @@ public class PLokerStorage implements StorageSystem{
 				commonBlocksFilled = true;
 				block.autoFillHeader(getNextId(block), up);
 				index.put(block);
-				storage.add(block);
+				if (!realDiskIO){
+					peristor.add(block);
+				}
 			}
 		}
 		if (commonBlocksFilled){
@@ -116,16 +126,16 @@ public class PLokerStorage implements StorageSystem{
 			if (currentSpecial.tryAdd(vector.cutCopy(startPoint, startPoint + L_S - 1))){
 				currentSpecial.autoFillHeader(getNextId(currentSpecial), vector.getLength() - L_S);
 				index.put(currentSpecial);
-				storage.add(currentSpecial);
+				peristor.add(currentSpecial);
 				currentSpecial = new Block(P_S, L_S);
 			}
 		}
 	}
 
 	public List<Block> serve(Query q) throws Exception{
-		List<Integer> ids = index.get(q.getJ1(), q.getJ2(), q.getI1(), q.getI2());
+		List<Long> ids = index.get(q.getJ1(), q.getJ2(), q.getI1(), q.getI2());
 		List<Block> resultBlocks = new ArrayList<>(); 
-		for (Integer id: ids){
+		for (Long id: ids){
 			blocksReadInTotal++;
 			resultBlocks.add(cache.get(id));
 		}

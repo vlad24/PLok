@@ -32,12 +32,14 @@ public class FilePersistentStorage {
 	private ByteBuffer writeBuffer;
 	private final RandomAccessFile raf;
 	private final FileChannel channel;
+	private boolean turnedOn = true;
 
 	@Inject
 	public FilePersistentStorage(@Named(NamedProps.N) int N, @Named(NamedProps.P) int P, 
-			@Named(NamedProps.L) int L, @Named(NamedProps.STORAGE_PATH) String storagePath) throws IOException {
+			@Named(NamedProps.L) int L, @Named(NamedProps.STORAGE_PATH) String storagePath,
+			@Named(NamedProps.TEST_MODE) boolean isInTestMode
+			) throws IOException {
 		super();
-		this.storagePath = Paths.get(storagePath).toAbsolutePath().toString();
 		this.P 		= P;
 		this.L 		= L;
 		this.L_S 	= N % L;
@@ -46,26 +48,40 @@ public class FilePersistentStorage {
 				1 + 													//additional byte to store whether block is special or common
 				BlockHeader.BYTES +										//header
 				Math.max(P   * L   * Float.BYTES + P   * Long.BYTES,
-						 P_S * L_S * Float.BYTES + P_S * Long.BYTES);	//vectors and their timestamps (data)
-		File storageFile = Paths.get(this.storagePath,
-				String.format(STORAGE_FILE_NAME_FORMAT, System.currentTimeMillis())).toFile();
-		storageFile.getParentFile().mkdirs();
-		raf = new RandomAccessFile(storageFile, "rw");
-		writeBuffer = ByteBuffer.allocateDirect(blockSize);
-		channel = raf.getChannel();
-		channel.position(channel.size());
-		log.debug("Persistent storage file has been created at {} ", storageFile.getAbsolutePath());
+						P_S * L_S * Float.BYTES + P_S * Long.BYTES);	//vectors and their timestamps (data)
+		if (isInTestMode){
+			this.turnedOn    = false;
+			this.storagePath = null;
+			this.raf         = null;
+			this.channel     = null;
+		}else{
+			this.storagePath = Paths.get(storagePath).toAbsolutePath().toString();
+			File storageFile = Paths.get(this.storagePath,
+					String.format(STORAGE_FILE_NAME_FORMAT, System.currentTimeMillis())).toFile();
+			storageFile.getParentFile().mkdirs();
+			raf = new RandomAccessFile(storageFile, "rw");
+			writeBuffer = ByteBuffer.allocateDirect(blockSize);
+			channel = raf.getChannel();
+			channel.position(channel.size());
+			log.debug("Persistent storage file has been created at {} ", storageFile.getAbsolutePath());
+		}
 	}
 
 	public void add(Block block) throws IOException {
-		log.trace("Writting {}", block);
-		writeBytes(toBytes(block));
+		if (turnedOn){
+			log.trace("Writting {}", block);
+			writeBytes(toBytes(block));
+		}
 	}
 
 	public Block get(long id) throws IOException {
-		return fromBytes(readBytes(id));
+		if (turnedOn){
+			return fromBytes(readBytes(id));
+		}else{
+			return null;
+		}
 	}
-	
+
 	public void writeBytes(ByteBuffer block) throws IOException {
 		writeBuffer.put(block).flip();
 		while (writeBuffer.hasRemaining()) {
@@ -76,61 +92,63 @@ public class FilePersistentStorage {
 		log.trace("Channel position: {}", channel.position());
 	}
 
-	  public ByteBuffer readBytes(long blockID) throws IOException {
+	public ByteBuffer readBytes(long blockID) throws IOException {
 		ByteBuffer resultBuffer = ByteBuffer.allocate(blockSize);
 		log.trace("Reading from {}", blockID * blockSize);
-	    channel.read(resultBuffer, blockID * blockSize);
-	    resultBuffer.flip();
-	    return resultBuffer;
-	  }
-	  
-		private ByteBuffer toBytes(Block block) {
-			ByteBuffer result = ByteBuffer.allocate(blockSize);
-			result.put((byte) (block.getData().size() == L ? 1 : 0));
-			result.putInt(block.getHeader().getId())
-					.putInt(block.getHeader().getiBeg())
-					.putInt(block.getHeader().getiEnd())
-					.putLong(block.getHeader().gettBeg())
-					.putLong(block.getHeader().gettEnd());
-			for (Vector v: block.getData()){
-				for (Float m : v.getVector()){
-					result.putFloat(m);
-				}
-				result.putLong(v.getTimestamp());
+		channel.read(resultBuffer, blockID * blockSize);
+		resultBuffer.flip();
+		return resultBuffer;
+	}
+
+	private ByteBuffer toBytes(Block block) {
+		ByteBuffer result = ByteBuffer.allocate(blockSize);
+		result.put((byte) (block.getData().size() == L ? 1 : 0));
+		result.putLong(block.getHeader().getId())
+		.putInt(block.getHeader().getiBeg())
+		.putInt(block.getHeader().getiEnd())
+		.putLong(block.getHeader().gettBeg())
+		.putLong(block.getHeader().gettEnd());
+		for (Vector v: block.getData()){
+			for (Float m : v.getVector()){
+				result.putFloat(m);
 			}
-			result.position(result.capacity()).flip();
-			log.trace("Gonna write {} bytes", result.remaining());
-			return result;
+			result.putLong(v.getTimestamp());
 		}
-		
-		private Block fromBytes(ByteBuffer bytes) {
-			log.trace("Parsing  from {}", bytes);
-			byte isCommon = bytes.get();
-			BlockHeader header = new BlockHeader(bytes.getInt());
-			header.setiBeg(bytes.getInt());
-			header.setiEnd(bytes.getInt());
-			header.settBeg(bytes.getLong());
-			header.settEnd(bytes.getLong());
-			Block result = (isCommon == 1) ? new Block(P, L) : new Block(P_S, L_S);   
-			result.setHeader(header);
-			int vectorLength = (isCommon == 1) ? L : L_S;
-			int vectorAmount = (isCommon == 1) ? P : P_S;
-			for (int j = 0; j < vectorAmount; j++){
-				float[] values = new float[vectorLength];
-				for (int i = 0; i < vectorLength; i++){
-						values[i] = bytes.getFloat();
-				}
-				result.tryAdd(new Vector(bytes.getLong(), values));
+		result.position(result.capacity()).flip();
+		log.trace("Gonna write {} bytes", result.remaining());
+		return result;
+	}
+
+	private Block fromBytes(ByteBuffer bytes) {
+		log.trace("Parsing  from {}", bytes);
+		byte isCommon = bytes.get();
+		BlockHeader header = new BlockHeader(bytes.getInt());
+		header.setiBeg(bytes.getInt());
+		header.setiEnd(bytes.getInt());
+		header.settBeg(bytes.getLong());
+		header.settEnd(bytes.getLong());
+		Block result = (isCommon == 1) ? new Block(P, L) : new Block(P_S, L_S);   
+		result.setHeader(header);
+		int vectorLength = (isCommon == 1) ? L : L_S;
+		int vectorAmount = (isCommon == 1) ? P : P_S;
+		for (int j = 0; j < vectorAmount; j++){
+			float[] values = new float[vectorLength];
+			for (int i = 0; i < vectorLength; i++){
+				values[i] = bytes.getFloat();
 			}
-			return result;
+			result.tryAdd(new Vector(bytes.getLong(), values));
 		}
-	
-	
+		return result;
+	}
+
+
 
 	public void close() throws IOException {
-		log.trace("Closing file persister");
-		channel.force(false);
-		raf.close();
+		if (turnedOn){
+			log.trace("Closing file persister");
+			channel.force(false);
+			raf.close();
+		}
 	}
 
 }

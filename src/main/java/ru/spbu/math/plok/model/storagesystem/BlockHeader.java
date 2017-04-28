@@ -2,9 +2,9 @@ package ru.spbu.math.plok.model.storagesystem;
 
 public class BlockHeader {
 	
-	public static int BYTES = 3 * Integer.BYTES + 2 * Long.BYTES; 
+	public static int BYTES = 2 * Integer.BYTES + 3 * Long.BYTES; 
 	
-	private int id;
+	private long id;
 	private long tBeg;
 	private long tEnd;
 	private int iBeg;
@@ -25,12 +25,49 @@ public class BlockHeader {
 				+ "]";
 	}
 
-	public BlockHeader(int id, long tBeg, long tEnd, int iBeg, int iEnd) {
+	public BlockHeader(long id, long tBeg, long tEnd, int iBeg, int iEnd) {
 		super();
 		this.id = id;
 		this.tBeg = tBeg;
 		this.tEnd = tEnd;
 		this.iBeg = iBeg;
+		this.iEnd = iEnd;
+	}
+
+
+	public long getId() {
+		return id;
+	}
+
+	public long gettBeg() {
+		return tBeg;
+	}
+
+	public void settBeg(long tBeg) {
+		this.tBeg = tBeg;
+	}
+
+	public long gettEnd() {
+		return tEnd;
+	}
+
+	public void settEnd(long tEnd) {
+		this.tEnd = tEnd;
+	}
+
+	public int getiBeg() {
+		return iBeg;
+	}
+
+	public void setiBeg(int iBeg) {
+		this.iBeg = iBeg;
+	}
+
+	public int getiEnd() {
+		return iEnd;
+	}
+
+	public void setiEnd(int iEnd) {
 		this.iEnd = iEnd;
 	}
 
@@ -66,42 +103,6 @@ public class BlockHeader {
 		if (tEnd != other.tEnd)
 			return false;
 		return true;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public long gettBeg() {
-		return tBeg;
-	}
-
-	public void settBeg(long tBeg) {
-		this.tBeg = tBeg;
-	}
-
-	public long gettEnd() {
-		return tEnd;
-	}
-
-	public void settEnd(long tEnd) {
-		this.tEnd = tEnd;
-	}
-
-	public int getiBeg() {
-		return iBeg;
-	}
-
-	public void setiBeg(int iBeg) {
-		this.iBeg = iBeg;
-	}
-
-	public int getiEnd() {
-		return iEnd;
-	}
-
-	public void setiEnd(int iEnd) {
-		this.iEnd = iEnd;
 	}
 	
 }

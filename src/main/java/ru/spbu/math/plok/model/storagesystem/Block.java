@@ -32,8 +32,14 @@ public class Block {
 	}
 	
 	
-	public void autoFillHeader(int id, int iBeg){
+	public Block autoFillHeader(long id, int iBeg){
 		this.header = new BlockHeader(id, data.get(0).getTimestamp(), data.get(data.size() - 1).getTimestamp(), iBeg, iBeg + L - 1);
+		return this;
+	}
+	
+	public Block withHeader(BlockHeader header){
+		setHeader(header);
+		return this;
 	}
 	
 	public BlockHeader getHeader() {
@@ -43,6 +49,7 @@ public class Block {
 	public void setHeader(BlockHeader header) {
 		this.header = header;
 	}
+	
 
 	@Override
 	public String toString() {
@@ -51,6 +58,36 @@ public class Block {
 
 	public ArrayList<Vector> getData() {
 		return data;
+	}
+
+	/**
+	 * Hashed just as headers
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return header.hashCode();
+	}
+
+	/** 
+	 * Compared by headers
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Block other = (Block) obj;
+		if (header == null) {
+			return (other.header == null);
+		} else if (!header.equals(other.header)){
+			return false;
+		}
+		return true;
 	}
 
 }

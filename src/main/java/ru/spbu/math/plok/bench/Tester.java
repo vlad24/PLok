@@ -1,7 +1,6 @@
 package ru.spbu.math.plok.bench;
 
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import ru.spbu.math.plok.MapKeyNames;
 import ru.spbu.math.plok.model.client.Client;
 import ru.spbu.math.plok.model.generator.Generator;
 import ru.spbu.math.plok.model.storagesystem.StorageSystem;
+import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 
 public class Tester {
 
@@ -21,24 +21,30 @@ public class Tester {
 
 	public static void main(String[] args) throws Exception {
 		log.debug("Tester started");
-		Configuration configuration = new Configuration(args);
+		UserConfiguration configuration = new UserConfiguration(args);
 		log.info(configuration.toString());
 		if (!configuration.isDebugging()){
 			AppConfig appConfig              = new AppConfig(configuration);
-			HashMap<String, Object> solution = appConfig.getSolution();
+			Map<String, Object> solution     = appConfig.getSolution();
 			Injector injector                = Guice.createInjector(appConfig);
 			Generator generator              = injector.getInstance(Generator.class);
 			Client client 		             = injector.getInstance(Client.class);
 			StorageSystem store              = injector.getInstance(StorageSystem.class);
-			log.info("Letting the generator to attack for {} msec", configuration.getAttackTimeMs());
-			HashMap<String, Object> generatorReport = generator.attack(store);
-			log.info("Stored {} blocks", store.getBlockCount());
-			log.info("Let's have a break for {} msec", configuration.getPhaseBreakMs());
-			TimeUnit.MILLISECONDS.sleep(configuration.getPhaseBreakMs());
-			log.info("Break is over. Starting client...");
-			HashMap<String, Object> clientReport = client.attack(store, solution, 
-					configuration.isRepeatingHistory(), (Long)generatorReport.get(MapKeyNames.TIME_FROM),
-					(Long)generatorReport.get(MapKeyNames.TIME_TO));
+			log.info("Generator appending {} vectors ", configuration.getVectorAmount());
+			generator.fill(store);
+			log.debug("Stored {} blocks", store.getBlockCount());
+			log.info("Starting client...");
+			Map<String, Object> clientReport;
+			if (configuration.isTesting()){
+				clientReport = client.attack(store, appConfig.getHistoryAnalysisReport().getQueries());
+			}else{
+				clientReport = client.attack(store,
+						(Policy)solution.get(MapKeyNames.I_POLICY_KEY),
+						(Policy)solution.get(MapKeyNames.J_POLICY_KEY),
+						(Map<String,Object>)  solution.get(MapKeyNames.POLICIES_PARAMS),
+						configuration.getReadPeriod()
+				);
+			}
 			log.info("Client has finished!");
 			String reportFilePath = ReportPrinter.print(configuration, clientReport);
 			log.info("Report has been printed to {}", reportFilePath);
@@ -51,9 +57,9 @@ public class Tester {
 	}
 
 
-	private static void debug(Configuration configuration) throws Exception {
+	private static void debug(UserConfiguration configuration) throws Exception {
 		AppConfig appConfig              = new AppConfig(configuration);
-		HashMap<String, Object> solution = appConfig.getSolution();
+		Map<String, Object> solution     = appConfig.getSolution();
 		log.debug(solution.toString());
 	}
 

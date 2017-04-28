@@ -23,22 +23,22 @@ public class Index {
 	private int P_S = -1;
 	private long firstBasicTimestamp = -1;
 	private long firstSpecialTimestamp = -1;
-	private List<List<Integer>> grid;
-	private List<Integer> specialGrid;
+	private List<List<Long>> grid;
+	private List<Long> specialGrid;
 	private int blockCount;
 
 
 	@Inject
-	public Index(@Named(NamedProps.N)int N,  @Named(NamedProps.P)int P,  @Named(NamedProps.L)int L,  @Named(NamedProps.PERIOD)int period) {
+	public Index(@Named(NamedProps.N)int N,  @Named(NamedProps.P)int P,  @Named(NamedProps.L)int L) {
 		super();
-		this.p = period;
+		this.p = 1;
 		this.N = N;
 		this.P = P;
 		this.L = L;
 		this.L_S = N % L;
 		this.P_S = (L_S != 0) ? (P * L / L_S) : 0;
 		grid = new ArrayList<>();
-		grid.add(new ArrayList<Integer>());
+		grid.add(new ArrayList<Long>());
 		specialGrid = new ArrayList<>();
 	}
 
@@ -68,7 +68,7 @@ public class Index {
 		}else{
 			int last = grid.size() - 1;
 			if (grid.get(last).size() == N / L){
-				grid.add(new ArrayList<Integer>());
+				grid.add(new ArrayList<Long>());
 				last++;
 			}
 			grid.get(last).add(entry.getId());
@@ -83,18 +83,18 @@ public class Index {
 		return entry.getiEnd() - entry.getiBeg() + 1 != L;
 	}
 
-	public List<Integer> get(long startTime, long endTime, int i1, int i2) {
-		List<Integer> commons   = getFromBasic  (startTime,   endTime,  i1,                        Math.min(N - L_S - 1, i2)    );
-		List<Integer> specials = getFromSpecial(startTime,   endTime,  Math.max(i1, N - L_S),     i2                           );
+	public List<Long> get(long startTime, long endTime, int i1, int i2) {
+		List<Long> commons   = getFromBasic  (startTime,   endTime,  i1,                        Math.min(N - L_S - 1, i2)    );
+		List<Long> specials = getFromSpecial(startTime,   endTime,  Math.max(i1, N - L_S),     i2                           );
 		log.debug("Got {} commons and {} specials", commons.size(), specials.size());
-		List<Integer> result = new ArrayList<>(commons.size() + specials.size());
+		List<Long> result = new ArrayList<>(commons.size() + specials.size());
 		result.addAll(commons);
 		result.addAll(specials);
 		return result;
 	}
 	
 	
-	private List<Integer> getFromBasic(long qTimeStart, long qTimeEnd, int qIndexStart, int qIndexEnd) {
+	private List<Long> getFromBasic(long qTimeStart, long qTimeEnd, int qIndexStart, int qIndexEnd) {
 		long firstTime = firstBasicTimestamp;
 		long lastTime  = firstTime + grid.size() * P * p - p;
 		if (grid.isEmpty() 
@@ -110,16 +110,16 @@ public class Index {
 		int rightBlockIndex = (int)  (qTimeEnd    <= lastTime	? ((qTimeEnd   - firstTime) / p) / P   : grid.size() - 1  );
 		int upBlockIndex  	= (int)  (qIndexStart >= 0 		    ? qIndexStart / L : 0 );
 		int downBlockIndex  = (int)  (qIndexEnd   <= N - 1	    ? qIndexEnd   / L : 0 );
-		List<Integer> result = new ArrayList<>();
+		List<Long> result = new ArrayList<>();
 		for (int i = leftBlockIndex; i <= rightBlockIndex; i++){
-			List<Integer> list = grid.get(i);
+			List<Long> list = grid.get(i);
 			result.addAll(list.subList(upBlockIndex, downBlockIndex + 1));
 		}
 		return result;
 	}
 
 	
-	private List<Integer> getFromSpecial(long qStartTime, long qEndTime, int qIndexStart, int qIndexEnd) {
+	private List<Long> getFromSpecial(long qStartTime, long qEndTime, int qIndexStart, int qIndexEnd) {
 		long firstTime = firstSpecialTimestamp;
 		long lastTime = firstTime + (specialGrid.size() * P) * p;
 		if (specialGrid.isEmpty() 

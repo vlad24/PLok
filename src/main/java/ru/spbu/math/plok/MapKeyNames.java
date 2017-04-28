@@ -1,6 +1,7 @@
 package ru.spbu.math.plok;
 
 public class MapKeyNames {
+	public static final String N_KEY                    = "N";
 	public static final String P_KEY       				= "P";
 	public static final String L_KEY       				= "L";
 	public static final String IS_FILLED_FROM_UP_KEY    = "is_filled_from_up";
@@ -23,4 +24,5 @@ public class MapKeyNames {
 	public static final String TARGET_RATIO 			= "d/Q";
 	public static final String CALL_FINISH 				= "call_finish";
 	public static final String CALL_START 				= "call_start";
+	public static final String ARE_HINTS_PROVIDED = "are_hints_provided";
 }

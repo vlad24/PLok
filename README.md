@@ -21,25 +21,26 @@ PLok is a project aimed to investigate dependency of optimal block sizes on quer
 ### Program configurations
 Command line options:
 
-|  Name         | Description                                   |  Constraints                  |  Required                                     |
+|  Name         | Description                                                          |  Constraints                   |  Required                                     |
 |:-------------:|:--------------------------------------------------------------------:|:------------------------------:|:---------------------------------------------:|
 | N				| vector length  			                       					   | integer ( > 0)			     	|   yes											| 
 | H				| history file                              						   | string  (path)                 |   yes											| 
-| T				| write time (msec) 							                       | integer	( > 0)				|	yes											| 
+| V				| write vectors amount 							                       | integer	( > 0)				|	yes											| 
 | C				| cache ratio 								                           | float (between 0.0 and 1.0)	|	no (default: "0,25")						| 
-| p				| idle between two subsequent writes (msec)                            | int (> 0)		                |	no (default: 1)                             | 
-| S				| storage type						                       			   | string (sql, plok)			    |	no (default: "plok")						| 
+| r 			| idle between two subsequent reads  (msec)                            | int (> 0)		                |	no (default: 10)                            | 
 | O				| output folder path						                           | string (path)		            |	no (default: "./reports")	                | 
-| v				| verbosity level								                       | string (info, debug, fine...)	|	no (default: "info")						| 
-| phaseBreak	| break between write and read phases(msec) 	                       | integer ( > 0)				    |	no (default: "2000")						| 
+| v				| verbosity level								                       | string (info, debug, fine...)	|	no (default: "info")						|  
 | storagePath 	| storage path									                       | string (path)				    |	no (default: "./storages")                  |
-| solver 	    | solver type									                       | string (basic, ...)		    |	no (default: "histogram")                       |
 | debug			| debug mode flag 								                       | flag						    |	no (default: false)							| 
 | repeatHistory | flag, indicating if provided history should be repeated by generator | flag						    |	no (default: false)							| 
+| test			| test mode flag 								                       | flag						    |	no (default: false)							| 
+| P  			| tested P if test flag is up   				                       | int (>1)					    |	yes, if test flag is up						| 
+| L  			| tested L if test flag is up   				                       | int (>1)					    |	yes, if test flag is up						| 
 
 ### Launch example
 ```{java}
-java -jar PLok -H "hs/h1.csv" -N 10 -T 2000  --phaseBreak 100 -C 0.01  -p 1 -v debug
+java -jar PLok -H "hs/h1.csv" -N 10 -W 2000 -C 0.01  -pr 10 -v debug
+java -jar PLok -H "hs/h1.csv" -N 10 -W 2000 -C 0.01  -pr 10 -test -P 21 -L 11
 ```
 
 ## Output
