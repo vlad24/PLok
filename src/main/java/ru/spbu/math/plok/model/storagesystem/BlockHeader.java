@@ -2,15 +2,15 @@ package ru.spbu.math.plok.model.storagesystem;
 
 public class BlockHeader {
 	
-	public static int BYTES = 2 * Integer.BYTES + 3 * Long.BYTES; 
+	public static int BYTES = 3 * Long.BYTES + 2 * Integer.BYTES; 
 	
 	private long id;
 	private long tBeg;
 	private long tEnd;
-	private int iBeg;
-	private int iEnd;
+	private int  iBeg;
+	private int  iEnd;
 	
-	public BlockHeader(int id) {
+	public BlockHeader(long id) {
 		super();
 		this.id = id;
 		this.tBeg = -1L;

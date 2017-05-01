@@ -42,7 +42,7 @@ public class Tester {
 						(Policy)solution.get(MapKeyNames.I_POLICY_KEY),
 						(Policy)solution.get(MapKeyNames.J_POLICY_KEY),
 						(Map<String,Object>)  solution.get(MapKeyNames.POLICIES_PARAMS),
-						configuration.getReadPeriod()
+						appConfig.getHistoryAnalysisReport().getTimeStep()
 				);
 			}
 			log.info("Client has finished!");

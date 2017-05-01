@@ -24,9 +24,6 @@ public class UserConfiguration{
 	@Option(name="-C",usage="Cache ratio", required=false)
 	private Float 	cacheRatio = 0.25f;
 	
-	@Option(name="-r",usage="idle between two subsequent queries (msec)", required=false)
-	private int readPeriod  = 10;
-	
 	@Option(name="-O",usage="Output", required=false)
 	private String 	outputPath = "./reports/";
 	
@@ -51,12 +48,6 @@ public class UserConfiguration{
 	
 	@Option(name="--solver",usage="Solver type", required=false, forbids="--test")
 	private String  solverType = "histogram";
-
-	//Computed fields
-	private int 	queriesAmount;
-	private int 	writeDataSizeBytes;
-	private int 	cacheByteSize;
-	private int 	cacheUnitSize;
 
 	public UserConfiguration(){
 		inited = false;
@@ -91,7 +82,6 @@ public class UserConfiguration{
 				.add("H",     historyFile )
 				.add("C",     cacheRatio)
 				.add("V",     vectorsAmount )
-				.add("pr",    readPeriod )
 				.add("debug", debug)
 				.add("test" , test)
 				.toString();
@@ -114,9 +104,6 @@ public class UserConfiguration{
 		return vectorsAmount;
 	}
 	
-	public long getReadPeriod() {
-		return readPeriod;
-	}
 
 	public Float getCacheRatio() {
 		return cacheRatio;

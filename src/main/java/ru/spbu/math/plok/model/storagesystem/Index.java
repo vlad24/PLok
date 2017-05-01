@@ -27,6 +27,8 @@ public class Index {
 	private List<Long> specialGrid;
 	private int blockCount;
 
+	private long maxId;
+
 
 	@Inject
 	public Index(@Named(NamedProps.N)int N,  @Named(NamedProps.P)int P,  @Named(NamedProps.L)int L) {
@@ -86,10 +88,10 @@ public class Index {
 	public List<Long> get(long startTime, long endTime, int i1, int i2) {
 		List<Long> commons   = getFromBasic  (startTime,   endTime,  i1,                        Math.min(N - L_S - 1, i2)    );
 		List<Long> specials = getFromSpecial(startTime,   endTime,  Math.max(i1, N - L_S),     i2                           );
-		log.debug("Got {} commons and {} specials", commons.size(), specials.size());
 		List<Long> result = new ArrayList<>(commons.size() + specials.size());
 		result.addAll(commons);
 		result.addAll(specials);
+		log.debug("Got {} commons and {} specials ({})", commons.size(), specials.size(), result);
 		return result;
 	}
 	

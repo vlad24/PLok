@@ -47,8 +47,9 @@ public class FilePersistentStorage {
 		this.blockSize =	
 				1 + 													//additional byte to store whether block is special or common
 				BlockHeader.BYTES +										//header
-				Math.max(P   * L   * Float.BYTES + P   * Long.BYTES,
+				Math.max(P  * L   * Float.BYTES + P   * Long.BYTES,
 						P_S * L_S * Float.BYTES + P_S * Long.BYTES);	//vectors and their timestamps (data)
+		log.info("Block size: {}", blockSize);
 		if (isInTestMode){
 			this.turnedOn    = false;
 			this.storagePath = null;
@@ -94,7 +95,7 @@ public class FilePersistentStorage {
 
 	public ByteBuffer readBytes(long blockID) throws IOException {
 		ByteBuffer resultBuffer = ByteBuffer.allocate(blockSize);
-		log.trace("Reading from {}", blockID * blockSize);
+		log.trace("Reading from {}-{}/{}", blockID * blockSize,blockID * blockSize + blockSize, channel.size());
 		channel.read(resultBuffer, blockID * blockSize);
 		resultBuffer.flip();
 		return resultBuffer;
@@ -120,9 +121,9 @@ public class FilePersistentStorage {
 	}
 
 	private Block fromBytes(ByteBuffer bytes) {
-		log.trace("Parsing  from {}", bytes);
+		log.debug("Parsing  from {}", bytes);
 		byte isCommon = bytes.get();
-		BlockHeader header = new BlockHeader(bytes.getInt());
+		BlockHeader header = new BlockHeader(bytes.getLong());
 		header.setiBeg(bytes.getInt());
 		header.setiEnd(bytes.getInt());
 		header.settBeg(bytes.getLong());

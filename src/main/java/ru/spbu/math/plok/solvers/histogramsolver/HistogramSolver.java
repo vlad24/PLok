@@ -147,7 +147,7 @@ public class HistogramSolver extends Solver {
 		if (maxBin.getId() == lastNzId && maxBin.getValue() - jRHist.getBin(lastNzId - 1).getValue() > J_THRESHOLD) {
 			this.jPolicy = Policy.RECENT_TRACKING;
 			Long rtWindow = jLHist.getMaxRaw();
-			log.debug("RT:{}", rtWindow);
+			log.debug("RT window:{}", rtWindow);
 			this.policiesParams.put(MapKeyNames.J_POLICY_RT_WINDOW_KEY, rtWindow);
 		} else {
 			this.jPolicy = Policy.FULL_TRACKING;

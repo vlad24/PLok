@@ -110,7 +110,7 @@ public class PLokerStorage implements StorageSystem{
 				commonBlocksFilled = true;
 				block.autoFillHeader(getNextId(block), up);
 				index.put(block);
-				if (!realDiskIO){
+				if (realDiskIO){
 					peristor.add(block);
 				}
 			}
@@ -126,7 +126,9 @@ public class PLokerStorage implements StorageSystem{
 			if (currentSpecial.tryAdd(vector.cutCopy(startPoint, startPoint + L_S - 1))){
 				currentSpecial.autoFillHeader(getNextId(currentSpecial), vector.getLength() - L_S);
 				index.put(currentSpecial);
-				peristor.add(currentSpecial);
+				if (realDiskIO){
+					peristor.add(currentSpecial);
+				}
 				currentSpecial = new Block(P_S, L_S);
 			}
 		}

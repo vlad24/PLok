@@ -15,7 +15,7 @@ public class QueryGenerator {
 
 	private int N;
 	private long timeStart = Long.MIN_VALUE;
-	private Map<String, Object> genParams;
+	private Map<String, Object> policiesParams;
 	private Policy jPolicy;
 	private Policy iPolicy;
 
@@ -24,7 +24,7 @@ public class QueryGenerator {
 		this.N = N;
 		this.iPolicy = iPolicy;
 		this.jPolicy = jPolicy;
-		this.genParams = policyParams;
+		this.policiesParams = policyParams;
 	}
 
 
@@ -45,7 +45,7 @@ public class QueryGenerator {
 			j1 = Stat.getRandomUniform(timeStart, time);
 			j2 = Stat.getRandomUniform(j1,        time);
 		}else if (jPolicy == Policy.RECENT_TRACKING){
-			Long w = (Long) ((HashMap<String,Object>)genParams.get(MapKeyNames.POLICIES_PARAMS)).get(MapKeyNames.J_POLICY_RT_WINDOW_KEY);
+			Long w = (Long) policiesParams.get(MapKeyNames.J_POLICY_RT_WINDOW_KEY);
 			assert (w != null); 
 			j2 = time;
 			j1 = Math.max(0, j2 - w + 1 - Stat.getRandomUniform(0, 2));

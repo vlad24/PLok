@@ -41,6 +41,7 @@ public class Client{
 			long time = 0;
 			while(madeQueries <= queriesCount) {
 				time += timeStep;
+				System.out.println("Q for " + time);
 				Query nextQ = queryGenerator.nextQuery(time);
 				store.serve(nextQ);
 				madeQueries++;
@@ -59,7 +60,7 @@ public class Client{
 	public HashMap<String, Object> attack(StorageSystem store, List<Query> queries){
 		try{
 			int i = 0;
-			while(madeQueries < queriesCount) {
+			while(madeQueries <= queriesCount) {
 				Query nextQ = queries.get(i);
 				store.serve(nextQ);
 				madeQueries++;
