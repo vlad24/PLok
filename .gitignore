@@ -3,12 +3,12 @@
 *.iws
 log/
 target/
-*/static_data/*
 #Eclipse configuration
 .classpath
 .project
 *.class
-*settings/*
+*.pydevproject*
+*.settings*
 #Custom
 report*
 storage*
