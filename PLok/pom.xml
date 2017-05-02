@@ -71,7 +71,7 @@
 							<archive>
 								<manifest>
 									<mainClass>
-										ru.spbu.math.plok.bench.Tester
+										ru.spbu.math.ais.plok.bench.Tester
 									</mainClass>
 								</manifest>
 							</archive>
