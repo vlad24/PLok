@@ -24,7 +24,7 @@ public class HistoryFileGenerator{
 		if (args.length >= 4){
 			Policy iPolicy      = Policy.valueOf(args[0]);
 			Policy jPolicy      = Policy.valueOf(args[1]);
-			int N               = Integer.parseInt(args[2]);
+			int vectorLength    = Integer.parseInt(args[2]);
 			int timeStep        = Integer.parseInt(args[3]);
 			int queriesCount    = Integer.parseInt(args[4]);
 			String fileName     = args[5];
@@ -32,7 +32,7 @@ public class HistoryFileGenerator{
 			if (args.length >= 6){
 				paramsString = args[6];
 			}
-			File output = new File(fileName);
+			File output       = new File(fileName);
 			FileWriter writer = new FileWriter(output);
 			writer.write(
 					new StringBuilder()
@@ -40,9 +40,9 @@ public class HistoryFileGenerator{
 					.append("#Parameters: ").append(Arrays.toString(args)).append("\n")
 					.toString()
 					);
-			HashMap<String, Object> qGenParams = packParams(N, iPolicy, jPolicy, paramsString);
+			HashMap<String, Object> qGenParams = packParams(vectorLength, iPolicy, jPolicy, paramsString);
 			writer.write("@" + qGenParams.get(MapKeyNames.N_KEY) + "\n");
-			QueryGenerator queryGenerator = new QueryGenerator(N, iPolicy, jPolicy, (Map<String, Object>) qGenParams.get(MapKeyNames.POLICIES_PARAMS));
+			QueryGenerator queryGenerator = new QueryGenerator(vectorLength, iPolicy, jPolicy, (Map<String, Object>) qGenParams.get(MapKeyNames.POLICIES_PARAMS));
 			long t = 0;
 			for (int i = 0; i <= queriesCount; i++){
 				t += timeStep;
