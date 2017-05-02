@@ -35,13 +35,13 @@ public class Tester {
 			log.info("Generator has fifnished.");
 			log.debug("Stored blocks: {}", store.getBlockCount());
 			log.info("Starting client...");
-			Map<String, Object> clientReport;
+			Map<String, Object> finalReport;
 			if (config.isTesting()){
 				log.debug("In test mode...");
-				clientReport = client.attack(store, appConfig.getHistoryAnalysisReport().getQueries());
+				finalReport = client.attack(store, appConfig.getHistoryAnalysisReport().getQueries());
 			}else{
 				log.debug("In real mode...");
-				clientReport = client.attack(store,
+				finalReport = client.attack(store,
 						(Policy)solution.get(MapKeyNames.I_POLICY_KEY),
 						(Policy)solution.get(MapKeyNames.J_POLICY_KEY),
 						(Map<String,Object>)  solution.get(MapKeyNames.POLICIES_PARAMS),
@@ -50,9 +50,15 @@ public class Tester {
 				);
 			}
 			log.info("Client has finished.");
-			String reportFolderPath = ReportPrinter.print(config.getOutputFile(), config.isOutputAppended(), config.toString(), clientReport);
-			log.info("Report has been printed to {}", reportFolderPath);
-			log.info("Target ratio: {}%", clientReport.get(MapKeyNames.TARGET_RATIO));
+			finalReport.putAll(appConfig.getSolution());
+			String reportPath = ReportPrinter.print(
+					config.getOutputFile(),
+					config.isOutputAppended(),
+					config.toString(),
+					finalReport
+				);
+			log.info("Report has been printed to {}", reportPath);
+			log.info("Target ratio: {}%", finalReport.get(MapKeyNames.TARGET_RATIO));
 		}else{
 			AppConfig appConfig              = new AppConfig(config);
 			Map<String, Object> solution     = appConfig.getSolution();
