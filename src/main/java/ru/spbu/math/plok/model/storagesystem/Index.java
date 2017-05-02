@@ -91,7 +91,7 @@ public class Index {
 		List<Long> result = new ArrayList<>(commons.size() + specials.size());
 		result.addAll(commons);
 		result.addAll(specials);
-		log.debug("Got {} commons and {} specials ({})", commons.size(), specials.size(), result);
+		log.trace("Got {} commons and {} specials", commons.size(), specials.size());
 		return result;
 	}
 	

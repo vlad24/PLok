@@ -21,7 +21,7 @@ public class Generator{
 	private int vectorAmount;
 	private final int vectorSize;
 	private Random randomizer;
-	private volatile boolean isAttacking;
+	private volatile boolean isFilling;
 	
 	@Override
 	public String toString() {
@@ -38,7 +38,7 @@ public class Generator{
 	}
 	
 	private void prepareData() {
-		log.info("Preparing {} vectors", vectorAmount);
+		log.trace("Preparing {} vectors", vectorAmount);
 		this.vectors = new ArrayList<Vector>(vectorAmount); 
 		for (int i = 0; i < vectorAmount; i++){
 			long time = i;
@@ -46,6 +46,9 @@ public class Generator{
 			fillFloatArrayRandomly(vectorData);
 			vectors.add(new Vector(time, vectorData));
 		}
+		log.trace("Prepared {} vectors", vectors .size());
+		assert (vectors.size() == vectorAmount);
+		assert (vectors.get(0).values.length == vectorSize);
 	}
 
 	private void fillFloatArrayRandomly(float[] array) {
@@ -55,22 +58,22 @@ public class Generator{
 	}
 
 	public void fill(StorageSystem store) {
+		log.trace("Filling store...");
 		try {
-			isAttacking = true;
-			for (int j = 0; j < vectors.size() && isAttacking; j++){
+			isFilling = true;
+			for (int j = 0; j < vectors.size() && isFilling; j++){
 				store.put(vectors.get(j));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Problem {}!", e.getMessage());
 		}finally{
-			stopAttack();
-			log.info("Finally stored {} blocks", store.getBlockCount());
+			stopFilling();
 		}
 	}
 
-	public void stopAttack(){
-		isAttacking = false;
+	public void stopFilling(){
+		isFilling = false;
 	}
 	
 

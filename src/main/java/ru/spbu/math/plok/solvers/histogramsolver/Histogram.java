@@ -2,7 +2,6 @@ package ru.spbu.math.plok.solvers.histogramsolver;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ru.spbu.math.plok.utils.structures.Pair;
 import ru.spbu.math.plok.utils.structures.Triplet;
 
 /**
@@ -71,8 +69,24 @@ class Histogram<K extends Number>{
 		buildEquiWidthBinHistogram(data);
 		log.debug("Binned histogram built");
 	}
+	
+	
+	//////////////////////////////////////////////////// RAW VIEW ////////////////////////////////////////////////////////////////////
+	private void buildRawHistogram(List<K> data) {
+		for (K k : data){
+			@SuppressWarnings("unchecked")
+			K key = (isDiscrete)?  k : (K)Double.valueOf(floatTrimmer.format(k.doubleValue()));
+			Double oldValue = rawOccs.get(key);
+			rawOccs.put(key, (oldValue == null)? 1 : oldValue + 1);
+		}
+	}
+	
+	public double getRawValue(K key){
+		Double occurence = rawOccs.get(key);
+		return occurence == null ? 0 : occurence;
+	}
 
-
+	/////////////////////////////////////////////////// BINNED VIEW /////////////////////////////////////////////////////////////////
 	private void buildEquiWidthBinHistogram(List<K> data) {
 		binOffset = 0;
 		if (isDiscrete){
@@ -86,7 +100,7 @@ class Histogram<K extends Number>{
 			this.binCount = (int) Math.sqrt(data.size()); 
 			this.binWidth = SMALL_VALUE + (this.max - this.min) / binCount;
 		}
-		log.debug("Min Max  :    {} {} ", min, max);
+		log.debug("Min,Max  :    {} {} ", min, max);
 		log.debug("Bin width:       {} ", binWidth);
 		log.debug("Bin count:       {} ", binCount);
 		for (int i = 0; i < binCount; i++){
@@ -97,7 +111,7 @@ class Histogram<K extends Number>{
 				break;
 			}
 			bins.add(new Bin(i, left, right, 0));
-			log.debug("{}th bin {} inited", i, bins.get(i));
+			log.trace("{}th bin {} inited", i, bins.get(i));
 		}
 		for (K k : data){
 			int id = binify(k);
@@ -105,22 +119,26 @@ class Histogram<K extends Number>{
 			assert (targetBin.getLeft() <= k.doubleValue()) && (k.doubleValue() <= targetBin.getRight());
 			targetBin.incrementValue();
 		}
-		log.debug("All bins have been filled");
+		log.trace("All bins have been filled");
 	}
 	
-	private void buildRawHistogram(List<K> data) {
-		for (K k : data){
-			@SuppressWarnings("unchecked")
-			K key = (isDiscrete)?  k : (K)Double.valueOf(floatTrimmer.format(k.doubleValue()));
-			Double oldValue = rawOccs.get(key);
-			rawOccs.put(key, (oldValue == null)? 1 : oldValue + 1);
-		}
+	private int binify(K k) {
+		double kAsDouble = k.doubleValue();
+		return (int)((kAsDouble - (min - binOffset)) / binWidth);
 	}
 	
+	public List<Bin> getBins(){
+		return bins;
+	}
+
 	public int getAmountOfBins() {
 		return binCount;
 	}
-
+	
+	public Bin getBin(int binId){
+		return bins.get(binId);
+	}
+	
 	public int getLastNonZeroBin() {
 		int result = 0;
 		for (Bin bin : bins){
@@ -131,7 +149,72 @@ class Histogram<K extends Number>{
 		return result;
 	}
 	
-	public double[] getLeftDerivatives(){
+	public int getDistinctObservationsAmount(){
+		return rawOccs.keySet().size();
+	}
+	
+	////////////////////////////////////////////////// NORMALIZED VIEW //////////////////////////////////////////////////////////
+	
+	public void normalizeToPercents() {
+		log.debug("Normalizing {} to percents", name);
+		double percentage = 0;
+		for (K k : rawOccs.keySet()){
+			percentage = (100.0 * rawOccs.get(k)) / observations;
+			rawOccs.put(k, percentage);
+		}
+		log.debug("Raw representation of {} normalized", name);
+		for (Bin bin : bins){
+			percentage = (100.0 * bin.getValue()) / observations;
+			bin.setValue(percentage);
+		}
+		log.debug("Binned representation of {} normalized", name);
+		this.valueType = ValueType.PERCENTAGE;
+	}
+	
+	
+	
+	///////////////////////////////////////////////// EXTREMES DETECTION ///////////////////////////////////////////////////////// 
+	
+	public K getMaxRaw(){
+		K result = null;
+		double maxOccurence = Double.MIN_VALUE;
+		for (Map.Entry<K, Double> entry : rawOccs.entrySet()){
+			if (entry.getValue() >= maxOccurence){
+				maxOccurence = entry.getValue();
+				result = entry.getKey();
+			}
+		}
+		return result;
+	}
+	
+	public Bin getMaxBin(){
+		double maxOcc = Double.MIN_VALUE;
+		Bin maxBin = null;
+		for (Bin bin : bins){
+			if (Double.compare(bin.getValue(), maxOcc) > 0){
+				maxOcc = bin.getValue();
+				maxBin = bin;
+			}
+		}
+		return maxBin;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public K getMaxRawForBin(int binId){
+		K lefter  = rawOccs.ceilingKey((K)Double.valueOf(getBin(binId).getLeft()));
+		K righter = rawOccs.floorKey((K)Double.valueOf(getBin(binId).getRight() + SMALL_VALUE));
+		K result = null;
+		double maxOccurence = Double.MIN_VALUE;
+		for (Map.Entry<K, Double> entry : rawOccs.subMap(lefter, righter).entrySet()){
+			if (entry.getValue() >= maxOccurence){
+				maxOccurence = entry.getValue();
+				result = entry.getKey();
+			}
+		}
+		return result;
+	}
+	
+	private double[] getLeftDerivatives(){
 		double[] leftDers  = new double[binCount];
 		leftDers[0]             = SMALL_VALUE;
 		for (int i = 1; i < binCount; i++){
@@ -140,7 +223,7 @@ class Histogram<K extends Number>{
 		return leftDers;
 	}
 	
-	public double[] getRightDerivatives(){
+	private double[] getRightDerivatives(){
 		double[] rightDers = new double[binCount];
 		for (int i = 0; i < binCount - 1; i++){
 			rightDers[i] = (bins.get(i).getValue() - bins.get(i + 1).getValue()) / binWidth;
@@ -159,7 +242,6 @@ class Histogram<K extends Number>{
 			}
 		}
 		return maximas;
-		
 	}
 	
 	public List<Triplet<Integer>> getIslands(){
@@ -194,87 +276,9 @@ class Histogram<K extends Number>{
 		return islands;
 	}
 	
-	public Bin getBin(int binId){
-		return bins.get(binId);
-	}
 	
-	public List<Bin> getBins(){
-		return bins;
-	}
+	/////////////////////////////////////////////////////////// PRINTABLE VIEWS ////////////////////////////////////////
 	
-	public int getDistinctObservationsAmount(){
-		return rawOccs.keySet().size();
-	}
-
-	
-	//Raw data
-	
-	public Bin getMaxBin(){
-		double maxOcc = Double.MIN_VALUE;
-		Bin maxBin = null;
-		for (Bin bin : bins){
-			if (Double.compare(bin.getValue(), maxOcc) > 0){
-				maxOcc = bin.getValue();
-				maxBin = bin;
-			}
-		}
-		return maxBin;
-	}
-	
-	public K getMaxRaw(){
-		K result = null;
-		double maxOccurence = Double.MIN_VALUE;
-		for (Map.Entry<K, Double> entry : rawOccs.entrySet()){
-			if (entry.getValue() >= maxOccurence){
-				maxOccurence = entry.getValue();
-				result = entry.getKey();
-			}
-		}
-		return result;
-	}
-	
-	public K getMaxRawForBin(int binId){
-		K lefter  = rawOccs.ceilingKey((K)Double.valueOf(getBin(binId).getLeft()));
-		K righter = rawOccs.floorKey((K)Double.valueOf(getBin(binId).getRight() + SMALL_VALUE));
-		K result = null;
-		double maxOccurence = Double.MIN_VALUE;
-		for (Map.Entry<K, Double> entry : rawOccs.subMap(lefter, righter).entrySet()){
-			if (entry.getValue() >= maxOccurence){
-				maxOccurence = entry.getValue();
-				result = entry.getKey();
-			}
-		}
-		return result;
-	}
-	
-	
-	public double getRawValue(K key){
-		Double occurence = rawOccs.get(key);
-		return occurence == null ? 0 : occurence;
-	}
-
-	public void normalizeToPercents() {
-		log.debug("Normalizing {} to percents", name);
-		double percentage = 0;
-		for (K k : rawOccs.keySet()){
-			percentage = (100.0 * rawOccs.get(k)) / observations;
-			rawOccs.put(k, percentage);
-		}
-		log.debug("Raw representation of {} normalized", name);
-		for (Bin bin : bins){
-			percentage = (100.0 * bin.getValue()) / observations;
-			bin.setValue(percentage);
-		}
-		log.debug("Binned representation of {} normalized", name);
-		this.valueType = ValueType.PERCENTAGE;
-	}
-	
-	private int binify(K k) {
-		double kAsDouble = k.doubleValue();
-		return (int)((kAsDouble - (min - binOffset)) / binWidth);
-	}
-
-
 	@Override
 	public String toString() {
 		return new StringBuilder()

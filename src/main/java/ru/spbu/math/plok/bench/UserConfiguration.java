@@ -18,23 +18,26 @@ public class UserConfiguration{
 	@Option(name="-H",usage="History file", required=true)
 	private String 	historyFile;
 	
-	@Option(name="-V",usage="Vectors to write amount", required=false)
+	@Option(name="-V",usage="Vectors to write amount", required=true)
 	private int 	vectorsAmount = -1;
 	
 	@Option(name="-C",usage="Cache ratio", required=false)
 	private Float 	cacheRatio = 0.25f;
 	
-	@Option(name="-O",usage="Output", required=false)
-	private String 	outputPath = "./reports/";
+	@Option(name="-O",usage="Output file", required=false)
+	private String 	outputPath = null;
+
+	@Option(name="--append",usage="Flag, controlling if output should be appended to output", required=false)
+	private boolean outputAppended = false;
 	
-	@Option(name="-v",usage="Verbosity level", required=false)
+	@Option(name="--verbosity",usage="Verbosity level", required=false)
 	private String  verbosity = "info";
 	
 	@Option(name="--storagePath",usage="Persister file", required=false)
 	private String 	storagePath="./storages";
 	//////////////////////////////////////////////////////////////////////////////////////////////// TEST MODE
 	@Option(name="--test",usage="Test flag", required=false, forbids={"--debug", "--repeatHistory", "--solver", "-r"})
-	private boolean test;
+	private boolean testFlag;
 	
 	@Option(name="-P",usage="Tested P", required=false, depends="--test")
 	private Integer testedP;
@@ -42,13 +45,15 @@ public class UserConfiguration{
 	@Option(name="-L",usage="Tested L", required=false, depends="--test")
 	private Integer testedL;
 	
-	//////////////////////////////////////////////////////////////////////////////////////////////// DEBUG MODE
-	@Option(name="--debug",usage="Debug flag", required=false, forbids="--test")
-	private boolean debug;
+	//////////////////////////////////////////////////////////////////////////////////////////////// SOLVE MODE
+	@Option(name="--solve",usage="Solve flag", required=false, forbids="--test")
+	private boolean solveFlag;
 	
 	@Option(name="--solver",usage="Solver type", required=false, forbids="--test")
 	private String  solverType = "histogram";
 
+	
+	
 	public UserConfiguration(){
 		inited = false;
 	}
@@ -64,7 +69,7 @@ public class UserConfiguration{
 			try {
 				parser.parseArgument(args);
 				if (isTesting()){
-					solverType    = "mock";
+					solverType = "mock";
 				}
 				inited = true;
 			} catch (CmdLineException e) {
@@ -77,17 +82,14 @@ public class UserConfiguration{
 
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this)
+		return MoreObjects.toStringHelper("")
 				.omitNullValues()
-				.add("H",     historyFile )
+				.add("H",     historyFile)
 				.add("C",     cacheRatio)
-				.add("V",     vectorsAmount )
-				.add("debug", debug)
-				.add("test" , test)
-				.toString();
+				.add("V",     vectorsAmount)
+				.toString()
+				.replace("{", "").replace("}", "");
 	}
-
-	
 	
 	/*
 	 * Getters and setters go below
@@ -109,7 +111,7 @@ public class UserConfiguration{
 		return cacheRatio;
 	}
 
-	public String getOutputPath() {
+	public String getOutputFile() {
 		return outputPath;
 	}
 
@@ -125,12 +127,12 @@ public class UserConfiguration{
 		return solverType;
 	}
 
-	public boolean isDebugging() {
-		return debug;
+	public boolean isSolving() {
+		return solveFlag;
 	}
 
 	public boolean isTesting() {
-		return test;
+		return testFlag;
 	}
 	
 	public int getTestL() {
@@ -141,6 +143,8 @@ public class UserConfiguration{
 		return testedP;
 	}
 
-	
+	public boolean isOutputAppended() {
+		return outputAppended;
+	}
 
 }

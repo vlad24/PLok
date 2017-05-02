@@ -16,11 +16,12 @@ public class HistoryPreprocessor {
 	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
 	
 	
-	public static final String COMMENT_STRING_INDICATOR = "#";
 	public static final String ELEMENT_SEPARATOR        = ",";
+	public static final String HINTS_SEPARATOR          = "/";
+	
 	public static final String HEAD_STRING_INDICATOR    = "@";
 	public static final String HINT_STRING_INDICATOR    = "!";
-	public static final String HINTS_SEPARATOR          = "/";
+	public static final String COMMENT_STRING_INDICATOR = "#";
 	
 	private String filePath;
 	private HistoryAnalysisReport report;

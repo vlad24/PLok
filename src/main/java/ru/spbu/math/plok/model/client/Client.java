@@ -18,36 +18,31 @@ import ru.spbu.math.plok.solvers.histogramsolver.UserChoice.Policy;
 public class Client{
 	private static Logger log = LoggerFactory.getLogger(Client.class);
 
-	private final long queriesCount;			// Q
 	private int vectorSize;						// N
-	private long madeQueries;
 
 	@Override
 	public String toString() {
-		return "CLIENT_[" + queriesCount + "q]";
+		return "CLIENT_[" + vectorSize + " lengthed vectors]";
 	}
 
 	@Inject
-	public Client(@Named(NamedProps.Q)int queriesCount, @Named(NamedProps.N) int N){
-		this.queriesCount = queriesCount;
-		this.madeQueries  = 0;
+	public Client(@Named(NamedProps.N) int N){
 		this.vectorSize   = N;
 	}
 
-	public HashMap<String, Object> attack(StorageSystem store, Policy iPolicy, Policy jPolicy, Map<String, Object> policyParams, Long timeStep){
-		log.debug("Stating quering {} queries from client", queriesCount);
+	public Map<String, Object> attack(StorageSystem store, Policy iPolicy, Policy jPolicy, Map<String, Object> policyParams, int queriesCount, Long timeStep){
+		log.debug("Stating performing {} self-made queries", queriesCount);
 		QueryGenerator queryGenerator = new QueryGenerator(vectorSize, iPolicy, jPolicy, policyParams);
 		try{
 			long time = 0;
+			int madeQueries = 0;
 			while(madeQueries <= queriesCount) {
 				time += timeStep;
-				System.out.println("Q for " + time);
 				Query nextQ = queryGenerator.nextQuery(time);
+				log.trace("Query: {}", nextQ.toString());
 				store.serve(nextQ);
 				madeQueries++;
-				log.debug("Progress = {}%", 100.0 * (float)madeQueries/queriesCount);
 			}
-			log.debug("Client is over");
 			return store.getStatistics();
 		}catch(Exception er){
 			log.error("Client unexpectedly finished!", er);
@@ -57,17 +52,12 @@ public class Client{
 		}
 	}
 	
-	public HashMap<String, Object> attack(StorageSystem store, List<Query> queries){
+	public Map<String, Object> attack(StorageSystem store, List<Query> queries){
+		log.debug("Stating performing {} queries from file", queries.size());
 		try{
-			int i = 0;
-			while(madeQueries <= queriesCount) {
-				Query nextQ = queries.get(i);
-				store.serve(nextQ);
-				madeQueries++;
-				i++;
-				log.debug("Progress = {}%", 100.0 * (float)madeQueries/queriesCount);
+			for (Query q : queries){
+				store.serve(q);
 			}
-			log.debug("Client is over");
 			return store.getStatistics();
 		}catch(Exception er){
 			log.error("Client unexpectedly finished!", er);

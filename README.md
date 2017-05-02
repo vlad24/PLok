@@ -21,26 +21,25 @@ PLok is a project aimed to investigate dependency of optimal block sizes on quer
 ### Program configurations
 Command line options:
 
-|  Name         | Description                                                          |  Constraints                   |  Required                                     |
-|:-------------:|:--------------------------------------------------------------------:|:------------------------------:|:---------------------------------------------:|
-| N				| vector length  			                       					   | integer ( > 0)			     	|   yes											| 
-| H				| history file                              						   | string  (path)                 |   yes											| 
-| V				| write vectors amount 							                       | integer	( > 0)				|	yes											| 
-| C				| cache ratio 								                           | float (between 0.0 and 1.0)	|	no (default: "0,25")						| 
-| r 			| idle between two subsequent reads  (msec)                            | int (> 0)		                |	no (default: 10)                            | 
-| O				| output folder path						                           | string (path)		            |	no (default: "./reports")	                | 
-| v				| verbosity level								                       | string (info, debug, fine...)	|	no (default: "info")						|  
-| storagePath 	| storage path									                       | string (path)				    |	no (default: "./storages")                  |
-| debug			| debug mode flag 								                       | flag						    |	no (default: false)							| 
-| repeatHistory | flag, indicating if provided history should be repeated by generator | flag						    |	no (default: false)							| 
-| test			| test mode flag 								                       | flag						    |	no (default: false)							| 
-| P  			| tested P if test flag is up   				                       | int (>1)					    |	yes, if test flag is up						| 
-| L  			| tested L if test flag is up   				                       | int (>1)					    |	yes, if test flag is up						| 
+|  Name         | Description                                                          |  Constraints                   |  Required                                         |
+|:-------------:|:--------------------------------------------------------------------:|:------------------------------:|:-------------------------------------------------:|
+| H				| history file                              						   | string  (path)                 |   yes											    | 
+| V				| write vectors amount (width of time-grid)                            | integer  ( > 0)                |   yes                                             | 
+| C				| cache ratio 								                           | float (between 0.0 and 1.0)	|	no (default: "0.25")					     	| 
+| O				| output file       						                           | string (path)		            |	no (default: null, self-generated will be used) | 
+| append		| append to output flag 								               | flag						    |	no (default: true)							  	| 
+| verbosity 	| verbosity level								                       | string (info, debug, fine...)	|	no (default: "info")							|  
+| storagePath 	| storage path									                       | string (path)				    |	no (default: "./storages")                      |
+| solve			| solve mode flag 								                       | flag						    |	no (default: false)							    | 
+| test			| test mode flag 								                       | flag						    |	no (default: false)							    | 
+| P  			| tested P if test flag is up   				                       | int (>1)					    |	yes, if test flag is up						    | 
+| L  			| tested L if test flag is up   				                       | int (>1)					    |	yes, if test flag is up						    | 
 
 ### Launch example
 ```{java}
-java -jar PLok -H "hs/h1.csv" -N 10 -W 2000 -C 0.01  -pr 10 -v debug
-java -jar PLok -H "hs/h1.csv" -N 10 -W 2000 -C 0.01  -pr 10 -test -P 21 -L 11
+java -jar plok.jar  -H "hs/h1.csv" -V 2000 -C 0.25 --verbosity trace
+java -jar plok.jar  -H "hs/h2.csv" -V 2000 -C 0.25 --verbosity debug --test -P 2 -L 5 --append
+java -jar plok.jar  -H "hs/h3.csv" -V 2000 -C 0.25 --verbosity info  --solve   
 ```
 
 ## Output
@@ -51,6 +50,6 @@ After launch a report file (in report folder) named "report_${invocationTime}.tx
 |:-------------:|:-----------------------------------------------------------------------------------:|
 | d             | number of queries served from disk                                                  |
 | Q             | total number of queries                                                             |
-| d/A           | 100% * d/Q                                                                          |
+| d/Q           | 100% * d/Q                                                                          |
 
 

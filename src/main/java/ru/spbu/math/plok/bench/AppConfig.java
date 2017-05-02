@@ -21,7 +21,7 @@ import ru.spbu.math.plok.solvers.Solver;
 import ru.spbu.math.plok.solvers.histogramsolver.HistogramSolver;
 
 public class AppConfig extends AbstractModule{
-	
+
 	private static final int VECTOR_UNIT_BYTE_SIZE = Float.BYTES;
 
 	private final static Logger log = LoggerFactory.getLogger(AppConfig.class);
@@ -32,10 +32,14 @@ public class AppConfig extends AbstractModule{
 
 	private Map<String, Object>   solution;
 	private HistoryAnalysisReport hReport;
-	
+
+	private Integer cacheUnitSize;
+	private Integer neededQueriesCount;
 
 	public AppConfig(UserConfiguration configuration) throws Exception {
 		userConfig   = configuration;
+		((ch.qos.logback.classic.Logger)LoggerFactory.getLogger("ROOT")).setLevel(Level.valueOf(userConfig.getVerbosityLevel()));
+		log.info("App configured: {}", configuration);
 		preprocessor = new HistoryPreprocessor(userConfig.getHistoryFilePath());
 		hReport = preprocessor.analyzeHistory();
 		solver   = createSolver();
@@ -49,52 +53,30 @@ public class AppConfig extends AbstractModule{
 			bind(StorageSystem.class).to(PLokerStorage.class);
 			bindConstant().annotatedWith(Names.named(NamedProps.N))                .to(hReport.getN());
 			bindConstant().annotatedWith(Names.named(NamedProps.V))                .to(userConfig.getVectorAmount());
-			bindConstant().annotatedWith(Names.named(NamedProps.Q))                .to(calculateQueryAmount());
 			bindConstant().annotatedWith(Names.named(NamedProps.TEST_MODE))        .to(userConfig.isTesting());
 			bindConstant().annotatedWith(Names.named(NamedProps.STORAGE_PATH))     .to(userConfig.getStoragePath());
-			bindConstant().annotatedWith(Names.named(NamedProps.CACHE_UNIT_SIZE))  .to(calculateCacheUnitSize());
+			bindConstant().annotatedWith(Names.named(NamedProps.CACHE_UNIT_SIZE))  .to(getCacheUnitSize());
 			bindConstant().annotatedWith(Names.named(NamedProps.P))                .to((Integer)solution.get(MapKeyNames.P_KEY));
 			bindConstant().annotatedWith(Names.named(NamedProps.L))                .to((Integer)solution.get(MapKeyNames.L_KEY));
 			bindConstant().annotatedWith(Names.named(NamedProps.IS_FILLED_FROM_UP)).to((Boolean)solution.get(MapKeyNames.IS_FILLED_FROM_UP_KEY));
-			bindVerbosityLevel();
 		}catch(Exception e){
-
+			log.error("Error while configuring app: {}", e);
 		}
 	}
 
 	private Solver createSolver() throws IOException {
 		if (userConfig.isTesting()){
-			log.info("Mock Solver set.");
+			log.debug("Mock Solver set.");
 			return new MockSolver(userConfig.getTestP(), userConfig.getTestL());
 		}else if (userConfig.getSolverType().equalsIgnoreCase("histogram")){
-			log.info("Histogram Solver set.");
-			return new HistogramSolver(hReport, calculateCacheUnitSize());
+			log.debug("Histogram Solver set.");
+			return new HistogramSolver(hReport, getCacheUnitSize());
 		}else {
 			return null;
 		}
 
 	}
 
-	private void bindVerbosityLevel() {
-		String verbosity = userConfig.getVerbosityLevel();
-		ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger("ROOT");
-
-		if(userConfig.isDebugging()){
-			rootLogger.setLevel(Level.DEBUG);
-		}
-		else if (verbosity.equalsIgnoreCase(Level.DEBUG.toString())){
-			rootLogger.setLevel(Level.DEBUG);
-		}else if (verbosity.equalsIgnoreCase(Level.INFO.toString())){
-			rootLogger.setLevel(Level.INFO);
-		}else if (verbosity.equalsIgnoreCase(Level.ALL.toString())){
-			rootLogger.setLevel(Level.ALL);
-		}else if (verbosity.equalsIgnoreCase(Level.ERROR.toString())){
-			rootLogger.setLevel(Level.ERROR);
-		}
-	}
-
-	
-	
 	public Map<String, Object> getSolution() {
 		return solution;
 	}
@@ -102,9 +84,27 @@ public class AppConfig extends AbstractModule{
 	public HistoryAnalysisReport getHistoryAnalysisReport() {
 		return hReport;
 	}
+	
+	public int getCacheUnitSize() {
+		if (cacheUnitSize == null){
+			cacheUnitSize = calculateCacheByteSize() / VECTOR_UNIT_BYTE_SIZE; 
+		}
+		return cacheUnitSize;  
+	}
+	
+	public int getQueryAmount() {
+		if (neededQueriesCount == null){
+			if (userConfig.isTesting()){
+				neededQueriesCount = hReport.getQueries().size();
+			}else{
+				neededQueriesCount = (int) (userConfig.getVectorAmount() / hReport.getTimeStep());
+			}
+		}
+		return neededQueriesCount;
+	}
 
-	
-	
+
+
 	private int calculateCacheByteSize() {
 		return (int) (Math.ceil(calculateWriteDataSizeInBytes() * userConfig.getCacheRatio()));
 	}
@@ -112,17 +112,6 @@ public class AppConfig extends AbstractModule{
 	private int calculateWriteDataSizeInBytes() {
 		return userConfig.getVectorAmount() * (VECTOR_UNIT_BYTE_SIZE * hReport.getN());
 	}
-	
-	private int calculateCacheUnitSize() {
-		return  calculateCacheByteSize() / VECTOR_UNIT_BYTE_SIZE;
-	}
 
-	private int calculateQueryAmount() {
-		if (userConfig.isTesting()){
-			return hReport.getQueries().size();
-		}else{
-			return (int) (userConfig.getVectorAmount() / hReport.getTimeStep());
-		}
-	}
 
 }
