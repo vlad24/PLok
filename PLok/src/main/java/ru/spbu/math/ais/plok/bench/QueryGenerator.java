@@ -1,6 +1,5 @@
 package ru.spbu.math.ais.plok.bench;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
