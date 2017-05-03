@@ -4,7 +4,7 @@ public class MapKeyNames {
 	public static final String N_KEY                    = "N";
 	public static final String P_KEY       				= "P";
 	public static final String L_KEY       				= "L";
-	public static final String IS_FILLED_FROM_UP_KEY    = "is_filled_from_up";
+	public static final String IS_FILLED_FROM_UP_KEY    = "isFFU";
 	public static final String I_MIN_KEY			    = "iMin";
 	public static final String I_MAX_KEY    			= "iMax";
 	public static final String J_MIN_KEY    			= "jMin";
