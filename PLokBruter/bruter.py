@@ -49,8 +49,8 @@ if __name__ == "__main__":
     policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
     Ws       = [2, timeStep // 2, timeStep * 2]
     HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
-    Ns       = [100, 1019]
-    Cs       = [0.01, 0.05, 0.1]
+    Ns       = [100, 720, 1019]
+    Cs       = [0.01, 0.05]
     
     if not real_brute:
         vectorAmount = 101
