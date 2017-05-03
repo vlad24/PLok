@@ -50,7 +50,7 @@ public class HFGConfiguration{
 	@Option(name="--windowSize",usage="Window size for JPolicy.RecentTracking", required=false)
 	private Long    windowSize;
 	
-	@Option(name="--hotRanges",usage="Hot ranges for IPolicy.HotRanges", required=false)
+	@Option(name="--hotRanges",usage="Hot ranges for IPolicy.HotRanges. EX: 1-2, 33-66, 75-100", required=false)
 	private String	hotRanges;
 	
 	@Option(name="--includeHints",usage="If hints should be included into history file", required=false)

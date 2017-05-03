@@ -150,8 +150,8 @@ public class PLokerStorage implements StorageSystem{
 	public Map<String, Object> getStatistics() {
 		LinkedHashMap<String,Object> result = new LinkedHashMap<>();
 		result.put(MapKeyNames.BLOCKS_READ_FROM_DISK, blocksReadFromDisk);
-		result.put(MapKeyNames.BLOCKS_READ_IN_TOTAL, blocksReadInTotal);
-		result.put(MapKeyNames.TARGET_RATIO, 100 * (float)blocksReadFromDisk / blocksReadInTotal);
+		result.put(MapKeyNames.BLOCKS_READ_IN_TOTAL,  blocksReadInTotal);
+		result.put(MapKeyNames.TARGET_RATIO,          String.format("%.3f", 100 * (float)blocksReadFromDisk / blocksReadInTotal));
 		return result;
 	}
 	

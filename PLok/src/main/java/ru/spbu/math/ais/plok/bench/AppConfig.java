@@ -103,8 +103,6 @@ public class AppConfig extends AbstractModule{
 		return neededQueriesCount;
 	}
 
-
-
 	private int calculateCacheByteSize() {
 		return (int) (Math.ceil(calculateWriteDataSizeInBytes() * userConfig.getCacheRatio()));
 	}

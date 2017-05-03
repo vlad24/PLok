@@ -1,5 +1,6 @@
 package ru.spbu.math.ais.plok.bench;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,8 @@ import ru.spbu.math.ais.plok.solvers.histogramsolver.UserChoice.Policy;
 import ru.spbu.math.ais.plok.utils.Stat;
 
 public class QueryGenerator {
+	private static final double HOT_RANGE_CHOICE_THRESHOLD = 0.85;
+
 	private final static org.slf4j.Logger log = LoggerFactory.getLogger(QueryGenerator.class);
 
 	private int N;
@@ -37,8 +40,20 @@ public class QueryGenerator {
 			i1 = (int) Stat.getRandomUniform(0,  N - 1);
 			i2 = (int) Stat.getRandomUniform(i1, N - 1);
 		}else if (iPolicy == Policy.HOT_RANGES) {
-			i1 = (int) Stat.getRandomUniform(0,  N - 1);
-			i2 = (int) Stat.getRandomUniform(i1, N - 1);
+			if (Double.compare(Stat.getRandomUniformFloat(), HOT_RANGE_CHOICE_THRESHOLD) < 0){
+				log.trace("Generating index range based on hot ranges");
+				String hrs = (String) policiesParams.get(MapKeyNames.I_POLICY_HR_RANGES_KEY);
+				String[] ranges = hrs.split(",");
+				String range = ranges[(int) Stat.getRandomUniform(0, ranges.length)];
+				log.trace("Chosen range: {}", range);
+				String[] points = range.split("-");
+				i1 = (int)((Float.parseFloat(points[0]) / 100.0) * (N - 1)); 
+				i2 = (int)((Float.parseFloat(points[1]) / 100.0) * (N - 1)); 
+			}else{
+				log.trace("Hot ranges ignored");
+				i1 = (int) Stat.getRandomUniform(0,  N - 1);
+				i2 = (int) Stat.getRandomUniform(i1, N - 1);
+			}
 		}
 		if (jPolicy == Policy.FULL_TRACKING){
 			j1 = Stat.getRandomUniform(timeStart, time);
