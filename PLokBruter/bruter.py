@@ -44,17 +44,19 @@ if __name__ == "__main__":
         user_input = raw_input("Enter invocation id (y/n, default=y) : ")
         invocation_id = int(user_input)
     output_file = output_file_format.format(host=hostanme, id=invocation_id)
+    
     #Bruted parameters
     policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
-    Ws       = [timeStep // 2, timeStep * 2]
-    HRs      = [("1-7", "52-58", "87-100")]
+    Ws       = [2, timeStep // 2, timeStep * 2]
+    HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
     Ns       = [100, 1019]
-    Cs       = [0.01, 0.1]
+    Cs       = [0.01, 0.05, 0.1]
+    
     if not real_brute:
         vectorAmount = 101
         policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
         Ws       = [timeStep]
-        HRs      = [("1-7", "52-58", "87-100")]
+        HRs      = ["1-20,70-90"]
         Ns       = [100]
         Cs       = [0.001]
     
@@ -82,7 +84,7 @@ if __name__ == "__main__":
                         for k in range(attempts):
                             history_file_name = history_filename_format.format(iP=iP, jP=jP, N=N, k=k)
                             cl_generate_history = cl_hfg.format(plokHfgJar=plok_hfg_jar, iP=iP, jP=jP, N=N,
-                                                                    iParam=jParam, 
+                                                                    iParam=iParam, 
                                                                     jParam=jParam,
                                                                     timeStep=timeStep, 
                                                                     count=history_length,
@@ -101,7 +103,7 @@ if __name__ == "__main__":
                                     if (P == 1 and L == 1):
                                         break
                                     cl_invoke_plok = plokInvokeLine.format(plokJar=plok_jar, H=history_file_name, C=C, vectorAmount=vectorAmount, O=output_file, P=P, L=L)
-                                    print cl_invoke_plok
+                                    #print cl_invoke_plok
                                     invoke_timestart = time.time()
                                     os.system(cl_invoke_plok)
                                     invoke_timeend = time.time()
