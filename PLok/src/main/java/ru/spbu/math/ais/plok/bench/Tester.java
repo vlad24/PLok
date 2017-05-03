@@ -11,7 +11,7 @@ import com.google.inject.Injector;
 import ru.spbu.math.ais.plok.MapKeyNames;
 import ru.spbu.math.ais.plok.model.client.Client;
 import ru.spbu.math.ais.plok.model.generator.Generator;
-import ru.spbu.math.ais.plok.model.storagesystem.StorageSystem;
+import ru.spbu.math.ais.plok.model.store.StorageSystem;
 import ru.spbu.math.ais.plok.solvers.histogramsolver.UserChoice.Policy;
 
 public class Tester {

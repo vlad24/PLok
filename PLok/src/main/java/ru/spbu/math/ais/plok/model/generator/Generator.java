@@ -11,7 +11,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import ru.spbu.math.ais.plok.NamedProps;
-import ru.spbu.math.ais.plok.model.storagesystem.StorageSystem;
+import ru.spbu.math.ais.plok.model.store.StorageSystem;
 
 public class Generator{
 	
