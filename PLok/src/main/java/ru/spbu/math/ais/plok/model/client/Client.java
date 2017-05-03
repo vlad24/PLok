@@ -1,6 +1,7 @@
 package ru.spbu.math.ais.plok.model.client;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,9 +11,10 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import ru.spbu.math.ais.plok.MapKeyNames;
 import ru.spbu.math.ais.plok.NamedProps;
 import ru.spbu.math.ais.plok.bench.QueryGenerator;
-import ru.spbu.math.ais.plok.model.storagesystem.StorageSystem;
+import ru.spbu.math.ais.plok.model.store.StorageSystem;
 import ru.spbu.math.ais.plok.solvers.histogramsolver.UserChoice.Policy;
 
 public class Client{
@@ -43,10 +45,12 @@ public class Client{
 				store.serve(nextQ);
 				madeQueries++;
 			}
-			return store.getStatistics();
+			Map<String, Object> report = store.getStatistics();
+			report.put(MapKeyNames.QUERIES_COUNT_KEY, queriesCount);
+			return report;
 		}catch(Exception er){
 			log.error("Client unexpectedly finished!", er);
-			HashMap<String, Object> errorReport = new HashMap<>();
+			LinkedHashMap<String, Object> errorReport = new LinkedHashMap<>();
 			errorReport.put("error", er);
 			return errorReport;
 		}
@@ -56,9 +60,12 @@ public class Client{
 		log.debug("Stating performing {} queries from file", queries.size());
 		try{
 			for (Query q : queries){
+				log.trace("Query: {}", q.toString());
 				store.serve(q);
 			}
-			return store.getStatistics();
+			Map<String, Object> report = store.getStatistics();
+			report.put(MapKeyNames.QUERIES_COUNT_KEY, queries.size());
+			return report;
 		}catch(Exception er){
 			log.error("Client unexpectedly finished!", er);
 			HashMap<String, Object> errorReport = new HashMap<>();

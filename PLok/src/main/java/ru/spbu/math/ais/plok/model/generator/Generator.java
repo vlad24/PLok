@@ -64,6 +64,7 @@ public class Generator{
 			for (int j = 0; j < vectors.size() && isFilling; j++){
 				store.put(vectors.get(j));
 			}
+			store.printState();
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Problem {}!", e.getMessage());

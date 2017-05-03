@@ -2,8 +2,6 @@ package ru.spbu.math.ais.plok.solvers;
 
 import java.util.Map;
 
-import ru.spbu.math.ais.plok.bench.UserConfiguration;
-
 public abstract class Solver {
 	
 	/**

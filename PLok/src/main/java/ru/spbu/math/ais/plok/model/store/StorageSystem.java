@@ -14,8 +14,10 @@ public interface StorageSystem {
 
 	public void put(Vector vector) throws Exception;
 	
-	public Map<String, Object> getStatistics();
-
 	public int getBlockCount();
+	
+	public Map<String, Object> getStatistics();
+	
+	public void printState(); 
 
 }

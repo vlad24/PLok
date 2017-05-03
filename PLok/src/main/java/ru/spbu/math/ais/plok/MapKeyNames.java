@@ -14,15 +14,16 @@ public class MapKeyNames {
 	public static final String J_POLICY_KEY 			= "jPolicy";
 	public static final String I_POLICY_HR_RANGES_KEY 	= "iPolicy_HR_ranges";
 	public static final String J_POLICY_RT_WINDOW_KEY 	= "jPolicy_RT_window";
-	public static final String POLICIES_PARAMS 			= "policies_params";
+	public static final String POLICIES_PARAMS_KEY 		= "policies_params";
+	public static final String QUERIES_COUNT_KEY            = "queriesCount";
 	
 	
 	public static final String TIME_FROM 				= "tFrom";
 	public static final String TIME_TO 					= "tTo";
-	public static final String BLOCKS_READ_FROM_DISK    = "d";
-	public static final String BLOCKS_READ_IN_TOTAL     = "Q";
-	public static final String TARGET_RATIO 			= "d/Q";
+	public static final String BLOCKS_READ_FROM_DISK    = "diskReads";
+	public static final String BLOCKS_READ_IN_TOTAL     = "totalReads";
+	public static final String TARGET_RATIO 			= "missRatio";
 	public static final String CALL_FINISH 				= "call_finish";
 	public static final String CALL_START 				= "call_start";
-	public static final String ARE_HINTS_PROVIDED = "are_hints_provided";
+	public static final String ARE_HINTS_PROVIDED       = "are_hints_provided";
 }

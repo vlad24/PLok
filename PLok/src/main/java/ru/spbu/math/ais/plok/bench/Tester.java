@@ -21,7 +21,6 @@ public class Tester {
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-		log.info("Tester started");
 		UserConfiguration config = new UserConfiguration(args);
 		if (!config.isSolving()){
 			AppConfig appConfig              = new AppConfig(config);
@@ -44,7 +43,7 @@ public class Tester {
 				finalReport = client.attack(store,
 						(Policy)solution.get(MapKeyNames.I_POLICY_KEY),
 						(Policy)solution.get(MapKeyNames.J_POLICY_KEY),
-						(Map<String,Object>)  solution.get(MapKeyNames.POLICIES_PARAMS),
+						(Map<String,Object>)  solution.get(MapKeyNames.POLICIES_PARAMS_KEY),
 						appConfig.getQueryAmount(),
 						appConfig.getHistoryAnalysisReport().getTimeStep()
 				);

@@ -73,7 +73,7 @@ public class HistogramSolver extends Solver {
 		report.put(MapKeyNames.L_KEY,                 L);
 		report.put(MapKeyNames.I_POLICY_KEY,          iPolicy);
 		report.put(MapKeyNames.J_POLICY_KEY,          jPolicy);
-		report.put(MapKeyNames.POLICIES_PARAMS,       policiesParams);
+		report.put(MapKeyNames.POLICIES_PARAMS_KEY,   policiesParams);
 		report.put(MapKeyNames.IS_FILLED_FROM_UP_KEY, true);
 		return report;
 	}

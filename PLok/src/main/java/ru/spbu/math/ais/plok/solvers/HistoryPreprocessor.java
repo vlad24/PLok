@@ -4,45 +4,48 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.spbu.math.ais.plok.MapKeyNames;
 import ru.spbu.math.ais.plok.model.client.Query;
 import ru.spbu.math.ais.plok.solvers.histogramsolver.HistogramSolver;
+import ru.spbu.math.ais.plok.solvers.histogramsolver.UserChoice.Policy;
 
 public class HistoryPreprocessor {
 	private final static Logger log = LoggerFactory.getLogger(HistogramSolver.class);
-	
-	
+
+
 	public static final String ELEMENT_SEPARATOR        = ",";
 	public static final String HINTS_SEPARATOR          = "/";
-	
+
 	public static final String HEAD_STRING_INDICATOR    = "@";
 	public static final String HINT_STRING_INDICATOR    = "!";
 	public static final String COMMENT_STRING_INDICATOR = "#";
-	
+
 	private String filePath;
 	private HistoryAnalysisReport report;
-	
+
 	public HistoryPreprocessor(String file) {
-			this.filePath  = file;
-			this.report = new HistoryAnalysisReport();
+		this.filePath  = file;
+		this.report = new HistoryAnalysisReport();
 	}
-	
+
 	public HistoryAnalysisReport analyzeHistory() throws IOException {
 		String line;
 		boolean hintsProvided = false;
-		boolean headProvided  = false;
 		long prevTime = 0;
-		long timeStep = 0;
+		long timeStepSum = 0;
 		List<Query> queries = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 			while ((line = reader.readLine()) != null) {
 				if (isValidHistoryLine(line)) {
 					Query query = getNextUserQuery(line);
-					timeStep = query.getTime() - prevTime; 
+					timeStepSum += query.getTime() - prevTime; 
 					prevTime = query.getTime();
 					queries.add(query);
 					relaxExtremes(query);
@@ -51,13 +54,23 @@ public class HistoryPreprocessor {
 					if (hints != null) {
 						hintsProvided = true;
 					}
+					hintsProvided = true;
+					String[] hintNames = { 
+							MapKeyNames.I_POLICY_KEY, 
+							MapKeyNames.J_POLICY_KEY,
+							MapKeyNames.J_POLICY_RT_WINDOW_KEY,
+							MapKeyNames.I_POLICY_HR_RANGES_KEY, 
+					};
+					for (int i = 0; i < hints.length; i++) {
+						report.addHint(hintNames[i],  hints[i]);
+					}
 				} else if (isHead(line)){
-					headProvided = true;
 					String[] headParts = line.substring(1).split(ELEMENT_SEPARATOR); 
 					report.setN(Integer.parseInt(headParts[0]));
 				}
 			}
-			report.setTimeStep(timeStep);
+			assert (queries.size() >= 2);
+			report.setTimeStep(timeStepSum / (queries.size() - 1));
 			report.setQueries(queries);
 			report.setHintsProvided(hintsProvided);
 		} catch (IOException er) {
@@ -75,8 +88,6 @@ public class HistoryPreprocessor {
 	private String[] checkAndParseHints(String line){
 		if (line.contains(HINTS_SEPARATOR)){
 			String[] hints = line.substring(1).split(HINTS_SEPARATOR);
-			if (hints.length != 2)
-				throw new IllegalArgumentException("Hint format exception: not correct number of hints");
 			return hints;
 		}else{
 			throw new IllegalArgumentException("Hint format exception: no hints separator " + HINTS_SEPARATOR);
@@ -88,19 +99,19 @@ public class HistoryPreprocessor {
 		String[] row = line.replace(" ", "").split(ELEMENT_SEPARATOR);
 		return new Query(Long.parseLong(row[0]), Integer.parseInt(row[1]), Integer.parseInt(row[2]), Integer.parseInt(row[3]), Integer.parseInt(row[4]));
 	}
-	
+
 	private boolean isComment(String line) {
 		return line.startsWith(COMMENT_STRING_INDICATOR);
 	}
-	
+
 	private boolean isHead(String line) {
 		return line.startsWith(HEAD_STRING_INDICATOR);
 	}
-	
+
 	private boolean isHint(String line) {
 		return line.startsWith(HINT_STRING_INDICATOR);
 	}
-	
+
 	private void relaxExtremes(Query query) {
 		if (query.getTime() <= report.gettBeg())
 			report.settBeg(query.getTime());
@@ -115,7 +126,7 @@ public class HistoryPreprocessor {
 		if (query.getJ2() >= report.getjMax())
 			report.setjMax(query.getJ2());
 	}
-	
+
 }
 
 

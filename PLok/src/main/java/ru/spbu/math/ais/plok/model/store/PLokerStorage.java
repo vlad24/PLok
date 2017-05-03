@@ -80,6 +80,7 @@ public class PLokerStorage implements StorageSystem{
 		log.info("Inited Ploker storage with N={} P={}, L={}, P_S={}, L_S={}, realDiskIO={}",N, P, L, P_S, L_S, realDiskIO);
 	}
 	
+	
 	private void refreshCommonColumn() {
 		currentCommonBlocks.clear();
 		for (int i = 0; i < N / L; i++){
@@ -162,6 +163,11 @@ public class PLokerStorage implements StorageSystem{
 	@Override
 	public int getNextId(Block block) {
 		return nextId.getAndIncrement();
+	}
+
+	@Override
+	public void printState() {
+		//log.debug(index.getVisualBlockScheme());
 	}
 
 }

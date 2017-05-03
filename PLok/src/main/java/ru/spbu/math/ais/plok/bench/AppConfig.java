@@ -67,7 +67,7 @@ public class AppConfig extends AbstractModule{
 	private Solver createSolver() throws IOException {
 		if (userConfig.isTesting()){
 			log.debug("Mock Solver set.");
-			return new MockSolver(userConfig.getTestP(), userConfig.getTestL());
+			return new MockSolver(hReport, userConfig.getTestP(), userConfig.getTestL());
 		}else if (userConfig.getSolverType().equalsIgnoreCase("histogram")){
 			log.debug("Histogram Solver set.");
 			return new HistogramSolver(hReport, getCacheUnitSize());

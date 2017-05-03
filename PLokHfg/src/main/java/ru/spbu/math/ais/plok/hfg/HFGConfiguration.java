@@ -53,6 +53,10 @@ public class HFGConfiguration{
 	@Option(name="--hotRanges",usage="Hot ranges for IPolicy.HotRanges", required=false)
 	private String	hotRanges;
 	
+	@Option(name="--includeHints",usage="If hints should be included into history file", required=false)
+	private boolean includeHints;
+	
+	
 	
 	public HFGConfiguration(){
 		inited = false;
@@ -129,6 +133,14 @@ public class HFGConfiguration{
 	public Long getWindowSize() {
 		return windowSize;
 	}
+	
+	public String getHotRanges() {
+		return hotRanges;
+	}
+	
+	public boolean isIncludeHints() {
+		return includeHints;
+	}
 
 	public Map<String, Object> getPoliciesParams() {
 		LinkedHashMap<String, Object> params = new LinkedHashMap<>();
@@ -140,5 +152,8 @@ public class HFGConfiguration{
 		}
 		return params;
 	}
+
+
+
 	
 }
