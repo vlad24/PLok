@@ -10,6 +10,6 @@ target/
 *.pydevproject*
 *.settings*
 #Custom
-report*
+tmp_*
 storages*
 
