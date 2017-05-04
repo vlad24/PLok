@@ -10,9 +10,19 @@ import ru.spbu.math.ais.plok.model.client.Query;
 public class HistoryAnalysisReport {
 	@Override
 	public String toString() {
-		return "HistoryAnalysisReport [N=" + N + ", tBeg=" + tBeg + ", tEnd=" + tEnd + ", iMin=" + iMin + ", jMin="
-				+ jMin + ", iMax=" + iMax + ", jMax=" + jMax + ", timeStep=" + timeStep + ", areHintsProvided="
-				+ areHintsProvided + ", queries=" + queries.subList(0, Math.min(2, queries.size())) + "..., hints=" + hints + "]";
+		StringBuilder stringBuilder = new StringBuilder("HistoryAnalysisReport[")
+		.append("N=") .append(N)
+		.append(", tBeg=").append(tBeg)
+		.append(", tEnd=").append(tEnd)
+		.append(", iMin=").append(iMin)
+		.append(", jMin=").append(jMin)
+		.append(", iMax=").append(iMax)
+		.append(", jMax=").append(jMax)
+		.append(", timeStep=").append(timeStep)
+		.append(", hints= ").append(hints)
+		.append(", queries=").append(queries.subList(0, Math.min(2, queries.size())))
+		.append("... ]");
+		return stringBuilder.toString();
 	}
 	private int  N;
 	private long tBeg;
