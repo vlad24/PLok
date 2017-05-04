@@ -23,7 +23,7 @@ public class ReportPrinter {
 	private final static Logger log = LoggerFactory.getLogger(ReportPrinter.class);
 
 	private final static String REPORT_DIR = "reports";
-	private static final String ELEMENT_SEPARATOR = ",\t";
+	private static final String ELEMENT_SEPARATOR = ";t";
 	private final static String GENERATED_FILENAME_PATTERN = "tmp_report_%s.txt";
 	private final static SimpleDateFormat GENERATED_FILENAME_ID = new SimpleDateFormat("yyyy_MM_dd--E_kk_mm_ss");
 	private static Joiner.MapJoiner mapJoiner = Joiner.on(ELEMENT_SEPARATOR).withKeyValueSeparator("=");
