@@ -12,7 +12,7 @@ public class HistoryAnalysisReport {
 	public String toString() {
 		return "HistoryAnalysisReport [N=" + N + ", tBeg=" + tBeg + ", tEnd=" + tEnd + ", iMin=" + iMin + ", jMin="
 				+ jMin + ", iMax=" + iMax + ", jMax=" + jMax + ", timeStep=" + timeStep + ", areHintsProvided="
-				+ areHintsProvided + ", queries=" + queries.subList(0, Math.max(5, queries.size())) + ", hints=" + hints + "]";
+				+ areHintsProvided + ", queries=" + queries.subList(0, Math.min(2, queries.size())) + "..., hints=" + hints + "]";
 	}
 	private int  N;
 	private long tBeg;
