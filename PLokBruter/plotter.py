@@ -7,6 +7,10 @@ Created on May 5, 2017
 import math
 import os
 import time
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import LinearLocator
 
 
 #Paths
@@ -42,20 +46,50 @@ class Record:
 
 
 ###############################################################################
+
+
+def plot(ps, ls, ms):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    x = np.asarray(ps)
+    y = np.asarray(ls)
+    z = np.asarray(ms)    
+    ax.set_xlabel('P')
+    ax.set_ylabel('L')
+    ax.set_zlabel('M')
+    ax.set_xlim(min(x), max(x))
+    #ax.plot_surface(x, y, z, linewidth=1)
+    #ax.set_zlim(-1, 1)
+    #colors[x, y] = colortuple[(x + y) % len(colortuple)]
+    ax.plot_trisurf(x, y, z, linewidth=0.2, antialiased=False)
+    plt.show()
+
+
 if __name__ == "__main__":
     plot_start = time.time()
-    results = dict()
+    experimetns = dict()
+    records = list()
     with open(fname) as f:
         for line in f:
             record = Record(line)
+            records.append(record)
             exp = record.get_experiment_code()
             point = (record.P, record.L)
             adding = record.missRatio / attempts
-            if not (exp in results):
-                results[exp] = dict()
-            results[exp][point] = results[exp].get(point, 0) + adding  
-    assert len(results.keys()) == len(set(results.keys()))
-    print results.values()[0]
+            if not (exp in experimetns):
+                experimetns[exp] = dict()
+            experimetns[exp][point] = experimetns[exp].get(point, 0) + adding  
+    assert len(experimetns.keys()) == len(set(experimetns.keys()))
+    for e in experimetns.iteritems():
+        code   = e[0]
+        points = e[1]
+        ps = [p[0] for p in points.keys()] 
+        ls = [p[1] for p in points.keys()] 
+        ms = [v    for v in points.values()] 
+        plot(ps, ls, ms)
+        break
+        
+    
     print "Done, time spent: {} min".format(round((time.time() - plot_start) / 60, 3))
         
     
