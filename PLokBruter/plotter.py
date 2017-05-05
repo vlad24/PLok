@@ -11,6 +11,7 @@ from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import LinearLocator
+from matplotlib import cm
 
 
 #Paths
@@ -54,10 +55,23 @@ def plot(ps, ls, ms):
     x = np.asarray(ps)
     y = np.asarray(ls)
     z = np.asarray(ms)    
+    zmin = np.argmin(z)# [i for i in range(len(z)) if z[i] == zmin]
+    mi = (x[zmin], y[zmin], np.amin(z))
+    print mi
+    #plot points.
+    Ami = np.array([mi]*4)
+    print Ami
+    for i, v in enumerate([-40,40,-100]):
+        Ami[i,i] = v 
+    print Ami
+    #plot points.
+    ax.plot(Ami[:,0], Ami[:,1], Ami[:,2], marker="o", ls="", c=cm.coolwarm(0.))
     ax.set_xlabel('P')
     ax.set_ylabel('L')
     ax.set_zlabel('M')
     ax.set_xlim(min(x), max(x))
+    ax.set_ylim(min(y), max(y))
+    ax.set_zlim(0,      100)
     #ax.plot_surface(x, y, z, linewidth=1)
     #ax.set_zlim(-1, 1)
     #colors[x, y] = colortuple[(x + y) % len(colortuple)]
@@ -80,7 +94,11 @@ if __name__ == "__main__":
                 experimetns[exp] = dict()
             experimetns[exp][point] = experimetns[exp].get(point, 0) + adding  
     assert len(experimetns.keys()) == len(set(experimetns.keys()))
+    i = 0
     for e in experimetns.iteritems():
+        i += 1
+        if (i < 29):
+            continue
         code   = e[0]
         points = e[1]
         ps = [p[0] for p in points.keys()] 
