@@ -82,13 +82,11 @@ public class UserConfiguration{
 
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper("")
-				.omitNullValues()
-				.add("H",     historyFile)
-				.add("C",     cacheRatio)
-				.add("V",     vectorsAmount)
-				.toString()
-				.replace("{", "").replace("}", "");
+		return new StringBuilder()
+				.append("H").append(Reporter.KEY_VALUE_SEPARATOR).append(historyFile).append(Reporter.ELEMENT_SEPARATOR)
+				.append("C").append(Reporter.KEY_VALUE_SEPARATOR).append(cacheRatio).append(Reporter.ELEMENT_SEPARATOR)
+				.append("V").append(Reporter.KEY_VALUE_SEPARATOR).append(vectorsAmount)
+				.toString();
 	}
 	
 	/*

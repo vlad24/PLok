@@ -17,20 +17,22 @@ import com.google.common.base.Joiner;
 
 import ru.spbu.math.ais.plok.utils.MapsUtils;
 
-public class ReportPrinter {
+public class Reporter {
 
 
-	private final static Logger log = LoggerFactory.getLogger(ReportPrinter.class);
 
-	private final static String REPORT_DIR = "reports";
-	private static final String ELEMENT_SEPARATOR = ";\t";
+	private final static Logger log = LoggerFactory.getLogger(Reporter.class);
+
+	public static final  String ELEMENT_SEPARATOR = ";\t";
+	public static final String KEY_VALUE_SEPARATOR = "=";
+	public final static String REPORT_DIR = "reports";
 	private final static String GENERATED_FILENAME_PATTERN = "tmp_report_%s.txt";
 	private final static SimpleDateFormat GENERATED_FILENAME_ID = new SimpleDateFormat("yyyy_MM_dd--E_kk_mm_ss");
-	private static Joiner.MapJoiner mapJoiner = Joiner.on(ELEMENT_SEPARATOR).withKeyValueSeparator("=");
+	private static Joiner.MapJoiner mapJoiner = Joiner.on(ELEMENT_SEPARATOR).withKeyValueSeparator(KEY_VALUE_SEPARATOR);
 	
 
 
-	public static String print(String outputFilePath, boolean outputAppended, String reportPrefix, Map<String, Object> queryReport) throws IOException{
+	public static String printReport(String outputFilePath, boolean outputAppended, String reportPrefix, Map<String, Object> queryReport) throws IOException{
 		BufferedWriter outputWriter  = null;
 		Path targetFilePath = null;
 		targetFilePath = (outputFilePath == null) ?  getUniqueReportFilePath() :  Paths.get(outputFilePath).toAbsolutePath(); 

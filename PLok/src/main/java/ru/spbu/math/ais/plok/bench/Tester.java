@@ -50,7 +50,7 @@ public class Tester {
 			}
 			log.info("Client has finished.");
 			finalReport.putAll(appConfig.getSolution());
-			String reportPath = ReportPrinter.print(
+			String reportPath = Reporter.printReport(
 					config.getOutputFile(),
 					config.isOutputAppended(),
 					config.toString(),
