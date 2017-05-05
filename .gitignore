@@ -12,4 +12,5 @@ target/
 #Custom
 tmp_*
 storages*
+*.jpage
 
