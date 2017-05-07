@@ -55,17 +55,18 @@ def plot(ps, ls, ms):
     x = np.asarray(ps)
     y = np.asarray(ls)
     z = np.asarray(ms)    
-    zmin = np.argmin(z)# [i for i in range(len(z)) if z[i] == zmin]
-    mi = (x[zmin], y[zmin], np.amin(z))
-    print mi
-    #plot points.
-    Ami = np.array([mi]*4)
-    print Ami
-    for i, v in enumerate([-40,40,-100]):
-        Ami[i,i] = v 
-    print Ami
-    #plot points.
-    ax.plot(Ami[:,0], Ami[:,1], Ami[:,2], marker="o", ls="", c=cm.coolwarm(0.))
+    z_min = np.amin(z)
+    z_min_indexes = [i for i in range(len(z)) if z[i] == z_min]
+    mins = [(x[j], y[j], z_min) for j in z_min_indexes]
+    mins_projections = np.array(mins*3)
+    for i in range(len(mins_projections)):
+        mins_projections[i,i] = 0 
+    ax.plot(mins_projections[:,0], mins_projections[:,1], mins_projections[:,2], marker="o", ls="", c='red')
+    labels = ["{}/{}/{:.2f}".format(*m) for m in mins]
+    print "----"
+    print labels
+    for i in range(len(mins)):
+        ax.text(mins[i][0], mins[i][0], mins[i][2], labels[i], color='green') # <--
     ax.set_xlabel('P')
     ax.set_ylabel('L')
     ax.set_zlabel('M')
@@ -75,9 +76,12 @@ def plot(ps, ls, ms):
     #ax.plot_surface(x, y, z, linewidth=1)
     #ax.set_zlim(-1, 1)
     #colors[x, y] = colortuple[(x + y) % len(colortuple)]
-    ax.plot_trisurf(x, y, z, linewidth=0.2, antialiased=False)
+    ax.plot_trisurf(x, y, z, linewidth=0.1, antialiased=False)
     plt.show()
 
+def plot_flat(x, y, z):
+    plt.scatter(x,y,c=z)
+    plt.show()
 
 if __name__ == "__main__":
     plot_start = time.time()
@@ -97,7 +101,7 @@ if __name__ == "__main__":
     i = 0
     for e in experimetns.iteritems():
         i += 1
-        if (i < 29):
+        if (i < 2):
             continue
         code   = e[0]
         points = e[1]
