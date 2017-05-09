@@ -54,6 +54,9 @@ public class PLokerStorage implements StorageSystem{
 			@Named(NamedProps.CACHE_UNIT_SIZE) int cacheSizeInUnits, 
 			Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
 		super();
+		if ((P < 1) || (L < 1) || (N < L)){
+			throw new IllegalArgumentException("Incorrect P,L,N");
+		}
 		peristor = persStorage.get();
 		int cacheSizeInBlocks = cacheSizeInUnits / (P * L);
 		cache = CacheBuilder.newBuilder()
