@@ -20,31 +20,34 @@ output_img_format       = "../PLok/reports/plok_bruter_report_{host}_{id}.txt"
 fname                   = "../PLok/reports/plok_bruter_report_EliteBook_312.txt"
 style                   = "trisurf"
 attempts                = 3
-plots_3d_needed         = True
-plots_2d_needed         = False 
+plots_3d_needed         = False
+plots_2d_needed         = True 
 
 
 class Record:
     
     def __str__(self):
-        return "{}({}, {})".format(self.get_experiment_code(), self.P, self.L)
+        return "{}({}, {}) -> {}".format(self.get_experiment_code(), self.P, self.L, self.missRatio)
+    
+    def __eq__(self, other):
+        return other.get_experiment_code() == self.get_experiment_code()
     
     def __init__(self, record):
         #H=../PLok/hs/H0__FULL_TRACKING-RECENT_TRACKING-100.csv;    C=0.01;    V=5000;    missRatio=100.000;    queriesCount=500;    P=1;    L=2;    isFFU=true;    iPolicy=FULL_TRACKING;    jPolicy=RECENT_TRACKING;    jPolicy_RT_window=2
         parts = record.rstrip().split(";\t")
-        self.iP        = str  (parts[8].split("=")[1])
-        self.jP        = str  (parts[9].split("=")[1])
-        self.W         = int  (parts[10].split("=")[1])
-        self.hrs       = str  (parts[11].split("=")[1]) if len(parts) > 11 else None
-        self.N         = int  (parts[0].split("-")[2].split(".")[0])
-        self.C         = float(parts[1].split("=")[1])
-        self.V         = int  (parts[2].split("=")[1])
-        self.Q         = int  (parts[4].split("=")[1])
-        self.isFUU     = bool (parts[7].split("=")[1])
+        self.iP         = str  (parts[8].split("=")[1])
+        self.jP         = str  (parts[9].split("=")[1])
+        self.W          = int  (parts[10].split("=")[1])
+        self.hrs        = str  (parts[11].split("=")[1]) if len(parts) > 11 else None
+        self.N          = int  (parts[0].split("-")[2].split(".")[0])
+        self.C          = float(parts[1].split("=")[1])
+        self.V          = int  (parts[2].split("=")[1])
+        self.Q          = int  (parts[4].split("=")[1])
+        self.isFUU      = bool (parts[7].split("=")[1])
         #####
-        self.P         = int  (parts[5].split("=")[1])
-        self.L         = int  (parts[6].split("=")[1])
-        self.attempt   = int  (parts[0].split("__")[0].split("/")[-1][1])
+        self.P          = int  (parts[5].split("=")[1])
+        self.L          = int  (parts[6].split("=")[1])
+        self.exp_series = int  (parts[0].split("__")[0].split("/")[-1][1])
         self.missRatio = float(parts[3].split("=")[1])
     
     def get_experiment_code(self):
@@ -108,7 +111,7 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
 
 
 def plot_2d(xs, ys):
-    plt.plot(xs,ys)
+    plt.plot(xs,ys, linestyle='-', marker='o', color='orange')
     plt.show()
 
 if __name__ == "__main__":
@@ -141,10 +144,17 @@ if __name__ == "__main__":
         xs = []
         ys = []
         for r in records:
-            if (r.iP == "FULL_TRACKING" and r.jP == "RECENT_TRACKING"  and r.W == 2 and r.C == 0.01 and r.N == 100 and r.L == 100):
+            if (r.iP == "FULL_TRACKING"   and 
+                r.jP == "RECENT_TRACKING" and 
+                r.W == 2                  and 
+                r.C == 0.01               and 
+                r.N == 100                and 
+                r.L == 2                  and
+                r.exp_series == 1
+                ):
                 xs.append(r.P)
                 ys.append(r.missRatio)
         print xs
-        print ys
+        print ys    
         plot_2d(xs, ys) 
     print "Done, time spent: {} min".format(round((time.time() - plot_start) / 60, 3))
