@@ -20,6 +20,12 @@ plokInvokeLine = 'java -jar {plokJar}   -H {H} -C {C} -V {vectorAmount} --test -
 hfgCL_FT_RT      = 'java -jar {plokHfgJar}  --iPolicy FULL_TRACKING  --jPolicy RECENT_TRACKING --vectorSize {N} \
 --timeStep {timeStep} --count {count} -O {output_file} --windowSize {jParam} --verbosity error --includeHints'
 
+hfgCL_FT_FT      = 'java -jar {plokHfgJar}  --iPolicy FULL_TRACKING  --jPolicy FULL_TRACKING --vectorSize {N} \
+--timeStep {timeStep} --count {count} -O {output_file} --verbosity error --includeHints'
+
+hfgCL_HR_FT      = 'java -jar {plokHfgJar}  --iPolicy HOT_RANGES  --jPolicy FULL_TRACKING --vectorSize {N} \
+--timeStep {timeStep} --count {count} -O {output_file} --hotRanges {iParam} --verbosity error --includeHints'
+
 hfgCL_HR_RT      = 'java -jar {plokHfgJar}  --iPolicy HOT_RANGES  --jPolicy  RECENT_TRACKING --vectorSize {N} \
 --timeStep {timeStep} --count {count} -O {output_file} --hotRanges {iParam} --windowSize {jParam} --verbosity error --includeHints'
 
@@ -46,11 +52,17 @@ if __name__ == "__main__":
     output_file = output_file_format.format(host=hostanme, id=invocation_id)
     
     #Bruted parameters
-    policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
-    Ws       = [2, timeStep // 2, timeStep * 2]
+    #policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
+    #Ws       = [2, timeStep // 2, timeStep * 2]
+    #HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
+    #Ns       = [100, 720, 1019]
+    #Cs       = [0.01, 0.05]
+
+    policies = [("FULL_TRACKING", "FULL_TRACKING"), ("HOT_RANGES", "FULL_TRACKING")]
+    Ws       = [timeStep // 2, timeStep * 2]
     HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
-    Ns       = [100, 720, 1019]
-    Cs       = [0.01, 0.05]
+    Ns       = [100, 720]
+    Cs       = [0.01, 0.05]    
     
     if not real_brute:
         vectorAmount = 101
@@ -79,6 +91,14 @@ if __name__ == "__main__":
                     iParams = HRs
                     jParams = Ws
                     cl_hfg = hfgCL_HR_RT
+                if (iP == "HOT_RANGES"    and jP == "FULL_TRACKING"):
+                    iParams = HRs
+                    jParams = [None]
+                    cl_hfg = hfgCL_HR_FT
+                if (iP == "FULL_TRACKING"    and jP == "FULL_TRACKING"):
+                    iParams = [None]
+                    jParams = [None]
+                    cl_hfg = hfgCL_FT_FT
                 for jParam in jParams:
                     for iParam in iParams:
                         for k in range(attempts):
