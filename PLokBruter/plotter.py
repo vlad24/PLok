@@ -20,14 +20,21 @@ output_img_format       = "../PLok/reports/plok_bruter_report_{host}_{id}.txt"
 fname                   = "../PLok/reports/plok_bruter_report_EliteBook_312.txt"
 style                   = "trisurf"
 attempts                = 3
+plots_3d_needed         = True
+plots_2d_needed         = False 
 
 
 class Record:
+    
+    def __str__(self):
+        return "{}({}, {})".format(self.get_experiment_code(), self.P, self.L)
+    
     def __init__(self, record):
+        #H=../PLok/hs/H0__FULL_TRACKING-RECENT_TRACKING-100.csv;    C=0.01;    V=5000;    missRatio=100.000;    queriesCount=500;    P=1;    L=2;    isFFU=true;    iPolicy=FULL_TRACKING;    jPolicy=RECENT_TRACKING;    jPolicy_RT_window=2
         parts = record.rstrip().split(";\t")
-        self.jP        = str  (parts[8].split("=")[1])
-        self.iP        = str  (parts[9].split("=")[1])
-        self.W         = str  (parts[10].split("=")[1])
+        self.iP        = str  (parts[8].split("=")[1])
+        self.jP        = str  (parts[9].split("=")[1])
+        self.W         = int  (parts[10].split("=")[1])
         self.hrs       = str  (parts[11].split("=")[1]) if len(parts) > 11 else None
         self.N         = int  (parts[0].split("-")[2].split(".")[0])
         self.C         = float(parts[1].split("=")[1])
@@ -41,7 +48,7 @@ class Record:
         self.missRatio = float(parts[3].split("=")[1])
     
     def get_experiment_code(self):
-        return '''Experiment[jP={}; iP={}; W={}; HRS={}; N={}; C={}; V={}; Q={}; isFFU={}]'''.format(
+        return '''Experiment[iP={}; jP={}; W={}; HRS={}; N={}; C={}; V={}; Q={}; isFFU={}]'''.format(
                 self.iP, self.jP, self.W, self.hrs, self.N, 
                 self.C,self.V, self.Q, self.isFUU
                 )
@@ -50,7 +57,7 @@ class Record:
 ###############################################################################
 
 
-def plot(ps, ls, ms, title, lower_label="", color=None, with_projections=True, style="trisurf"):
+def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projections=True, style="trisurf"):
     fig = plt.figure()
     x = np.asarray(ps)
     y = np.asarray(ls)
@@ -93,14 +100,16 @@ def plot(ps, ls, ms, title, lower_label="", color=None, with_projections=True, s
         plt.gray()
         plt.scatter(x,y,c=z, s=75)
     fig.set_size_inches(18.5, 10.5, forward=True)
-    img_name = "img/{style}_{title}.jpg".format(style=style, title=title)
+    img_name = "3dplots/{style}_{title}.jpg".format(style=style, title=title)
     plt.savefig(img_name)
     print "Saved", img_name
     plt.close()
     #plt.show()
 
 
-
+def plot_2d(xs, ys):
+    plt.plot(xs,ys)
+    plt.show()
 
 if __name__ == "__main__":
     plot_start = time.time()
@@ -108,24 +117,34 @@ if __name__ == "__main__":
     records = list()
     with open(fname) as f:
         for line in f:
-            record = Record(line)
-            records.append(record)
-            exp = record.get_experiment_code()
-            point = (record.P, record.L)
-            adding = record.missRatio / attempts
-            if not (exp in experimetns):
-                experimetns[exp] = dict()
-            experimetns[exp][point] = experimetns[exp].get(point, 0) + adding  
+            if (line.strip() != ''):
+                record = Record(line)
+                records.append(record)
+                exp = record.get_experiment_code()
+                point = (record.P, record.L)
+                adding = record.missRatio / attempts
+                if not (exp in experimetns):
+                    experimetns[exp] = dict()
+                experimetns[exp][point] = experimetns[exp].get(point, 0) + adding  
     assert len(experimetns.keys()) == len(set(experimetns.keys()))
-    i = 0
-    for e in sorted(experimetns.iteritems()):
-        i += 1
-        code   = e[0]
-        points = e[1]
-        ps = [p[0]       for p in points.keys()] 
-        ls = [p[1]       for p in points.keys()] 
-        ms = [100 - v    for v in points.values()] 
-        plot(ps, ls, ms, code,with_projections=True, style=style)
+    if plots_3d_needed:
+        i = 0
+        for e in sorted(experimetns.iteritems()):
+            i += 1
+            code   = e[0]
+            points = e[1]
+            ps = [p[0]       for p in points.keys()] 
+            ls = [p[1]       for p in points.keys()] 
+            ms = [100 - v    for v in points.values()] 
+            save_3D_plots(ps, ls, ms, code,with_projections=True, style=style)
+    if plots_2d_needed:
+        xs = []
+        ys = []
+        for r in records:
+            if (r.iP == "FULL_TRACKING" and r.jP == "RECENT_TRACKING"  and r.W == 2 and r.C == 0.01 and r.N == 100 and r.L == 100):
+                xs.append(r.P)
+                ys.append(r.missRatio)
+        print xs
+        print ys
+        plot_2d(xs, ys) 
     print "Done, time spent: {} min".format(round((time.time() - plot_start) / 60, 3))
-        
-    
