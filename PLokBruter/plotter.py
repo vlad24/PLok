@@ -4,21 +4,22 @@ Created on May 5, 2017
 @author: vlad
 '''
 
-import math
+from mpl_toolkits.mplot3d import axes3d
 import os
 import time
-from mpl_toolkits.mplot3d import axes3d
+
+from matplotlib import cm
+
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import LinearLocator
-from matplotlib import cm
 
 
 #Paths
 history_filename_format = "../PLok/hs/H{k}__{iP}-{jP}-{N}.csv"
-output_img_format      = "../PLok/reports/plok_bruter_report_{host}_{id}.txt"
-fname = "../PLok/reports/plok_bruter_report_EliteBook_312.txt"
-attempts     = 3
+output_img_format       = "../PLok/reports/plok_bruter_report_{host}_{id}.txt"
+fname                   = "../PLok/reports/plok_bruter_report_EliteBook_312.txt"
+style                   = "trisurf"
+attempts                = 3
 
 
 class Record:
@@ -49,39 +50,57 @@ class Record:
 ###############################################################################
 
 
-def plot(ps, ls, ms):
+def plot(ps, ls, ms, title, lower_label="", color=None, with_projections=True, style="trisurf"):
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
     x = np.asarray(ps)
     y = np.asarray(ls)
     z = np.asarray(ms)    
-    z_min = np.amin(z)
-    z_min_indexes = [i for i in range(len(z)) if z[i] == z_min]
-    mins = [(x[j], y[j], z_min) for j in z_min_indexes]
-    mins_projections = np.array(mins*3)
-    for i in range(len(mins_projections)):
-        mins_projections[i,i] = 0 
-    ax.plot(mins_projections[:,0], mins_projections[:,1], mins_projections[:,2], marker="o", ls="", c='red')
-    labels = ["{}/{}/{:.2f}".format(*m) for m in mins]
-    print "----"
-    print labels
-    for i in range(len(mins)):
-        ax.text(mins[i][0], mins[i][0], mins[i][2], labels[i], color='green') # <--
-    ax.set_xlabel('P')
-    ax.set_ylabel('L')
-    ax.set_zlabel('M')
-    ax.set_xlim(min(x), max(x))
-    ax.set_ylim(min(y), max(y))
-    ax.set_zlim(0,      100)
-    #ax.plot_surface(x, y, z, linewidth=1)
-    #ax.set_zlim(-1, 1)
-    #colors[x, y] = colortuple[(x + y) % len(colortuple)]
-    ax.plot_trisurf(x, y, z, linewidth=0.1, antialiased=False)
-    plt.show()
+    if (style != "flat"):
+        ax = fig.add_subplot(111, projection='3d')
+        ##################################### Extreme point plotting
+        z_extreme = np.amax(z)
+        z_extr_indexes = np.asarray([i for i in range(len(z)) if z[i] == z_extreme])
+        extremes = np.asarray([[x[j], y[j], z_extreme] for j in z_extr_indexes])
+        ax.plot(extremes[:,0], extremes[:,1], extremes[:,2], marker="o", ls="", c='red')
+        ##################################### Extreme point projections plotting
+        if (with_projections):
+            projections = np.array(list(extremes) * 3)
+            for i in range(len(projections)):
+                projections[i,i] = 0 
+            ax.plot(projections[:,0], projections[:,1], projections[:,2], marker='o', ls='', c='cyan')
+            labels = ["(P={:.0f}, L={:.0f}, 100-M={:.2f})".format(*m) for m in extremes]
+            for i in range(len(extremes)):
+                ax.text(extremes[i][0], extremes[i][1], extremes[i][2], labels[i], color='red', zdir='x')
+        ##################################### All points plotting
+        ########################Labeling
+        ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
+        if len(extremes) == 1:
+            (exP , exL, _)= extremes[0]
+            lower_label = "P is {:.1f}%, L is {:.1f}% of max possible".format(exP/np.amax(ps) * 100, exL/np.amax(ls) * 100)
+        ax.text2D(0.05, 0.05, lower_label, transform=ax.transAxes)
+        ax.set_xlabel('P')
+        ax.set_ylabel('L')
+        ax.set_zlabel('100 - missRatio')
+        ax.set_xlim(min(x), max(x))
+        ax.set_ylim(min(y), max(y))
+        ax.set_zlim(0     , 100)
+        #### Plot all points
+        if (style == "bar"):
+            ax.bar(x,y,z, zdir='y')
+        else:
+            ax.plot_trisurf(x, y, z, cmap=plt.cm.gray if color is None else color, linewidth=0.1, antialiased=False)
+    else:
+        plt.gray()
+        plt.scatter(x,y,c=z, s=75)
+    fig.set_size_inches(18.5, 10.5, forward=True)
+    img_name = "img/{style}_{title}.jpg".format(style=style, title=title)
+    plt.savefig(img_name)
+    print "Saved", img_name
+    plt.close()
+    #plt.show()
 
-def plot_flat(x, y, z):
-    plt.scatter(x,y,c=z)
-    plt.show()
+
+
 
 if __name__ == "__main__":
     plot_start = time.time()
@@ -99,19 +118,14 @@ if __name__ == "__main__":
             experimetns[exp][point] = experimetns[exp].get(point, 0) + adding  
     assert len(experimetns.keys()) == len(set(experimetns.keys()))
     i = 0
-    for e in experimetns.iteritems():
+    for e in sorted(experimetns.iteritems()):
         i += 1
-        if (i < 2):
-            continue
         code   = e[0]
         points = e[1]
-        ps = [p[0] for p in points.keys()] 
-        ls = [p[1] for p in points.keys()] 
-        ms = [v    for v in points.values()] 
-        plot(ps, ls, ms)
-        break
-        
-    
+        ps = [p[0]       for p in points.keys()] 
+        ls = [p[1]       for p in points.keys()] 
+        ms = [100 - v    for v in points.values()] 
+        plot(ps, ls, ms, code,with_projections=True, style=style)
     print "Done, time spent: {} min".format(round((time.time() - plot_start) / 60, 3))
         
     
