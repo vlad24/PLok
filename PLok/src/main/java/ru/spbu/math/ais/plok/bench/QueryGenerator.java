@@ -1,6 +1,5 @@
 package ru.spbu.math.ais.plok.bench;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ public class QueryGenerator {
 	private final static org.slf4j.Logger log = LoggerFactory.getLogger(QueryGenerator.class);
 
 	private int N;
-	private long timeStart = Long.MIN_VALUE;
+	private long timeStart = 0L;
 	private Map<String, Object> policiesParams;
 	private Policy jPolicy;
 	private Policy iPolicy;

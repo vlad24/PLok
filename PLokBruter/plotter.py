@@ -61,12 +61,12 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
     fig = plt.figure()
     x = np.asarray(ps)
     y = np.asarray(ls)
-    z = np.asarray(ms)    
+    calls_made = np.asarray(ms)    
     if (style != "flat"):
         ax = fig.add_subplot(111, projection='3d')
         ##################################### Extreme point plotting
-        z_extreme = np.amax(z)
-        z_extr_indexes = np.asarray([i for i in range(len(z)) if z[i] == z_extreme])
+        z_extreme = np.amax(calls_made)
+        z_extr_indexes = np.asarray([i for i in range(len(calls_made)) if calls_made[i] == z_extreme])
         extremes = np.asarray([[x[j], y[j], z_extreme] for j in z_extr_indexes])
         ax.plot(extremes[:,0], extremes[:,1], extremes[:,2], marker="o", ls="", c='red')
         ##################################### Extreme point projections plotting
@@ -93,12 +93,12 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
         ax.set_zlim(0     , 100)
         #### Plot all points
         if (style == "bar"):
-            ax.bar(x,y,z, zdir='y')
+            ax.bar(x,y,calls_made, zdir='y')
         else:
-            ax.plot_trisurf(x, y, z, cmap=plt.cm.gray if color is None else color, linewidth=0.1, antialiased=False)
+            ax.plot_trisurf(x, y, calls_made, cmap=plt.cm.gray if color is None else color, linewidth=0.1, antialiased=False)
     else:
         plt.gray()
-        plt.scatter(x,y,c=z, s=75)
+        plt.scatter(x,y,c=calls_made, s=75)
     fig.set_size_inches(18.5, 10.5, forward=True)
     img_name = "3dplots/{style}_{title}.jpg".format(style=style, title=title)
     plt.savefig(img_name)

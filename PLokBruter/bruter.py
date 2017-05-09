@@ -35,11 +35,12 @@ attempts     = 3
 timeStep     = 10
 iterFactorL  = 1.2
 iterFactorP  = 2
-
+max_inv_id   = 10000
+est_norm_constant = 3.6
 
 ###############################################################################
 if __name__ == "__main__":
-    invocation_id = int(time.time()) % 1000
+    invocation_id = int(time.time()) % 10000
     hostanme   = os.uname()[1]
     real_brute = True
     user_input = raw_input("Start Auto Configured Real Brute?(y/n, default=y) : ")
@@ -47,22 +48,27 @@ if __name__ == "__main__":
     if not quickstart:
         user_input = raw_input("Real Brute? (y/n, default:y)")
         real_brute = (user_input == "" or user_input == "y") 
-        user_input = raw_input("Enter invocation id (y/n, default=y) : ")
-        invocation_id = int(user_input)
+        user_input = raw_input("Enter invocation id (0-{}, default=0) : ".format(max_inv_id - 1))
+        invocation_id = 0 if user_input == "" else int(user_input) % max_inv_id
     output_file = output_file_format.format(host=hostanme, id=invocation_id)
     
+    
     #Bruted parameters
+    ##############################################################################################3
+    ########### brute312:
     #policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
     #Ws       = [2, timeStep // 2, timeStep * 2]
     #HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
     #Ns       = [100, 720, 1019]
     #Cs       = [0.01, 0.05]
-
+    
+    ########### current:
     policies = [("FULL_TRACKING", "FULL_TRACKING"), ("HOT_RANGES", "FULL_TRACKING")]
     Ws       = [timeStep // 2, timeStep * 2]
     HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
     Ns       = [100, 720]
     Cs       = [0.01, 0.05]    
+    ##############################################################################################3
     
     if not real_brute:
         vectorAmount = 101
@@ -76,6 +82,12 @@ if __name__ == "__main__":
     assert all(map(lambda x: x < 1, Cs))
     assert timeStep > 1
     
+    calls_rough_est = int ( 
+                len(policies) * len(Ws) * len(HRs) * len(Ns) * len(Cs) *\
+                math.log(max(Ns), iterFactorL) * \
+                math.log(int(vectorAmount * 0.41), 2) / est_norm_constant \
+            )
+    calls_made = 0
     brute_start = time.time()
     for policy_pair in policies:
         for C in Cs:
@@ -110,14 +122,14 @@ if __name__ == "__main__":
                                                                     count=history_length,
                                                                     output_file=history_file_name
                                                                 )
-                            #print cl_generate_history
+                            print cl_generate_history
                             os.system(cl_generate_history)
                             print "~~~Trying different P,L values for {} # {}, {} # {} # {}, {}  :".format(k, iP, jP, N, jParam, iParam)
                             cacheSizeUnits = int(vectorAmount * N * C)
                             maxL = N
                             L = 1
                             while L <= maxL:
-                                maxP = min(cacheSizeUnits // L, vectorAmount * 0.41)
+                                maxP = min(cacheSizeUnits // L, int(vectorAmount * 0.41))
                                 P = 1
                                 while (P <= maxP):
                                     if (P == 1 and L == 1):
@@ -127,8 +139,15 @@ if __name__ == "__main__":
                                     invoke_timestart = time.time()
                                     os.system(cl_invoke_plok)
                                     invoke_timeend = time.time()
-                                    print "_______ PL={}x{} \t took: {}s".format(P, L, round(invoke_timeend - invoke_timestart, 3))
+                                    duration = invoke_timeend - invoke_timestart
+                                    calls_made += 1
+                                    print "_______ PL={}x{} \t took: {}s \t Progress est: {}% \t Time left est :{}m".format(P, 
+                                                                                                                            L,
+                                                                                                                            round(duration, 2),
+                                                                                                                            round(100.0 * calls_made / calls_rough_est),
+                                                                                                                            round(duration * (calls_rough_est - calls_made) / 60, 2)
+                                                                                                                           )
                                     P *= iterFactorP
                                 L = int(math.ceil(L * iterFactorL))
-                            
+                            os.remove(history_file_name)
     print "Done, time spent: {} min".format(round((time.time() - brute_start) / 60, 3))
