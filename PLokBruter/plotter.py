@@ -48,9 +48,9 @@ class Record:
         self.missRatio = float(parts[3].split("=")[1])
     
     def get_experiment_code(self):
-        return '''Experiment[iP={}; jP={}; W={}; HRS={}; N={}; C={}; V={}; Q={}; isFFU={}]'''.format(
-                self.iP, self.jP, self.W, self.hrs, self.N, 
-                self.C,self.V, self.Q, self.isFUU
+        return '''Experiment[iP={}; jP={}; W={}; HRS={}; C={}; N={}; V={}; Q={}; isFFU={}]'''.format(
+                self.iP, self.jP, self.W, self.hrs, self.C, self.N,
+                self.V, self.Q, self.isFUU
                 )
 
 
