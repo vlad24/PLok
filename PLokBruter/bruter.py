@@ -94,7 +94,7 @@ if __name__ == "__main__":
                             os.system(cl_generate_history)
                             print "~~~Trying different P,L values for {} # {}, {} # {} # {}, {}  :".format(k, iP, jP, N, jParam, iParam)
                             cacheSizeUnits = int(vectorAmount * N * C)
-                            maxL = N + 1
+                            maxL = N
                             L = 1
                             while L <= maxL:
                                 maxP = min(cacheSizeUnits // L, vectorAmount * 0.41)
