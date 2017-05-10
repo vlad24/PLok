@@ -15,13 +15,11 @@ import numpy as np
 
 
 #Paths
-history_filename_format = "../PLok/hs/H{k}__{iP}-{jP}-{N}.csv"
-output_img_format       = "../PLok/reports/plok_bruter_report_{host}_{id}.txt"
-fname                   = "../PLok/reports/plok_bruter_report_EliteBook_312.txt"
+fname                   = "../PLok/reports/plok_bruter_report_{}_{}.txt"
 style                   = "trisurf"
 attempts                = 3
-plots_3d_needed         = False
-plots_2d_needed         = True 
+plots_3d_needed         = True
+plots_2d_needed         = False 
 
 
 class Record:
@@ -37,7 +35,7 @@ class Record:
         parts = record.rstrip().split(";\t")
         self.iP         = str  (parts[8].split("=")[1])
         self.jP         = str  (parts[9].split("=")[1])
-        self.W          = int  (parts[10].split("=")[1])
+        self.W          = int  (parts[10].split("=")[1]) if len(parts) > 10 else None
         self.hrs        = str  (parts[11].split("=")[1]) if len(parts) > 11 else None
         self.N          = int  (parts[0].split("-")[2].split(".")[0])
         self.C          = float(parts[1].split("=")[1])
@@ -60,7 +58,7 @@ class Record:
 ###############################################################################
 
 
-def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projections=True, style="trisurf"):
+def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projections=True, style="trisurf", img_prefix="plok"):
     fig = plt.figure()
     x = np.asarray(ps)
     y = np.asarray(ls)
@@ -103,7 +101,7 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
         plt.gray()
         plt.scatter(x,y,c=calls_made, s=75)
     fig.set_size_inches(18.5, 10.5, forward=True)
-    img_name = "3dplots/{style}_{title}.jpg".format(style=style, title=title)
+    img_name = "3dplots/{prefix}_{style}_{title}.jpg".format(prefix=img_prefix, style=style, title=title)
     plt.savefig(img_name)
     print "Saved", img_name
     plt.close()
@@ -118,7 +116,17 @@ if __name__ == "__main__":
     plot_start = time.time()
     experimetns = dict()
     records = list()
-    with open(fname) as f:
+    invocation_id = 0
+    hostanme   = os.uname()[1]
+    user_input = raw_input("Enter hostname that generated report(default={}): ".format(hostanme))
+    hostanme = hostanme if user_input == "" else user_input 
+    user_input = raw_input("Enter id of report (default=0): ")
+    invocation_id = 0 if user_input == "" else int(user_input)
+    img_prefix = ""
+    if plots_3d_needed:
+        user_input = raw_input("Enter prefix of generated images(default={}): ".format(invocation_id))
+        img_prefix = str(invocation_id) if user_input == "" else str(user_input)
+    with open(fname.format(hostanme, invocation_id)) as f:
         for line in f:
             if (line.strip() != ''):
                 record = Record(line)
@@ -139,7 +147,7 @@ if __name__ == "__main__":
             ps = [p[0]       for p in points.keys()] 
             ls = [p[1]       for p in points.keys()] 
             ms = [100 - v    for v in points.values()] 
-            save_3D_plots(ps, ls, ms, code,with_projections=True, style=style)
+            save_3D_plots(ps, ls, ms, code,with_projections=True, style=style, img_prefix=img_prefix)
     if plots_2d_needed:
         xs = []
         ys = []
