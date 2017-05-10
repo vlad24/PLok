@@ -63,7 +63,7 @@ if __name__ == "__main__":
     #Cs       = [0.01, 0.05]
     
     ########### current:
-    policies = [("FULL_TRACKING", "FULL_TRACKING"), ("HOT_RANGES", "FULL_TRACKING")]
+    policies = [("HOT_RANGES", "FULL_TRACKING"), ("FULL_TRACKING", "FULL_TRACKING")]
     Ws       = [timeStep // 2, timeStep * 2]
     HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
     Ns       = [100, 720]
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     assert timeStep > 1
     
     calls_rough_est = int ( 
-                len(policies) * len(Ws) * len(HRs) * len(Ns) * len(Cs) *\
+                len(policies) * len(Ws) * len(HRs) * len(Ns) * len(Cs) *  \
                 math.log(max(Ns), iterFactorL) * \
                 math.log(int(vectorAmount * 0.41), 2) / est_norm_constant \
             )
@@ -135,7 +135,7 @@ if __name__ == "__main__":
                                     if (P == 1 and L == 1):
                                         break
                                     cl_invoke_plok = plokInvokeLine.format(plokJar=plok_jar, H=history_file_name, C=C, vectorAmount=vectorAmount, O=output_file, P=P, L=L)
-                                    #print cl_invoke_plok
+                                    print cl_invoke_plok
                                     invoke_timestart = time.time()
                                     os.system(cl_invoke_plok)
                                     invoke_timeend = time.time()
