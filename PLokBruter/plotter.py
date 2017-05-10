@@ -35,8 +35,15 @@ class Record:
         parts = record.rstrip().split(";\t")
         self.iP         = str  (parts[8].split("=")[1])
         self.jP         = str  (parts[9].split("=")[1])
-        self.W          = int  (parts[10].split("=")[1]) if len(parts) > 10 else None
-        self.hrs        = str  (parts[11].split("=")[1]) if len(parts) > 11 else None
+        self.W          = None
+        self.hrs        = None
+        extraParamPos   = 10
+        if self.jP == "RECENT_TRACKING":
+            self.W          = int  (parts[extraParamPos].split("=")[1])
+            extraParamPos += 1
+        if self.iP == "HOT_RANGES":
+            self.hrs        = str  (parts[extraParamPos].split("=")[1])
+            extraParamPos += 1
         self.N          = int  (parts[0].split("-")[2].split(".")[0])
         self.C          = float(parts[1].split("=")[1])
         self.V          = int  (parts[2].split("=")[1])
@@ -83,8 +90,10 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
         ########################Labeling
         ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
         if len(extremes) == 1:
-            (exP , exL, _)= extremes[0]
-            lower_label = "P is {:.1f}%, L is {:.1f}% of max possible".format(exP/np.amax(ps) * 100, exL/np.amax(ls) * 100)
+            (exP , exL, exM) = extremes[0]
+            lower_label = "Extreme: (P={:.0f}, L={:.0f}, 100-M={:.2f}). \n P is {:.1f}%, L is {:.1f}% of max possible".format(
+                                         exP, exL, exM, exP/np.amax(ps) * 100, exL/np.amax(ls) * 100
+                                         )
         ax.text2D(0.05, 0.05, lower_label, transform=ax.transAxes)
         ax.set_xlabel('P')
         ax.set_ylabel('L')
@@ -147,7 +156,7 @@ if __name__ == "__main__":
             ps = [p[0]       for p in points.keys()] 
             ls = [p[1]       for p in points.keys()] 
             ms = [100 - v    for v in points.values()] 
-            save_3D_plots(ps, ls, ms, code,with_projections=True, style=style, img_prefix=img_prefix)
+            save_3D_plots(ps, ls, ms, code,with_projections=False, style=style, img_prefix=img_prefix)
     if plots_2d_needed:
         xs = []
         ys = []
