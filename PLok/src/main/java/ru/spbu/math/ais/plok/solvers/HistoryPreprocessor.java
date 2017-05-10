@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -55,14 +53,14 @@ public class HistoryPreprocessor {
 						hintsProvided = true;
 					}
 					hintsProvided = true;
-					String[] hintNames = { 
-							MapKeyNames.I_POLICY_KEY, 
-							MapKeyNames.J_POLICY_KEY,
-							MapKeyNames.J_POLICY_RT_WINDOW_KEY,
-							MapKeyNames.I_POLICY_HR_RANGES_KEY, 
-					};
-					for (int i = 0; i < hints.length; i++) {
-						report.addHint(hintNames[i],  hints[i]);
+					int hintPos = 0;
+					report.addHint(MapKeyNames.I_POLICY_KEY, hints[hintPos++]);
+					report.addHint(MapKeyNames.J_POLICY_KEY, hints[hintPos++]);
+					if (report.getHints().get(MapKeyNames.I_POLICY_KEY).equals(Policy.HOT_RANGES.toString())){
+						report.addHint(MapKeyNames.I_POLICY_HR_RANGES_KEY, hints[hintPos++]);
+					}
+					if (report.getHints().get(MapKeyNames.J_POLICY_KEY).equals(Policy.RECENT_TRACKING.toString())){
+						report.addHint(MapKeyNames.J_POLICY_RT_WINDOW_KEY, hints[hintPos++]);
 					}
 				} else if (isHead(line)){
 					String[] headParts = line.substring(1).split(ELEMENT_SEPARATOR); 
