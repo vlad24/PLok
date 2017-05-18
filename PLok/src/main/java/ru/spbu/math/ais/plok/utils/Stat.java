@@ -115,6 +115,11 @@ public class Stat {
 		return from + (long)delta;
 	}
 	
+	public static int getRandomUniform(int from, int to) {
+		float delta = new Random().nextFloat() * (to - from);
+		return from + (int)delta;
+	}
+	
 	public static float getRandomUniformFloat() {
 		return new Random().nextFloat();
 	}

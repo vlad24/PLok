@@ -36,8 +36,9 @@ public class QueryGenerator {
 		long j1 = 0;
 		long j2 = time;
 		if (iPolicy == Policy.FULL_TRACKING){
-			i1 = (int) Stat.getRandomUniform(0,  N - 1);
-			i2 = (int) Stat.getRandomUniform(i1, N - 1);
+			int length = Stat.getRandomUniform(1, N);
+			i1 = Stat.getRandomUniform(0, N - length);
+			i2 = i1 + length;
 		}else if (iPolicy == Policy.HOT_RANGES) {
 			if (Double.compare(Stat.getRandomUniformFloat(), HOT_RANGE_CHOICE_THRESHOLD) < 0){
 				log.trace("Generating index range based on hot ranges");
@@ -55,8 +56,9 @@ public class QueryGenerator {
 			}
 		}
 		if (jPolicy == Policy.FULL_TRACKING){
-			j1 = Stat.getRandomUniform(timeStart, time);
-			j2 = Stat.getRandomUniform(j1,        time);
+			long length = Stat.getRandomUniform(1, time);
+			j1 = Stat.getRandomUniform(timeStart, timeStart + time - length);
+			j2 = j1 + length;
 		}else if (jPolicy == Policy.RECENT_TRACKING){
 			Long w = (Long) policiesParams.get(MapKeyNames.J_POLICY_RT_WINDOW_KEY);
 			assert (w != null); 

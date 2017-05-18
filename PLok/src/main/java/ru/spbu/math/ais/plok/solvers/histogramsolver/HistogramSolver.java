@@ -175,9 +175,25 @@ public class HistogramSolver extends Solver {
 	}
 
 	private void calculatePL() {
-		// TODO implement smarter! Account cacheUnit size and policies
 		log.debug("Calculating P and L for {} cache unit size and {} and {} policies", cacheUnitSize, iPolicy, jPolicy);
-		P = jLHist.getMaxRaw().intValue();
-		L = iLHist.getMaxRaw();
+		if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.FULL_TRACKING)){
+			L = iLHist.getExpectedRaw().intValue();
+			P = jLHist.getExpectedRaw().intValue();
+			while (L > cacheUnitSize){
+				L /= 2;
+			}
+			P = Math.min(P, cacheUnitSize / L);
+		}else if (iPolicy.equals(Policy.HOT_RANGES) && jPolicy.equals(Policy.FULL_TRACKING)){
+			L = iLHist.getExpectedRaw().intValue();
+			P = jLHist.getExpectedRaw().intValue();
+			while (L > cacheUnitSize){
+				L /= 2;
+			}
+			P = Math.min(P, cacheUnitSize / L);
+		}else if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.FULL_TRACKING)){
+			
+		}else if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.FULL_TRACKING)){
+			
+		}
 	}
 }

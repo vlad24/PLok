@@ -66,13 +66,13 @@ public class HistoryFileGenerator{
 		writer.write(config.getiPolicy().toString());
 		writer.write(HistoryPreprocessor.HINTS_SEPARATOR);
 		writer.write(config.getjPolicy().toString());
-		if (config.getWindowSize() != null){
-			writer.write(HistoryPreprocessor.HINTS_SEPARATOR);
-			writer.write(config.getWindowSize().toString());
-		}
 		if (config.getHotRanges() != null){
 			writer.write(HistoryPreprocessor.HINTS_SEPARATOR);
 			writer.write(config.getHotRanges().toString());
+		}
+		if (config.getWindowSize() != null){
+			writer.write(HistoryPreprocessor.HINTS_SEPARATOR);
+			writer.write(config.getWindowSize().toString());
 		}
 		writer.newLine();
 	}

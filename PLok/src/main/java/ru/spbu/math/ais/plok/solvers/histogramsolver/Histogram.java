@@ -276,6 +276,24 @@ class Histogram<K extends Number>{
 		return islands;
 	}
 	
+	/////////////////////////////////////////////// EXPECTATIONS DETECTION /////////////////////////////////////////////////////////
+	
+	public Double getExpectedRaw(){
+		double result = 0;
+		for (Map.Entry<K, Double> entry : rawOccs.entrySet()){
+			result += entry.getKey().doubleValue() * entry.getValue();
+		}
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Double getExpectedBin(){
+		double result = 0;
+		for (Bin bin : bins){
+			result += 0.5 * (bin.getRight() - bin.getLeft()) * bin.getValue();
+		}
+		return result;
+	}
 	
 	/////////////////////////////////////////////////////////// PRINTABLE VIEWS ////////////////////////////////////////
 	
