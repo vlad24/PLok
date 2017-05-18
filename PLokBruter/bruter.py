@@ -15,7 +15,7 @@ history_filename_format = "../PLok/hs/H{k}__{iP}-{jP}-{N}.csv"
 output_file_format      = "../PLok/reports/plok_bruter_report_{host}_{id}.txt"
 
 #CL commands
-plokInvokeLine = 'java -jar {plokJar}   -H {H} -C {C} -V {vectorAmount} --test -P {P} -L {L} --verbosity error -O {O} --append'
+plokInvokeLine = 'java  -Xmx2048m -Xms256m -XX:-UseGCOverheadLimit -jar {plokJar}   -H {H} -C {C} -V {vectorAmount} --test -P {P} -L {L} --verbosity error -O {O} --append'
 
 hfgCL_FT_RT      = 'java -jar {plokHfgJar}  --iPolicy FULL_TRACKING  --jPolicy RECENT_TRACKING --vectorSize {N} \
 --timeStep {timeStep} --count {count} -O {output_file} --windowSize {jParam} --verbosity error --includeHints'
@@ -30,13 +30,15 @@ hfgCL_HR_RT      = 'java -jar {plokHfgJar}  --iPolicy HOT_RANGES  --jPolicy  REC
 --timeStep {timeStep} --count {count} -O {output_file} --hotRanges {iParam} --windowSize {jParam} --verbosity error --includeHints'
 
 #Constants
-vectorAmount = 5000
-attempts     = 3
-timeStep     = 10
-iterFactorL  = 1.2
-iterFactorP  = 2
-max_inv_id   = 10000
-est_norm_constant = 3.6
+queries_count     = 1000
+timeStep          = 20
+vectorAmount      = queries_count * timeStep
+attempts          = 3
+iterFactorL       = 1.2
+iterFactorP       = 2
+max_inv_id        = 10000
+P_limiter         = 0.41
+est_norm_constant = 1
 
 ###############################################################################
 if __name__ == "__main__":
@@ -54,25 +56,19 @@ if __name__ == "__main__":
     
     
     #Bruted parameters
-    ##############################################################################################3
-    ########### brute312:
-    #policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
-    #Ws       = [2, timeStep // 2, timeStep * 2]
-    #HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
-    #Ns       = [100, 720, 1019]
-    #Cs       = [0.01, 0.05]
-    
-    ########### current:
-    policies = [("HOT_RANGES", "FULL_TRACKING"), ("FULL_TRACKING", "FULL_TRACKING")]
-    Ws       = [timeStep // 2, timeStep * 2]
+    ##############################################################################################
+    ########### brute0:
+    #policies = [("FULL_TRACKING", "FULL_TRACKING"), ("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
+    policies = [("HOT_RANGES", "FULL_TRACKING")]
+    Ns       = [1019, 103, 10]
+    Cs       = [0.003, 0.05, 0.2  ]
+    Ws       = [timeStep // 4, timeStep * 4]
     HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
-    Ns       = [100, 720]
-    Cs       = [0.01, 0.05]    
     ##############################################################################################3
     
     if not real_brute:
         vectorAmount = 101
-        policies = [("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
+        policies = [("HOT_RANGES", "RECENT_TRACKING"), ("FULL_TRACKING", "RECENT_TRACKING")]
         Ws       = [timeStep]
         HRs      = ["1-20,70-90"]
         Ns       = [100]
@@ -84,8 +80,8 @@ if __name__ == "__main__":
     
     calls_rough_est = int ( 
                 len(policies) * len(Ws) * len(HRs) * len(Ns) * len(Cs) *  \
-                math.log(max(Ns), iterFactorL) * \
-                math.log(int(vectorAmount * 0.41), 2) / est_norm_constant \
+                math.ceil(math.log(max(Ns), iterFactorL)) * \
+                math.ceil(math.log(vectorAmount * P_limiter, iterFactorP))
             )
     calls_made = 0
     brute_start = time.time()
@@ -94,7 +90,6 @@ if __name__ == "__main__":
             for N in Ns:
                 iP = policy_pair[0]
                 jP = policy_pair[1]
-                history_length = vectorAmount / timeStep
                 if (iP == "FULL_TRACKING" and jP == "RECENT_TRACKING"):
                     iParams = [None]
                     jParams = Ws
@@ -119,7 +114,7 @@ if __name__ == "__main__":
                                                                     iParam=iParam, 
                                                                     jParam=jParam,
                                                                     timeStep=timeStep, 
-                                                                    count=history_length,
+                                                                    count=queries_count,
                                                                     output_file=history_file_name
                                                                 )
                             print cl_generate_history
@@ -141,12 +136,11 @@ if __name__ == "__main__":
                                     invoke_timeend = time.time()
                                     duration = invoke_timeend - invoke_timestart
                                     calls_made += 1
-                                    print "_______ PL={}x{} \t took: {}s \t Progress est: {}% \t Time left est :{}m".format(P, 
-                                                                                                                            L,
-                                                                                                                            round(duration, 2),
-                                                                                                                            round(100.0 * calls_made / calls_rough_est),
-                                                                                                                            round(duration * (calls_rough_est - calls_made) / 60, 2)
-                                                                                                                           )
+                                    print "_______ PL={}x{} \t took: {}s \t Progress est: {}%".format(P, 
+                                                                                                      L,
+                                                                                                      round(duration, 2),
+                                                                                                      round(100.0 * calls_made / calls_rough_est),
+                                                                                                    )
                                     P *= iterFactorP
                                 L = int(math.ceil(L * iterFactorL))
                             os.remove(history_file_name)

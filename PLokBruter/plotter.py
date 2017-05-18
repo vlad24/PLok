@@ -12,6 +12,7 @@ from matplotlib import cm
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import dtype
 
 
 #Paths
@@ -69,12 +70,13 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
     fig = plt.figure()
     x = np.asarray(ps)
     y = np.asarray(ls)
-    calls_made = np.asarray(ms)    
+    z = np.asarray(ms)    
     if (style != "flat"):
         ax = fig.add_subplot(111, projection='3d')
         ##################################### Extreme point plotting
-        z_extreme = np.amax(calls_made)
-        z_extr_indexes = np.asarray([i for i in range(len(calls_made)) if calls_made[i] == z_extreme])
+        z_extreme       = np.amax(z)
+        deviation       = np.std(z)
+        z_extr_indexes = np.asarray([i for i in range(len(z)) if z[i] == z_extreme])
         extremes = np.asarray([[x[j], y[j], z_extreme] for j in z_extr_indexes])
         ax.plot(extremes[:,0], extremes[:,1], extremes[:,2], marker="o", ls="", c='red')
         ##################################### Extreme point projections plotting
@@ -91,8 +93,8 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
         ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
         if len(extremes) == 1:
             (exP , exL, exM) = extremes[0]
-            lower_label = "Extreme: (P={:.0f}, L={:.0f}, 100-M={:.2f}). \n P is {:.1f}%, L is {:.1f}% of max possible".format(
-                                         exP, exL, exM, exP/np.amax(ps) * 100, exL/np.amax(ls) * 100
+            lower_label = "Extreme: (P={:.0f}, L={:.0f}, 100-M={:.2f}). \n P is {:.1f}%, L is {:.1f}% of max possible \n Deviation={}".format(
+                                         exP, exL, exM, exP/np.amax(ps) * 100, exL/np.amax(ls) * 100, round(deviation, 2)
                                          )
         ax.text2D(0.05, 0.05, lower_label, transform=ax.transAxes)
         ax.set_xlabel('P')
@@ -103,12 +105,12 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
         ax.set_zlim(0     , 100)
         #### Plot all points
         if (style == "bar"):
-            ax.bar(x,y,calls_made, zdir='y')
+            ax.bar(x,y,z, zdir='y')
         else:
-            ax.plot_trisurf(x, y, calls_made, cmap=plt.cm.gray if color is None else color, linewidth=0.1, antialiased=False)
+            ax.plot_trisurf(x, y, z, cmap=plt.cm.gray if color is None else color, linewidth=0.1, antialiased=False)
     else:
         plt.gray()
-        plt.scatter(x,y,c=calls_made, s=75)
+        plt.scatter(x,y,c=z, s=75)
     fig.set_size_inches(18.5, 10.5, forward=True)
     img_name = "3dplots/{prefix}_{style}_{title}.jpg".format(prefix=img_prefix, style=style, title=title)
     plt.savefig(img_name)
