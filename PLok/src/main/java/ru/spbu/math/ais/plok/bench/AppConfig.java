@@ -42,6 +42,7 @@ public class AppConfig extends AbstractModule{
 		log.info("App configured: {}", configuration);
 		preprocessor = new HistoryPreprocessor(userConfig.getHistoryFilePath());
 		hReport = preprocessor.analyzeHistory();
+		log.info("History analyzed: {}", hReport);
 		solver   = createSolver();
 		solution = solver.solvePLTask();
 	}
@@ -66,10 +67,10 @@ public class AppConfig extends AbstractModule{
 
 	private Solver createSolver() throws IOException {
 		if (userConfig.isTesting()){
-			log.debug("Mock Solver set.");
+			log.info("Mock Solver set.");
 			return new MockSolver(hReport, userConfig.getTestP(), userConfig.getTestL());
 		}else if (userConfig.getSolverType().equalsIgnoreCase("histogram")){
-			log.debug("Histogram Solver set.");
+			log.info("Histogram Solver set.");
 			return new HistogramSolver(hReport, getCacheUnitSize());
 		}else {
 			return null;

@@ -35,6 +35,9 @@ public class UserConfiguration{
 	
 	@Option(name="--storagePath",usage="Persister file", required=false)
 	private String 	storagePath="./storages";
+	
+	@Option(name="--forceUseHistory",usage="Persister file", required=false)
+	private boolean forced2UseHistory = true;
 	//////////////////////////////////////////////////////////////////////////////////////////////// TEST MODE
 	@Option(name="--test",usage="Test flag", required=false, forbids={"--debug", "--repeatHistory", "--solver", "-r"})
 	private boolean testFlag;
@@ -143,6 +146,10 @@ public class UserConfiguration{
 
 	public boolean isOutputAppended() {
 		return outputAppended;
+	}
+
+	public boolean isForcedToUseHistory() {
+		return forced2UseHistory;
 	}
 
 }

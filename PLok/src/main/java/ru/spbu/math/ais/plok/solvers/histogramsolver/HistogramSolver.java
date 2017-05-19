@@ -3,6 +3,7 @@ package ru.spbu.math.ais.plok.solvers.histogramsolver;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import ru.spbu.math.ais.plok.model.client.Query;
 import ru.spbu.math.ais.plok.solvers.HistoryAnalysisReport;
 import ru.spbu.math.ais.plok.solvers.Solver;
 import ru.spbu.math.ais.plok.solvers.histogramsolver.UserChoice.Policy;
+import ru.spbu.math.ais.plok.utils.NumbersUtils;
 import ru.spbu.math.ais.plok.utils.structures.Pair;
 import ru.spbu.math.ais.plok.utils.structures.SegmentTreeLazy;
 import ru.spbu.math.ais.plok.utils.structures.Triplet;
@@ -28,6 +30,8 @@ public class HistogramSolver extends Solver {
 	private static final int ISLAND_HEIGHT_THRESHOLD = 15;
 	//private static final int FLAT_THRESHOLD          = 15;
 	private static final int J_THRESHOLD             = 15;
+
+	private static final double BLOCK_SPACE_TRHESH = 0.3;
 
 
 	private int cacheUnitSize;
@@ -65,6 +69,8 @@ public class HistogramSolver extends Solver {
 		printAllHistograms();
 		if (hReport.areHintsProvided()){
 			setPolicies(hReport.getHints().get(MapKeyNames.I_POLICY_KEY), hReport.getHints().get(MapKeyNames.J_POLICY_KEY));
+			this.policiesParams.put(MapKeyNames.I_POLICY_HR_RANGES_KEY, hReport.getHints().get(MapKeyNames.I_POLICY_HR_RANGES_KEY));
+			this.policiesParams.put(MapKeyNames.J_POLICY_RT_WINDOW_KEY, Long.valueOf(hReport.getHints().get(MapKeyNames.J_POLICY_RT_WINDOW_KEY)));
 		}else{
 			guessPolicies();
 		}
@@ -176,24 +182,106 @@ public class HistogramSolver extends Solver {
 
 	private void calculatePL() {
 		log.debug("Calculating P and L for {} cache unit size and {} and {} policies", cacheUnitSize, iPolicy, jPolicy);
+		int N = hReport.getN();
+		double sqrtK = Math.sqrt(cacheUnitSize);
 		if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.FULL_TRACKING)){
 			L = iLHist.getExpectedRaw().intValue();
 			P = jLHist.getExpectedRaw().intValue();
-			while (L > cacheUnitSize){
+			while (L >= cacheUnitSize){
 				L /= 2;
 			}
 			P = Math.min(P, cacheUnitSize / L);
-		}else if (iPolicy.equals(Policy.HOT_RANGES) && jPolicy.equals(Policy.FULL_TRACKING)){
+		}else if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.RECENT_TRACKING)){
 			L = iLHist.getExpectedRaw().intValue();
-			P = jLHist.getExpectedRaw().intValue();
-			while (L > cacheUnitSize){
+			long boundP = Double.valueOf(Math.min(sqrtK, cacheUnitSize / L)).longValue();
+			Long w = Long.valueOf(hReport.getHints().get(MapKeyNames.J_POLICY_RT_WINDOW_KEY));
+			P = (int) Math.max(hReport.getTimeStep(), w);
+			while (P < boundP) {
+				P *= 2;
+			}
+		}else if (iPolicy.equals(Policy.HOT_RANGES) && jPolicy.equals(Policy.FULL_TRACKING)){
+			List<Pair<Integer>> hRanges = parseRanges(N);
+			hRanges.sort(new Comparator<Pair<Integer>>() {
+				public int compare(Pair<Integer> o1, Pair<Integer> o2) {
+					return (o1.getSecond() - o1.getFirst()) - (o2.getSecond() - o2.getFirst());
+				}
+			});
+			Pair<Integer> shortestRange = hRanges.get(0);
+			int smallestFactor = Math.max(NumbersUtils.getFactors(shortestRange.getSecond() - shortestRange.getFirst()).get(0), 2);
+			L = Math.min(N / 2,  Math.max(smallestFactor / 2, 2));
+			P = 2;
+			while (P * L >= cacheUnitSize) {
 				L /= 2;
 			}
-			P = Math.min(P, cacheUnitSize / L);
-		}else if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.FULL_TRACKING)){
-			
-		}else if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.FULL_TRACKING)){
-			
+		}else if (iPolicy.equals(Policy.HOT_RANGES) && jPolicy.equals(Policy.RECENT_TRACKING)){
+			Long r = hReport.getTimeStep();
+			Long w = Long.valueOf(hReport.getHints().get(MapKeyNames.J_POLICY_RT_WINDOW_KEY));
+			long realW = Math.max(r, w);
+			List<Pair<Integer>> hRanges = parseRanges(N);
+			Pair<Double> result = getOptimalL4HotRanges(N, hRanges, 2.f);
+			L = result.getFirst().intValue();
+			float cacheCapacityMeasure = (realW * L) / ((float)cacheUnitSize);
+			if (Double.compare(cacheCapacityMeasure, BLOCK_SPACE_TRHESH) > 0) {
+				P = (int) realW;
+			}else {
+				P = (int) Double.valueOf(sqrtK).longValue();
+			}
+			while (P*L >= cacheUnitSize) {
+				P /= 2;
+			}
 		}
+		assert P*L <= cacheUnitSize;
+	}
+
+	private Pair<Double> getOptimalL4HotRanges(int n, List<Pair<Integer>> hRanges, float alpha) {
+		List<Pair<Integer>> hrs = new ArrayList<Pair<Integer>>(hRanges);
+		Pair<Integer> shortestRange = Collections.min(hRanges, new Comparator<Pair<Integer>>() {
+			@Override
+			public int compare(Pair<Integer> o1, Pair<Integer> o2) {
+				return (o1.getSecond() - o1.getFirst()) - (o2.getSecond() - o2.getFirst());
+			}
+		});
+		int minL = shortestRange.getSecond() - shortestRange.getFirst();
+		double maxPrtn = Integer.MIN_VALUE;
+		int bestL = n;
+		for (int l = minL; l < n; l++) {
+			double prtn = 0; 
+			log.trace("----Take L={}", l);
+			for (int i = 0; i < Math.ceil(n/l); i++) {
+				int left = i * l;
+				int right = left + l;
+				int hrn = 0;
+				float full = 0;
+				for (Pair<Integer> hr : hrs) {
+					if (left <= hr.getFirst() && hr.getSecond() <= right) {
+						hrn++;
+						full += (1.0 / l) * (hr.getSecond() - hr.getFirst());
+					}
+				}
+				log.trace("In [{},{}] there are {} hrs, full {}", left, right, hrn, full);
+				prtn = Math.pow(hrn, alpha) * full;
+				if (prtn >= maxPrtn) {
+					maxPrtn = prtn;
+					bestL = l;
+				}
+			}
+		}
+		return new Pair<Double>((double) bestL, maxPrtn);
+		
+	}
+
+	private List<Pair<Integer>> parseRanges(int N) {
+		if(!hReport.getHints().containsKey(MapKeyNames.I_POLICY_HR_RANGES_KEY)) {
+			throw new IllegalArgumentException("HRs not provided");
+		}
+		String[] ranges = ((String) hReport.getHints().get(MapKeyNames.I_POLICY_HR_RANGES_KEY)).split(",");
+		List<Pair<Integer>> hRanges = new ArrayList<>();
+		for (String string : ranges) {
+			String[] points = string.split("-");
+			Integer i1 = (int)((Float.parseFloat(points[0]) / 100.0) * (N - 1)); 
+			Integer i2 = (int)((Float.parseFloat(points[1]) / 100.0) * (N - 1));
+			hRanges.add(new Pair<Integer>(i1, i2));
+		}
+		return hRanges;
 	}
 }

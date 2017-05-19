@@ -26,4 +26,5 @@ public class MapKeyNames {
 	public static final String CALL_FINISH 				= "call_finish";
 	public static final String CALL_START 				= "call_start";
 	public static final String ARE_HINTS_PROVIDED       = "are_hints_provided";
+	public static final String MODE_KEY 				= "mode";
 }
