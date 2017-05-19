@@ -20,7 +20,7 @@ fname                   = "../PLok/reports/plok_bruter_report_{}_{}.txt"
 style                   = "trisurf"
 attempts                = 3
 plots_3d_needed         = True
-plots_2d_needed         = False 
+plots_2d_needed         =  False 
 
 
 class Record:
@@ -57,7 +57,7 @@ class Record:
         self.missRatio = float(parts[3].split("=")[1])
     
     def get_experiment_code(self):
-        return '''Experiment[iP={}; jP={}; W={}; HRS={}; C={}; N={}; V={}; Q={}; isFFU={}]'''.format(
+        return '''iP={}; jP={}; W={}; HRS={}; C={}; N={}; V={}; Q={}; isFFU={}'''.format(
                 self.iP, self.jP, self.W, self.hrs, self.C, self.N,
                 self.V, self.Q, self.isFUU
                 )
@@ -66,7 +66,7 @@ class Record:
 ###############################################################################
 
 
-def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projections=True, style="trisurf", img_prefix="plok"):
+def save_3D_plots(ps, ls, ms, cache_size, code, lower_label="", color=None, with_projections=True, style="trisurf", prefix="plok"):
     fig = plt.figure()
     x = np.asarray(ps)
     y = np.asarray(ls)
@@ -90,16 +90,35 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
                 ax.text(extremes[i][0], extremes[i][1], extremes[i][2], labels[i], color='red', zdir='x')
         ##################################### All points plotting
         ########################Labeling
-        ax.text2D(0.05, 0.95, title, transform=ax.transAxes)
+        ax.text2D(0.05, 0.95, code, transform=ax.transAxes)
         if len(extremes) == 1:
             (exP , exL, exM) = extremes[0]
-            lower_label = "Extreme: (P={:.0f}, L={:.0f}, 100-M={:.2f}). \n P is {:.1f}%, L is {:.1f}% of max possible \n Deviation={}".format(
-                                         exP, exL, exM, exP/np.amax(ps) * 100, exL/np.amax(ls) * 100, round(deviation, 2)
-                                         )
-        ax.text2D(0.05, 0.05, lower_label, transform=ax.transAxes)
+            lower_label = '''
+                Extreme: 
+                ( P={:.0f}, L={:.0f}, M={:.2f} )
+                k = {}, sqrt(k) = {}, 
+                P is {:.1f}% of max P, 
+                    {:.1f}% of sqrt(k)
+                L is {:.1f}% of max L, 
+                    {:.1f}% of sqrt(k)
+                PL / k = {:.1f}% 
+                M deviation={}
+                
+                                     '''.format(
+                                         exP, exL, 100 - exM,
+                                         cache_size, 
+                                         round(np.sqrt(cache_size), 2),
+                                         exP/np.amax(ps) * 100,
+                                         round(exP/np.sqrt(cache_size) * 100, 2),
+                                         exL/np.amax(ls) * 100,
+                                         round(exL/np.sqrt(cache_size) * 100, 2),
+                                         (exP * exL) / float(cache_size) * 100,
+                                         round(deviation, 2)
+                                        )
+        ax.text2D(0.85, 0.05, lower_label, transform=ax.transAxes)
         ax.set_xlabel('P')
         ax.set_ylabel('L')
-        ax.set_zlabel('100 - missRatio')
+        ax.set_zlabel('100 - M')
         ax.set_xlim(min(x), max(x))
         ax.set_ylim(min(y), max(y))
         ax.set_zlim(0     , 100)
@@ -112,7 +131,11 @@ def save_3D_plots(ps, ls, ms, title, lower_label="", color=None, with_projection
         plt.gray()
         plt.scatter(x,y,c=z, s=75)
     fig.set_size_inches(18.5, 10.5, forward=True)
-    img_name = "3dplots/{prefix}_{style}_{title}.jpg".format(prefix=img_prefix, style=style, title=title)
+    policyPair = "__".join(code.split("; ")[:2])
+    folder = os.path.join("3dplots", prefix, policyPair)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    img_name = "{folder}/{style}_{title}.jpg".format(folder=folder, prefix=prefix, style=style, title=code)
     plt.savefig(img_name)
     print "Saved", img_name
     plt.close()
@@ -125,7 +148,8 @@ def plot_2d(xs, ys):
 
 if __name__ == "__main__":
     plot_start = time.time()
-    experimetns = dict()
+    exp_points = dict()
+    exp_cache_sizes = dict()
     records = list()
     invocation_id = 0
     hostanme   = os.uname()[1]
@@ -133,10 +157,10 @@ if __name__ == "__main__":
     hostanme = hostanme if user_input == "" else user_input 
     user_input = raw_input("Enter id of report (default=0): ")
     invocation_id = 0 if user_input == "" else int(user_input)
-    img_prefix = ""
+    prefix = ""
     if plots_3d_needed:
         user_input = raw_input("Enter prefix of generated images(default={}): ".format(invocation_id))
-        img_prefix = str(invocation_id) if user_input == "" else str(user_input)
+        prefix = str(invocation_id) if user_input == "" else str(user_input)
     with open(fname.format(hostanme, invocation_id)) as f:
         for line in f:
             if (line.strip() != ''):
@@ -144,30 +168,42 @@ if __name__ == "__main__":
                 records.append(record)
                 exp = record.get_experiment_code()
                 point = (record.P, record.L)
+                expCacheSize = int(record.N * record.V * record.C) 
+                assert(point[0] * point[1] <= expCacheSize)
                 adding = record.missRatio / attempts
-                if not (exp in experimetns):
-                    experimetns[exp] = dict()
-                experimetns[exp][point] = experimetns[exp].get(point, 0) + adding  
-    assert len(experimetns.keys()) == len(set(experimetns.keys()))
+                if not (exp in exp_points):
+                    exp_points[exp] = dict()
+                exp_cache_sizes[exp] = expCacheSize
+                exp_points[exp][point] = exp_points[exp].get(point, 0) + adding  
+    assert len(exp_points.keys()) == len(set(exp_points.keys()))
     if plots_3d_needed:
         i = 0
-        for e in sorted(experimetns.iteritems()):
+        for e in sorted(exp_points.iteritems()):
             i += 1
-            code   = e[0]
-            points = e[1]
+            exp_code = e[0]
+            points    = e[1]
             ps = [p[0]       for p in points.keys()] 
             ls = [p[1]       for p in points.keys()] 
             ms = [100 - v    for v in points.values()] 
-            save_3D_plots(ps, ls, ms, code,with_projections=False, style=style, img_prefix=img_prefix)
+            save_3D_plots(ps, ls, ms,
+                           code=exp_code,
+                           cache_size=exp_cache_sizes[exp_code],
+                           with_projections=False,
+                            style=style, 
+                            prefix=prefix)
+            
+            
+            
+            
     if plots_2d_needed:
         xs = []
         ys = []
         for r in records:
             if (r.iP == "FULL_TRACKING"   and 
                 r.jP == "RECENT_TRACKING" and 
-                r.W == 2                  and 
-                r.C == 0.01               and 
-                r.N == 100                and 
+                r.W == 5                  and 
+                r.C == 0.03               and 
+                r.N == 103                and 
                 r.L == 2                  and
                 r.exp_series == 1
                 ):
