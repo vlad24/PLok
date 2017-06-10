@@ -37,7 +37,7 @@ public class FilePersistentStorage {
 	@Inject
 	public FilePersistentStorage(@Named(NamedProps.N) int N, @Named(NamedProps.P) int P, 
 			@Named(NamedProps.L) int L, @Named(NamedProps.STORAGE_PATH) String storagePath,
-			@Named(NamedProps.TEST_MODE) boolean isInTestMode
+			@Named(NamedProps.FAKE_IO) boolean isInTestMode
 			) throws IOException {
 		super();
 		this.P 		= P;

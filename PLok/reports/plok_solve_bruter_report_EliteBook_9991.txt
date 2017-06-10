@@ -1,0 +1,61 @@
+#HOT_RANGES,FULL_TRACKING,
+#Ns       = [1019, 103, 10]
+#Cs       = [0.003, 0.05, 0.2]
+#Ws       = [timeStep // 4, timeStep * 4]
+#HRs      = ["1-20,70-90", "1-7,52-58,87-100"]
+
+
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.003;	V=20000;	missRatio=99.973;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.003;	V=20000;	missRatio=99.992;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.003;	V=20000;	missRatio=99.975;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.003;	V=20000;	missRatio=99.921;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.003;	V=20000;	missRatio=99.924;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.003;	V=20000;	missRatio=99.926;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.003;	V=20000;	missRatio=99.973;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.003;	V=20000;	missRatio=99.981;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.003;	V=20000;	missRatio=99.989;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.003;	V=20000;	missRatio=99.889;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.003;	V=20000;	missRatio=99.897;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.003;	V=20000;	missRatio=99.886;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.003;	V=20000;	missRatio=99.966;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.003;	V=20000;	missRatio=99.975;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.003;	V=20000;	missRatio=99.983;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.003;	V=20000;	missRatio=99.983;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.003;	V=20000;	missRatio=99.982;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.003;	V=20000;	missRatio=99.988;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.05;	V=20000;	missRatio=95.470;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.05;	V=20000;	missRatio=94.684;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.05;	V=20000;	missRatio=95.134;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.05;	V=20000;	missRatio=88.526;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.05;	V=20000;	missRatio=89.253;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.05;	V=20000;	missRatio=87.275;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.05;	V=20000;	missRatio=95.421;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.05;	V=20000;	missRatio=95.879;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.05;	V=20000;	missRatio=96.247;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.05;	V=20000;	missRatio=86.911;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.05;	V=20000;	missRatio=87.390;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.05;	V=20000;	missRatio=86.598;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.05;	V=20000;	missRatio=95.052;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.05;	V=20000;	missRatio=95.185;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.05;	V=20000;	missRatio=95.533;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.05;	V=20000;	missRatio=96.414;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.05;	V=20000;	missRatio=96.066;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.05;	V=20000;	missRatio=96.777;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.2;	V=20000;	missRatio=58.200;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.2;	V=20000;	missRatio=58.433;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.2;	V=20000;	missRatio=60.932;	queriesCount=1000;	P=2;	L=96;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.2;	V=20000;	missRatio=47.945;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.2;	V=20000;	missRatio=41.048;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-1019.csv;	C=0.2;	V=20000;	missRatio=45.133;	queriesCount=1000;	P=2;	L=30;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.2;	V=20000;	missRatio=61.857;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.2;	V=20000;	missRatio=60.208;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.2;	V=20000;	missRatio=61.115;	queriesCount=1000;	P=2;	L=9;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.2;	V=20000;	missRatio=46.728;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.2;	V=20000;	missRatio=43.006;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-103.csv;	C=0.2;	V=20000;	missRatio=44.204;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.2;	V=20000;	missRatio=65.061;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.2;	V=20000;	missRatio=62.425;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.2;	V=20000;	missRatio=60.919;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H0__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.2;	V=20000;	missRatio=67.862;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.2;	V=20000;	missRatio=69.395;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-FULL_TRACKING-10.csv;	C=0.2;	V=20000;	missRatio=69.720;	queriesCount=1000;	P=2;	L=2;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=FULL_TRACKING;	iPolicy_HR_ranges=1-7,52-58,87-100;	mode=real

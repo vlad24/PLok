@@ -6,8 +6,6 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.MoreObjects;
-
 public class UserConfiguration{
 
 	private static Logger log = LoggerFactory.getLogger(UserConfiguration.class);
@@ -28,7 +26,7 @@ public class UserConfiguration{
 	private String 	outputPath = null;
 
 	@Option(name="--append",usage="Flag, controlling if output should be appended to output", required=false)
-	private boolean outputAppended = false;
+	private boolean outputAppended = true;
 	
 	@Option(name="--verbosity",usage="Verbosity level", required=false)
 	private String  verbosity = "info";
@@ -36,8 +34,11 @@ public class UserConfiguration{
 	@Option(name="--storagePath",usage="Persister file", required=false)
 	private String 	storagePath="./storages";
 	
-	@Option(name="--forceUseHistory",usage="Persister file", required=false)
+	@Option(name="--forceUseHistory",usage="Use history", required=false)
 	private boolean forced2UseHistory = true;
+	
+	@Option(name="--fakeIO",usage="fakeIO", required=false)
+	private boolean fakeIO = false;
 	//////////////////////////////////////////////////////////////////////////////////////////////// TEST MODE
 	@Option(name="--test",usage="Test flag", required=false, forbids={"--debug", "--repeatHistory", "--solver", "-r"})
 	private boolean testFlag;
@@ -150,6 +151,14 @@ public class UserConfiguration{
 
 	public boolean isForcedToUseHistory() {
 		return forced2UseHistory;
+	}
+
+	public boolean isFakeIO() {
+		return fakeIO;
+	}
+
+	public void setFakeIO(boolean fakeIO) {
+		this.fakeIO = fakeIO;
 	}
 
 }

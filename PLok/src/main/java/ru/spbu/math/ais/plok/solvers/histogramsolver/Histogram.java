@@ -280,8 +280,9 @@ class Histogram<K extends Number>{
 	
 	public Double getExpectedRaw(){
 		double result = 0;
+		double normFactor = this.valueType == ValueType.PERCENTAGE ? 100 : 1;
 		for (Map.Entry<K, Double> entry : rawOccs.entrySet()){
-			result += entry.getKey().doubleValue() * entry.getValue();
+			result += entry.getKey().doubleValue() * (entry.getValue() / normFactor);
 		}
 		return result;
 	}

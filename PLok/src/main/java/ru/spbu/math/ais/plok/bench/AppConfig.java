@@ -39,10 +39,10 @@ public class AppConfig extends AbstractModule{
 	public AppConfig(UserConfiguration configuration) throws Exception {
 		userConfig   = configuration;
 		((ch.qos.logback.classic.Logger)LoggerFactory.getLogger("ROOT")).setLevel(Level.valueOf(userConfig.getVerbosityLevel()));
-		log.info("App configured: {}", configuration);
+		log.debug("App configured: {}", configuration);
 		preprocessor = new HistoryPreprocessor(userConfig.getHistoryFilePath());
 		hReport = preprocessor.analyzeHistory();
-		log.info("History analyzed: {}", hReport);
+		log.debug("History analyzed: {}", hReport);
 		solver   = createSolver();
 		solution = solver.solvePLTask();
 	}
@@ -54,7 +54,7 @@ public class AppConfig extends AbstractModule{
 			bind(StorageSystem.class).to(PLokerStorage.class);
 			bindConstant().annotatedWith(Names.named(NamedProps.N))                .to(hReport.getN());
 			bindConstant().annotatedWith(Names.named(NamedProps.V))                .to(userConfig.getVectorAmount());
-			bindConstant().annotatedWith(Names.named(NamedProps.TEST_MODE))        .to(userConfig.isTesting());
+			bindConstant().annotatedWith(Names.named(NamedProps.FAKE_IO))          .to(userConfig.isTesting() || userConfig.isFakeIO());
 			bindConstant().annotatedWith(Names.named(NamedProps.STORAGE_PATH))     .to(userConfig.getStoragePath());
 			bindConstant().annotatedWith(Names.named(NamedProps.CACHE_UNIT_SIZE))  .to(getCacheUnitSize());
 			bindConstant().annotatedWith(Names.named(NamedProps.P))                .to((Integer)solution.get(MapKeyNames.P_KEY));
@@ -67,10 +67,10 @@ public class AppConfig extends AbstractModule{
 
 	private Solver createSolver() throws IOException {
 		if (userConfig.isTesting()){
-			log.info("Mock Solver set.");
+			log.debug("Mock Solver set.");
 			return new MockSolver(hReport, userConfig.getTestP(), userConfig.getTestL());
 		}else if (userConfig.getSolverType().equalsIgnoreCase("histogram")){
-			log.info("Histogram Solver set.");
+			log.debug("Histogram Solver set.");
 			return new HistogramSolver(hReport, getCacheUnitSize());
 		}else {
 			return null;

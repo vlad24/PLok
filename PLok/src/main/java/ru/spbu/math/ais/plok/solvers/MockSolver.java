@@ -23,7 +23,6 @@ public class MockSolver extends Solver {
 		LinkedHashMap<String, Object> solution = new LinkedHashMap<>();
 		solution.put(MapKeyNames.P_KEY,         		P);
 		solution.put(MapKeyNames.L_KEY,                 L);
-		solution.put(MapKeyNames.L_KEY,                 L);
 		solution.put(MapKeyNames.IS_FILLED_FROM_UP_KEY, true);
 		solution.put(MapKeyNames.I_POLICY_KEY,          hReport.getHints().get(MapKeyNames.I_POLICY_KEY));
 		solution.put(MapKeyNames.J_POLICY_KEY,          hReport.getHints().get(MapKeyNames.J_POLICY_KEY));

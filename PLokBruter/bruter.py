@@ -35,7 +35,7 @@ timeStep          = 20
 vectorAmount      = queries_count * timeStep
 attempts          = 3
 iterFactorL       = 1.2
-iterFactorP       = 2
+iterFactorP       = 1.5
 max_inv_id        = 10000
 P_limiter         = 0.41
 est_norm_constant = 1
@@ -58,12 +58,34 @@ if __name__ == "__main__":
     #Bruted parameters
     ##############################################################################################
     ########### brute0:
-    #policies = [("FULL_TRACKING", "FULL_TRACKING"), ("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
-    policies = [("HOT_RANGES", "FULL_TRACKING")]
-    Ns       = [1019, 103, 10]
-    Cs       = [0.003, 0.05, 0.2  ]
-    Ws       = [timeStep // 4, timeStep * 4]
-    HRs      = ["1-7,52-58,87-100", "1-20,70-90"]
+#     policies = [("FULL_TRACKING", "FULL_TRACKING"), ("FULL_TRACKING", "RECENT_TRACKING"), ("HOT_RANGES", "RECENT_TRACKING")]
+#     Ns       = [1019, 103, 10]
+#     Cs       = [0.003, 0.05, 0.2]
+#     Ws       = [timeStep // 4, timeStep * 4]
+#     HRs      = ["1-20,70-90", "1-7,52-58,87-100"]
+    ########## brute1111:
+#     policies = [("HOT_RANGES", "RECENT_TRACKING")]
+#     Ns       = [103, 10]
+#     Cs       = [0.001]
+#     Ws       = [timeStep // 4, timeStep * 4]
+#     HRs      = ["1-20,22-42", "1-20"]
+    
+    
+    ###############
+    
+    
+    policies = [("HOT_RANGES",    "RECENT_TRACKING")]
+    Ns       = [103]
+    Cs       = [0.001]
+    Ws       = [timeStep * 4]
+    HRs      = ["1-3,5-7,9-11,13-15,17-19,21-23"]
+    
+    ########## brute 4444:
+#     policies = [("HOT_RANGES", "RECENT_TRACKING")]
+#     Ns       = [103]
+#     Cs       = [0.001]
+#     Ws       = [timeStep * 4]
+#     HRs      = ["1-20"]
     ##############################################################################################3
     
     if not real_brute:
@@ -141,7 +163,7 @@ if __name__ == "__main__":
                                                                                                       round(duration, 2),
                                                                                                       round(100.0 * calls_made / calls_rough_est),
                                                                                                     )
-                                    P *= iterFactorP
+                                    P = int(math.ceil(P * iterFactorP))
                                 L = int(math.ceil(L * iterFactorL))
                             os.remove(history_file_name)
     print "Done, time spent: {} min".format(round((time.time() - brute_start) / 60, 3))

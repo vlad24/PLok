@@ -50,7 +50,7 @@ public class PLokerStorage implements StorageSystem{
 	@Inject
 	public PLokerStorage(@Named(NamedProps.N)int N,  @Named(NamedProps.P)int P,	@Named(NamedProps.L)int L,
 			@Named(NamedProps.IS_FILLED_FROM_UP) boolean isFilledFromUp,
-			@Named(NamedProps.TEST_MODE) boolean isInTestMode,
+			@Named(NamedProps.FAKE_IO) boolean isInTestMode,
 			@Named(NamedProps.CACHE_UNIT_SIZE) int cacheSizeInUnits, 
 			Provider<Index> indexProvider, Provider<FilePersistentStorage> persStorage) {
 		super();

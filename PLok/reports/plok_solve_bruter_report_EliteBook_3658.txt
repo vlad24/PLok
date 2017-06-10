@@ -1,0 +1,3 @@
+H=../PLok/hs/H0__solve__HOT_RANGES-RECENT_TRACKING-103.csv;	C=0.001;	V=20000;	missRatio=99.876;	queriesCount=1000;	P=1;	L=91;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=RECENT_TRACKING;	jPolicy_RT_window=80;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H1__solve__HOT_RANGES-RECENT_TRACKING-103.csv;	C=0.001;	V=20000;	missRatio=99.888;	queriesCount=1000;	P=1;	L=91;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=RECENT_TRACKING;	jPolicy_RT_window=80;	iPolicy_HR_ranges=1-20,70-90;	mode=real
+H=../PLok/hs/H2__solve__HOT_RANGES-RECENT_TRACKING-103.csv;	C=0.001;	V=20000;	missRatio=99.873;	queriesCount=1000;	P=1;	L=91;	isFFU=true;	iPolicy=HOT_RANGES;	jPolicy=RECENT_TRACKING;	jPolicy_RT_window=80;	iPolicy_HR_ranges=1-20,70-90;	mode=real

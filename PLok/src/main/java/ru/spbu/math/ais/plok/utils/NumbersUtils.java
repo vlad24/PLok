@@ -7,11 +7,12 @@ public class NumbersUtils {
 
 	public static List<Integer> getFactors(int x){
 		List<Integer> factors = new ArrayList<Integer>();
-		for (int i = 2; i < x / 2; i++) {
+		for (int i = 2; i < x; i++) {
 			if (x % i == 0) {
 				factors.add(i);
 			}
 		}
+		factors.add(x);
 		return factors;
 	}
 	

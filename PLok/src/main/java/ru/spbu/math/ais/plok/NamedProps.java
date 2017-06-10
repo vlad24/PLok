@@ -8,5 +8,5 @@ public class NamedProps {
 	public static final String IS_FILLED_FROM_UP = "isFilledFromUp";
 	public static final String STORAGE_PATH = "storagePath";
 	public static final String CACHE_UNIT_SIZE = "cacheUnitSize";
-	public static final String TEST_MODE = "testMode";
+	public static final String FAKE_IO = "testMode";
 }

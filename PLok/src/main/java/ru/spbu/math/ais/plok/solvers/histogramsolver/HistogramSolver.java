@@ -31,7 +31,7 @@ public class HistogramSolver extends Solver {
 	//private static final int FLAT_THRESHOLD          = 15;
 	private static final int J_THRESHOLD             = 15;
 
-	private static final double BLOCK_SPACE_TRHESH = 0.3;
+	private static final double CACHE_CAPACITY_THRESH = 0.33;
 
 
 	private int cacheUnitSize;
@@ -64,23 +64,25 @@ public class HistogramSolver extends Solver {
 	}
 
 	public Map<String, Object> solvePLTask() throws IOException {
-		Map<String, Object> report = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> report = new LinkedHashMap<>();
 		buildHistograms();
 		printAllHistograms();
 		if (hReport.areHintsProvided()){
 			setPolicies(hReport.getHints().get(MapKeyNames.I_POLICY_KEY), hReport.getHints().get(MapKeyNames.J_POLICY_KEY));
-			this.policiesParams.put(MapKeyNames.I_POLICY_HR_RANGES_KEY, hReport.getHints().get(MapKeyNames.I_POLICY_HR_RANGES_KEY));
-			this.policiesParams.put(MapKeyNames.J_POLICY_RT_WINDOW_KEY, Long.valueOf(hReport.getHints().get(MapKeyNames.J_POLICY_RT_WINDOW_KEY)));
+			if (hReport.getHints().containsKey(MapKeyNames.J_POLICY_RT_WINDOW_KEY))
+				this.policiesParams.put(MapKeyNames.J_POLICY_RT_WINDOW_KEY, Long.valueOf(hReport.getHints().get(MapKeyNames.J_POLICY_RT_WINDOW_KEY)));
+			if (hReport.getHints().containsKey(MapKeyNames.I_POLICY_HR_RANGES_KEY))
+				this.policiesParams.put(MapKeyNames.I_POLICY_HR_RANGES_KEY, hReport.getHints().get(MapKeyNames.I_POLICY_HR_RANGES_KEY));
 		}else{
 			guessPolicies();
 		}
 		calculatePL();
 		report.put(MapKeyNames.P_KEY,                 P);
 		report.put(MapKeyNames.L_KEY,                 L);
+		report.put(MapKeyNames.IS_FILLED_FROM_UP_KEY, true);
 		report.put(MapKeyNames.I_POLICY_KEY,          iPolicy);
 		report.put(MapKeyNames.J_POLICY_KEY,          jPolicy);
 		report.put(MapKeyNames.POLICIES_PARAMS_KEY,   policiesParams);
-		report.put(MapKeyNames.IS_FILLED_FROM_UP_KEY, true);
 		return report;
 	}
 
@@ -181,16 +183,17 @@ public class HistogramSolver extends Solver {
 	}
 
 	private void calculatePL() {
-		log.debug("Calculating P and L for {} cache unit size and {} and {} policies", cacheUnitSize, iPolicy, jPolicy);
+		log.info("Calculating P and L for {} and {} policies and {} cache u.s.", iPolicy, jPolicy, cacheUnitSize);
 		int N = hReport.getN();
 		double sqrtK = Math.sqrt(cacheUnitSize);
 		if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.FULL_TRACKING)){
+//			L = Math.max(1, N / 100);
+//			P = Double.valueOf(cacheUnitSize / N).intValue();
 			L = iLHist.getExpectedRaw().intValue();
 			P = jLHist.getExpectedRaw().intValue();
-			while (L >= cacheUnitSize){
+			while (L >= cacheUnitSize || L > N){
 				L /= 2;
 			}
-			P = Math.min(P, cacheUnitSize / L);
 		}else if (iPolicy.equals(Policy.FULL_TRACKING) && jPolicy.equals(Policy.RECENT_TRACKING)){
 			L = iLHist.getExpectedRaw().intValue();
 			long boundP = Double.valueOf(Math.min(sqrtK, cacheUnitSize / L)).longValue();
@@ -199,6 +202,7 @@ public class HistogramSolver extends Solver {
 			while (P < boundP) {
 				P *= 2;
 			}
+			P /= 2;
 		}else if (iPolicy.equals(Policy.HOT_RANGES) && jPolicy.equals(Policy.FULL_TRACKING)){
 			List<Pair<Integer>> hRanges = parseRanges(N);
 			hRanges.sort(new Comparator<Pair<Integer>>() {
@@ -207,7 +211,8 @@ public class HistogramSolver extends Solver {
 				}
 			});
 			Pair<Integer> shortestRange = hRanges.get(0);
-			int smallestFactor = Math.max(NumbersUtils.getFactors(shortestRange.getSecond() - shortestRange.getFirst()).get(0), 2);
+			int length = shortestRange.getSecond() - shortestRange.getFirst();
+			int smallestFactor = Math.max(NumbersUtils.getFactors(length).get(0), 2);
 			L = Math.min(N / 2,  Math.max(smallestFactor / 2, 2));
 			P = 2;
 			while (P * L >= cacheUnitSize) {
@@ -221,8 +226,9 @@ public class HistogramSolver extends Solver {
 			Pair<Double> result = getOptimalL4HotRanges(N, hRanges, 2.f);
 			L = result.getFirst().intValue();
 			float cacheCapacityMeasure = (realW * L) / ((float)cacheUnitSize);
-			if (Double.compare(cacheCapacityMeasure, BLOCK_SPACE_TRHESH) > 0) {
-				P = (int) realW;
+			if (Double.compare(cacheCapacityMeasure, CACHE_CAPACITY_THRESH) > 0) {
+				//P = (int) realW;
+				P = Math.max((Double.valueOf((cacheUnitSize/L) / 100.0)).intValue() , 1);
 			}else {
 				P = (int) Double.valueOf(sqrtK).longValue();
 			}
@@ -230,6 +236,11 @@ public class HistogramSolver extends Solver {
 				P /= 2;
 			}
 		}
+		if (P * L < 2) {
+			L = 1;
+			P = 2;
+		}
+		log.info("Calculated: {}, {} .Cahce size:{}", P, L, cacheUnitSize);
 		assert P*L <= cacheUnitSize;
 	}
 
@@ -241,12 +252,12 @@ public class HistogramSolver extends Solver {
 				return (o1.getSecond() - o1.getFirst()) - (o2.getSecond() - o2.getFirst());
 			}
 		});
-		int minL = shortestRange.getSecond() - shortestRange.getFirst();
+		int minL = shortestRange.getSecond() - shortestRange.getFirst() + 1;
 		double maxPrtn = Integer.MIN_VALUE;
 		int bestL = n;
 		for (int l = minL; l < n; l++) {
 			double prtn = 0; 
-			log.trace("----Take L={}", l);
+			log.trace("Took L={}", l);
 			for (int i = 0; i < Math.ceil(n/l); i++) {
 				int left = i * l;
 				int right = left + l;

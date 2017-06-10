@@ -37,6 +37,7 @@ public class Tester {
 			log.info("Starting client...");
 			Map<String, Object> finalReport;
 			if (config.isTesting()){
+				mode = "test";
 				log.debug("In test mode...");
 				finalReport = client.attack(store, appConfig.getHistoryAnalysisReport().getQueries());
 			}else{
